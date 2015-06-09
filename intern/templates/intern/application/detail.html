@@ -1,0 +1,96 @@
+{% extends 'intern/common/detail.html' %}
+
+{% load staticfiles %}
+{% block page-header %}
+{{ object.applicant_name }}
+	<a href="{% url 'application_edit' object.id %}" class="btn btn-xs addlink">
+		<i class="fa fa-plus"></i>
+		Edit
+	</a>
+{% endblock %}
+
+{% block detail-school-header %}
+<div class="school-landing">
+	<div class="cover-photo"
+	style="background:transparent url(/static/img/background-1683.jpg) no-repeat; background-size:cover;"
+	></div>
+	<div class="school-name-bar">
+		<div id="school-logo">
+			<div id="eggshell-114" class="C-common-school-logo medium">
+				<a class="logo" href="/schools/ucla">
+				<div class="school-icon white">
+					<div class="school-icon-img">
+						<i class="fa fa-institution"></i>
+					</div>
+				</div>
+				</a>
+			</div>
+		</div>
+		<div class="school-name">
+			<h4><div class="txt-hdr-top" style="font-size: 160%;">{{object.application_id}}</div></h4>
+			<div class="txt-hdr-dark" style="color:#555;">
+			{{object.applicant_name}}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block detail-navbar %}
+<ul class="nav nav-pills" data-type="nav-side">
+	<li class="active">
+    <a href="">
+		Application details
+	</a>
+	</li>
+</ul>
+{% endblock %}
+
+{% block detail-content %}
+<h2 class="">Dates</h2>
+<table class="table">
+	<thead>
+		<th></th>
+		<th></th>
+	</thead>
+	<tbody>
+		<tr><td>
+			<strong>Start date</strong>
+		</td><td>{{ object.start_date }}
+		</td></tr>
+
+		<tr><td>
+			<strong>End date</strong>
+		</td><td>{{ object.end_date }}
+		</td></tr>
+
+		<tr><td>
+			<strong>Duration (days)</strong>
+		</td><td>{{ object.duration_in_days }}
+		</td></tr>
+
+	</tbody>
+</table>
+
+<h2 class="page-header">Audits</h2>
+<table class="table table-striped">
+	<thead>
+		<th>Changed on</th>
+		<th>Status</th>
+		<th>Pre-change contact</th>
+	</thead>
+	<tbody>
+	{% for audit in object.mystatusaudit_set.all %}
+		<tr><td>
+			{{ audit.created }}
+		</td><td>
+			<span class="btn btn-default">{{ audit.old_status }}</span>
+			&rarr; 
+			<span class="btn btn-info">{{ audit.new_status }}</span>
+		</td><td>
+			<a href="mailto:{{ audit.contact.email }}">{{audit.contact}}</a>
+		</td></tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
