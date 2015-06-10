@@ -134,11 +134,16 @@
 	</tbody>
 </table>
 
+<h2 class="page-header">Reminders</h2>
+<p>
+Current primary contact: 
+<a href="mailto:{{ object.status.contact.email }}">{{object.status.contact}}</a>
+</p>
 <div class="btn-group" role="group">
-	<a type="button" class="btn btn-info" href="{%url 'application_reminder' object.id%}">
+	<a type="button" class="btn btn-lg btn-default" href="{%url 'application_reminder' object.id%}">
 		Preview reminder
 	</a>
-	<button type="button" class="btn btn-info
+	<button type="button" class="btn btn-lg btn-info
 	ladda-button
 	data-style="expand-left" 
 	data-size="l" 
