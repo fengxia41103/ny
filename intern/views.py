@@ -157,7 +157,7 @@ class MyApplicationListFilter (FilterSet):
 				'status':['exact'],
 				'applicant_name':['contains'],
 				'start_date':['exact'],
-				'end_date':['exact'],				
+				'end_date':['exact'],		
 				}
 
 class MyApplicationList (FilterView):
@@ -199,7 +199,19 @@ class MyApplicationDetail(DetailView):
 	def get_context_data(self, **kwargs):
 		context = super(DetailView, self).get_context_data(**kwargs)
 		application = self.get_object()
-		context['time_to_start'] = (application.start_date-dt.now().date()).days
 		context['audits'] = application.mystatusaudit_set.order_by('-created')
 
 		return context
+
+@class_view_decorator(login_required)
+class MyApplicationStatusUpdate(TemplateView):
+	template_name = ''
+
+	def post(self,request):
+		obj_id = request.POST['obj_id']
+		application = MyApplication.objects.get(id=int(obj_id))
+		application.status = MyStatus.objects.get(id=int(request.POST['status_id']))
+		application.save()
+
+		# refresh current page, whatever it is.
+		return HttpResponseRedirect(request.META['HTTP_REFERER'])

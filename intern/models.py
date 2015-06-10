@@ -209,8 +209,12 @@ class MyApplication(models.Model):
 	
 	def _lead_in_days(self):
 		return (self.start_date-self.created.date()).days
-	lead_in_days = property(_lead_in_days)	
-	
+	lead_in_days = property(_lead_in_days)
+
+	def _time_to_start_in_days(self):
+		return (self.start_date-dt.now().date()).days
+	time_to_start_in_days = property(_time_to_start_in_days)
+
 	def __unicode__(self):
 		return '%s (%s)'%(self.applicant_name,self.application_id)
 

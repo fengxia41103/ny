@@ -15,6 +15,7 @@
 	<thead>
 		<th></th>
 		<th>Status</th>
+		<th>Days to Start</th>
 		<th>Applicant name</th>
 		<th>Start date</th>
 		<th>End date</th>
@@ -28,6 +29,22 @@
 			<a href="{% url 'application_detail' obj.id %}">Detail</a>
 		</td><td>
 			{{ obj.status }}
+		</td><td>
+			<span class="
+				{% if obj.time_to_start_in_days > 7 and obj.time_to_start_in_days <= 14 %}
+				btn btn-info
+				{% endif %}
+
+				{% if obj.time_to_start_in_days >= 0 and obj.time_to_start_in_days <= 7 %}
+				btn btn-warning
+				{% endif %}
+
+				{% if obj.time_to_start_in_days < 0 %}
+				btn btn-danger
+				{% endif %}						
+			">
+			{{ obj.time_to_start_in_days}}
+			</span>
 		</td><td>
 			{{ obj.applicant_name }}
 		</td><td>

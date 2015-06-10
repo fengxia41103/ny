@@ -50,10 +50,52 @@
 
 <ul class="list-inline">
 	<li class="jumbotron" style="background:#fff;color:#a23;">
-		<h1 style="font-family: 'Abril Fatface', cursive;font-size:8.0em;">{{ time_to_start }}</h1>
+		<h1 style="font-family: 'Abril Fatface', cursive;font-size:8.0em;text-decoration: underline;">
+		{{ object.time_to_start_in_days }}</h1>
 	</li>
 	<li><strong>days left to START</strong></li>
 </ul>
+
+<h2 class="page-header">Status</h2>
+<p>
+	Click to update application status. The one highlighted is the current status.
+</p>
+
+<div class="btn-group" role="group" aria-label="Status group" id="statuses">
+  <button type="button" 
+  status_id = 1 
+  class="btn ladda-button
+  	{% if object.status.id == 1 %}
+  	btn-primary
+  	{% endif %}
+
+	data-style="expand-left" 
+	data-size="l" 
+	data-spinner-color="#333"  	
+  ">Initialized</button>
+  <button type="button" 
+  status_id = 2
+  class="btn ladda-button
+  	{% if object.status.id == 2 %}
+  	btn-primary
+  	{% endif %}
+	
+	data-style="expand-left" 
+	data-size="l" 
+	data-spinner-color="#333"  	
+  ">Dept submitted</button>
+  <button type="button" 
+  status_id = 3
+  class="btn ladda-button
+  	{% if object.status.id == 3 %}
+  	btn-primary
+  	{% endif %} 
+
+	data-style="expand-left" 
+	data-size="l" 
+	data-spinner-color="#333"  	
+  ">College submitted</button>
+</div>
 
 <h2 class="">Dates</h2>
 <table class="table">
@@ -73,13 +115,13 @@
 		</td></tr>
 
 		<tr><td>
-			<strong>Lead (days)</strong>
-		</td><td>{{ object.lead_in_days }}
+			<strong>Duration (days)</strong>
+		</td><td>{{ object.duration_in_days }}
 		</td></tr>
 
 		<tr><td>
-			<strong>Duration (days)</strong>
-		</td><td>{{ object.duration_in_days }}
+			<strong>Lead (days)</strong>
+		</td><td>{{ object.lead_in_days }}
 		</td></tr>
 
 	</tbody>
@@ -96,16 +138,15 @@
 	<thead>
 		<th>Changed on</th>
 		<th>Status</th>
-		<th>Pre-change contact</th>
+		<th>Contact</th>
 	</thead>
 	<tbody>
 	{% for audit in audits %}
 		<tr><td>
-			{{ audit.created }}
+			{{ audit.created|date:"M d, Y" }}
 		</td><td>
-			<span class="btn btn-default">{{ audit.old_status }}</span>
-			&rarr; 
-			<span class="btn btn-info">{{ audit.new_status }}</span>
+			{{ audit.old_status }}
+			&rarr; {{ audit.new_status }}
 		</td><td>
 			<a href="mailto:{{ audit.contact.email }}">{{audit.contact}}</a>
 		</td></tr>
@@ -116,24 +157,47 @@
 
 {% block custom_js %}
 <script type="text/javascript">
-  // DOM element where the Timeline will be attached
-  var container = document.getElementById('visualization');
+	// DOM element where the Timeline will be attached
+	var container = document.getElementById('visualization');
 
-  // Create a DataSet (allows two way data-binding)
-  var items = new vis.DataSet([
-  	{content:'Application created',start:"{{object.created|date:'M d,Y'}}", title:"{{object.created|date:'M d,Y'}}"},
-    {content: 'Start date', start: '{{ object.start_date }}', title:"{{ object.start_date }}"},
-    {% for audit in audits %}
-    {content: '{{audit.new_status}}<br/>({{audit.contact}})', start:"{{audit.created|date:'M d, Y'}}",title:"{{audit.created|date:'M d, Y'}}"},
-    {% endfor %}
-    {content: 'End date', start: '{{ object.end_date }}',title:"{{ object.end_date }}"}
-  ]);
+	// Create a DataSet (allows two way data-binding)
+	var items = new vis.DataSet([
+		{content:'Application created',start:"{{object.created|date:'M d,Y'}}", title:"{{object.created|date:'M d,Y'}}"},
+	{content: 'Start date', start: '{{ object.start_date }}', title:"{{ object.start_date }}"},
+	{% for audit in audits %}
+	{content: '{{audit.new_status}}<br/>({{audit.contact}})', start:"{{audit.created|date:'M d, Y'}}",title:"{{audit.created|date:'M d, Y'}}"},
+	{% endfor %}
+	//{content: 'End date', start: '{{ object.end_date }}',title:"{{ object.end_date }}"}
+	]);
 
-  // Configuration for the Timeline
-  var options = {
-  	'moveable': false};
+	// Configuration for the Timeline
+	var options = {'moveable': false};
 
-  // Create a Timeline
-  var timeline = new vis.Timeline(container, items, options);
+	// Create a Timeline
+	var timeline = new vis.Timeline(container, items, options);
+
+
+	j$(document).ready(function(){
+		// register events
+		j$('#statuses > button').click(function(){
+			console.log('here');
+
+			var l = Ladda.create(this);
+	 		l.start();
+
+	        j$.post("{% url 'application_status_update' %}", // passed in from view
+	            { 
+	                'obj_id':{{ object.id }},
+	                'status_id':j$(this).attr('status_id')
+	            }, 
+	            function(resp) { // success callback
+	            	window.location.reload();
+	            },'json'
+	        ).always(function(){     
+	        	l.stop(); 	
+	        });			
+		});
+
+	});
 </script>
 {% endblock %}
