@@ -73,6 +73,9 @@
 	{# bootstrap3-datepicker #}
 	<link rel="stylesheet" type="text/css" href="{% static 'bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css' %}">
 
+	{# visjs #}
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.2.0/vis.min.css">
+
 	<!-- JQuery lib -->
 	<script type="text/javascript" src="{% static 'jquery/jquery-2.1.3.min.js' %}"></script>
 {% endblock %}
@@ -243,10 +246,19 @@
     	src="{% static 'js/jquery.toc.min.js' %}">
     </script>
 
+    {# bootstrap datepicker #}
     <script type="text/javascript"
     	src="{% static 'bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}">
     </script>
 
+    {# visjs #}
+    <script type="text/javascript"
+    	src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.2.0/vis.min.js">
+    </script>
+
+    {# google fonts #}
+<link href='http://fonts.googleapis.com/css?family=Abril+Fatface' rel='stylesheet' type='text/css'>	 
+    
 	<script type="text/javascript">
 		var j$ = jQuery.noConflict();
 
@@ -327,8 +339,9 @@
 
 			// datepicker
 		    j$('.dateinput').datepicker({ 
-		    	format: "mm/dd/yyyy" ,
-		    	todayHighlight: true
+		    	format: "yyyy-mm-dd" ,
+		    	todayHighlight: true,
+		    	todayBtn: true
 		   	});
 
 			{% if user.is_authenticated %}

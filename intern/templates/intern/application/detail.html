@@ -29,7 +29,7 @@
 		<div class="school-name">
 			<h4><div class="txt-hdr-top" style="font-size: 160%;">{{object.application_id}}</div></h4>
 			<div class="txt-hdr-dark" style="color:#555;">
-			{{object.applicant_name}}
+			<em>{{object.applicant_name}}</em>
 			</div>
 		</div>
 	</div>
@@ -46,7 +46,15 @@
 </ul>
 {% endblock %}
 
-{% block detail-content %}
+{% block detail-sidebar %}
+
+<ul class="list-inline">
+	<li class="jumbotron" style="background:#fff;color:#a23;">
+		<h1 style="font-family: 'Abril Fatface', cursive;font-size:8.0em;">{{ time_to_start }}</h1>
+	</li>
+	<li><strong>days left to START</strong></li>
+</ul>
+
 <h2 class="">Dates</h2>
 <table class="table">
 	<thead>
@@ -65,12 +73,23 @@
 		</td></tr>
 
 		<tr><td>
+			<strong>Lead (days)</strong>
+		</td><td>{{ object.lead_in_days }}
+		</td></tr>
+
+		<tr><td>
 			<strong>Duration (days)</strong>
 		</td><td>{{ object.duration_in_days }}
 		</td></tr>
 
 	</tbody>
 </table>
+{% endblock %}
+
+{% block detail-content %}
+
+<h2 class="page-header">Timeline</h2>
+<div id="visualization"></div>
 
 <h2 class="page-header">Audits</h2>
 <table class="table table-striped">
@@ -80,7 +99,7 @@
 		<th>Pre-change contact</th>
 	</thead>
 	<tbody>
-	{% for audit in object.mystatusaudit_set.all %}
+	{% for audit in audits %}
 		<tr><td>
 			{{ audit.created }}
 		</td><td>
@@ -93,4 +112,28 @@
 	{% endfor %}
 	</tbody>
 </table>
+{% endblock %}
+
+{% block custom_js %}
+<script type="text/javascript">
+  // DOM element where the Timeline will be attached
+  var container = document.getElementById('visualization');
+
+  // Create a DataSet (allows two way data-binding)
+  var items = new vis.DataSet([
+  	{content:'Application created',start:"{{object.created|date:'M d,Y'}}", title:"{{object.created|date:'M d,Y'}}"},
+    {content: 'Start date', start: '{{ object.start_date }}', title:"{{ object.start_date }}"},
+    {% for audit in audits %}
+    {content: '{{audit.new_status}}<br/>({{audit.contact}})', start:"{{audit.created|date:'M d, Y'}}",title:"{{audit.created|date:'M d, Y'}}"},
+    {% endfor %}
+    {content: 'End date', start: '{{ object.end_date }}',title:"{{ object.end_date }}"}
+  ]);
+
+  // Configuration for the Timeline
+  var options = {
+  	'moveable': false};
+
+  // Create a Timeline
+  var timeline = new vis.Timeline(container, items, options);
+</script>
 {% endblock %}

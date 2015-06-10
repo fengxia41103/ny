@@ -180,6 +180,9 @@ class MyStatusAudit(models.Model):
 	)		
 
 class MyApplication(models.Model):
+	created = models.DateTimeField(
+		auto_now_add=True,
+	)	
 	application_id = models.CharField(
 		max_length = 64,
 		null = True,
@@ -204,6 +207,10 @@ class MyApplication(models.Model):
 		return (self.end_date-self.start_date).days
 	duration_in_days = property(_duration_in_days)	
 	
+	def _lead_in_days(self):
+		return (self.start_date-self.created.date()).days
+	lead_in_days = property(_lead_in_days)	
+	
 	def __unicode__(self):
 		return '%s (%s)'%(self.applicant_name,self.application_id)
 
@@ -220,7 +227,7 @@ def application_status_change_handler(sender, **kwargs):
 				application = instance,		
 				old_status = old_status,
 				new_status = new_status,
-				contact = original.status.contact.name,
+				contact = original.status.contact,
 				comment = u'Status changed'				
 			)
 			audit.save()

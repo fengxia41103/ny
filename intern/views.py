@@ -198,4 +198,8 @@ class MyApplicationDetail(DetailView):
 	template_name = 'intern/application/detail.html'
 	def get_context_data(self, **kwargs):
 		context = super(DetailView, self).get_context_data(**kwargs)
+		application = self.get_object()
+		context['time_to_start'] = (application.start_date-dt.now().date()).days
+		context['audits'] = application.mystatusaudit_set.order_by('-created')
+
 		return context
