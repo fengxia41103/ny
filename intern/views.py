@@ -26,6 +26,7 @@ from django.views.decorators.vary import vary_on_headers
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db.models import Q
+from django.template import loader, Context
 
 # django-crispy-forms
 from crispy_forms.helper import FormHelper
@@ -35,6 +36,9 @@ from crispy_forms.layout import Submit
 from django_filters import FilterSet, BooleanFilter
 from django_filters.views import FilterView
 import django_filters
+
+# django emails
+from django.core.mail import send_mail
 
 # so what
 import re,os,os.path,shutil,subprocess, testtools
@@ -213,5 +217,43 @@ class MyApplicationStatusUpdate(TemplateView):
 		application.status = MyStatus.objects.get(id=int(request.POST['status_id']))
 		application.save()
 
-		# refresh current page, whatever it is.
-		return HttpResponseRedirect(request.META['HTTP_REFERER'])
+		return HttpResponse(json.dumps({'status':'ok'}), 
+			content_type='application/javascript')
+
+@class_view_decorator(login_required)
+class MyApplicationReminder(DetailView):
+	model = MyApplication
+	template_name = 'intern/application/reminder_email.html'
+
+	def post(self,request,pk):
+		application = self.get_object()
+		content = loader.get_template(self.template_name)
+		html= content.render(Context({'object':application}))
+
+		send_mail(
+			subject = 'Reminder: application %s'%application.application_id, 
+			message = '',
+			html_message = html, 
+			from_email = 'fengxia41103@gmail.com',
+			recipient_list = [application.status.contact.email], 
+			fail_silently=False)
+
+		return HttpResponse(json.dumps({'status':'ok'}), 
+			content_type='application/javascript')
+
+###################################################
+#
+#	MyStatusAudit views
+#
+###################################################		
+@class_view_decorator(login_required)
+class MyStatusAuditDelete (DeleteView):
+	model = MyStatusAudit
+	template_name = 'intern/common/delete_form.html'
+	success_url = reverse_lazy('application_list')
+
+	def get_context_data(self, **kwargs):
+		context = super(DeleteView, self).get_context_data(**kwargs)
+		context['title'] = u'Delete status audit'
+		context['list_url'] = reverse_lazy('application_list')
+		return context	

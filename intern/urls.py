@@ -23,5 +23,7 @@ urlpatterns = patterns(
 		url(r'^application/(?P<pk>\d+)/delete/$', views.MyApplicationDelete.as_view(), name='application_delete'),
 		url(r'^application/(?P<pk>\d+)/$', views.MyApplicationDetail.as_view(), name='application_detail'),		
 		url(r'^application/status/update/$', views.MyApplicationStatusUpdate.as_view(), name='application_status_update'),
+		url(r'^application/(?P<pk>\d+)/reminder/$', views.MyApplicationReminder.as_view(), name='application_reminder'),
 
+		url(r'^status/audit/(?P<pk>\d+)/delete/$', views.MyStatusAuditDelete.as_view(), name='status_audit_delete'),
 	)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

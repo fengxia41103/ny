@@ -6,7 +6,55 @@
 	<a href="{% url 'application_edit' object.id %}" class="btn btn-xs addlink">
 		<i class="fa fa-plus"></i>
 		Edit
-	</a>
+	</a>	
+
+<div class="btn-group pull-right" role="group" aria-label="Status group" id="statuses">
+  <button type="button" 
+  status_id = 1 
+  class="btn ladda-button
+  	{% if object.status.id == 1 %}
+  	btn-primary
+  	{% endif %}
+
+	data-style="expand-left" 
+	data-size="l" 
+	data-spinner-color="#333"  	
+  ">Initialized</button>
+  <button type="button" 
+  status_id = 2
+  class="btn ladda-button
+  	{% if object.status.id == 2 %}
+  	btn-primary
+  	{% endif %}
+	
+	data-style="expand-left" 
+	data-size="l" 
+	data-spinner-color="#333"  	
+  ">Dept submitted</button>
+  <button type="button" 
+  status_id = 3
+  class="btn ladda-button
+  	{% if object.status.id == 3 %}
+  	btn-primary
+  	{% endif %} 
+
+	data-style="expand-left" 
+	data-size="l" 
+	data-spinner-color="#333"  	
+  ">College submitted</button>
+
+  <button type="button" 
+  status_id = 4
+  class="btn ladda-button
+  	{% if object.status.id == 3 %}
+  	btn-primary
+  	{% endif %} 
+
+	data-style="expand-left" 
+	data-size="l" 
+	data-spinner-color="#333"  	
+  ">Approved</button>  
+</div>
 {% endblock %}
 
 {% block detail-school-header %}
@@ -56,47 +104,6 @@
 	<li><strong>days left to START</strong></li>
 </ul>
 
-<h2 class="page-header">Status</h2>
-<p>
-	Click to update application status. The one highlighted is the current status.
-</p>
-
-<div class="btn-group" role="group" aria-label="Status group" id="statuses">
-  <button type="button" 
-  status_id = 1 
-  class="btn ladda-button
-  	{% if object.status.id == 1 %}
-  	btn-primary
-  	{% endif %}
-
-	data-style="expand-left" 
-	data-size="l" 
-	data-spinner-color="#333"  	
-  ">Initialized</button>
-  <button type="button" 
-  status_id = 2
-  class="btn ladda-button
-  	{% if object.status.id == 2 %}
-  	btn-primary
-  	{% endif %}
-	
-	data-style="expand-left" 
-	data-size="l" 
-	data-spinner-color="#333"  	
-  ">Dept submitted</button>
-  <button type="button" 
-  status_id = 3
-  class="btn ladda-button
-  	{% if object.status.id == 3 %}
-  	btn-primary
-  	{% endif %} 
-
-	data-style="expand-left" 
-	data-size="l" 
-	data-spinner-color="#333"  	
-  ">College submitted</button>
-</div>
-
 <h2 class="">Dates</h2>
 <table class="table">
 	<thead>
@@ -126,6 +133,20 @@
 
 	</tbody>
 </table>
+
+<div class="btn-group" role="group">
+	<a type="button" class="btn btn-info" href="{%url 'application_reminder' object.id%}">
+		Preview reminder
+	</a>
+	<button type="button" class="btn btn-info
+	ladda-button
+	data-style="expand-left" 
+	data-size="l" 
+	data-spinner-color="#333"  	
+	" id="btn-send-reminder">
+		Send reminder
+	</button>
+</div>
 {% endblock %}
 
 {% block detail-content %}
@@ -139,6 +160,7 @@
 		<th>Changed on</th>
 		<th>Status</th>
 		<th>Contact</th>
+		<th></th>
 	</thead>
 	<tbody>
 	{% for audit in audits %}
@@ -149,6 +171,8 @@
 			&rarr; {{ audit.new_status }}
 		</td><td>
 			<a href="mailto:{{ audit.contact.email }}">{{audit.contact}}</a>
+		</td><td>
+			<a href="{% url 'status_audit_delete' audit.id %}">Delete</a>
 		</td></tr>
 	{% endfor %}
 	</tbody>
@@ -180,10 +204,10 @@
 	j$(document).ready(function(){
 		// register events
 		j$('#statuses > button').click(function(){
-			console.log('here');
-
 			var l = Ladda.create(this);
 	 		l.start();
+
+			myBlockUI();
 
 	        j$.post("{% url 'application_status_update' %}", // passed in from view
 	            { 
@@ -191,13 +215,26 @@
 	                'status_id':j$(this).attr('status_id')
 	            }, 
 	            function(resp) { // success callback
-	            	window.location.reload();
+	            	location.reload();
 	            },'json'
 	        ).always(function(){     
 	        	l.stop(); 	
 	        });			
 		});
 
+		j$('#btn-send-reminder').click(function(){
+			var l = Ladda.create(this);
+	 		l.start();			
+	        j$.post("{% url 'application_reminder' object.id %}", // passed in from view
+	            { 
+	            }, 
+	            function(resp) { // success callback
+	            	toastr.success('Reminder sent!');
+	            },'json'
+	        ).always(function(){    
+	        	l.stop(); 	         	
+	        });	
+		});
 	});
 </script>
 {% endblock %}
