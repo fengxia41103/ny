@@ -171,7 +171,8 @@
         
                     <div class="section-heading">
                     <h2>Our Services</h2>
-                    <p>Lorem ipsum dolor sit amet, no nisl mentitum recusabo per, vim at blandit qualisque dissentiunt. Diam efficiantur conclusionemque ut has</p>
+                    <p>We offer consulting services that will transform your
+                    ideas into a fully documented specification and a live demo web application.</p>
                     </div>
             
                 </div>
@@ -187,8 +188,9 @@
                         <i class="fa fa-code fa-3x"></i>
                     </div>
                     <div class="service-desc">
-                        <h5>Print</h5>
-                        <p>Vestibulum tincidunt enim in pharetra malesuada. Duis semper magna metus electram accommodare.</p>
+                        <h5>Business Analysis</h5>
+                        <p>We analyze your business scenarios and
+                         organize them into solid use cases.</p>
                     </div>
                 </div>
     
@@ -200,8 +202,9 @@
                         <i class="fa fa-suitcase fa-3x"></i>
                     </div>
                     <div class="service-desc">
-                        <h5>Web Design</h5>
-                        <p>Vestibulum tincidunt enim in pharetra malesuada. Duis semper magna metus electram accommodare.</p>
+                        <h5>Specification</h5>
+                        <p>Based on the understanding of your business requirements,
+                        we will further develop written specifications.</p>
                     </div>
                 </div>
 
@@ -213,8 +216,9 @@
                         <i class="fa fa-cog fa-3x"></i>
                     </div>
                     <div class="service-desc">
-                        <h5>Photography</h5>
-                        <p>Vestibulum tincidunt enim in pharetra malesuada. Duis semper magna metus electram accommodare.</p>
+                        <h5>Proof-of-concept Website</h5>
+                        <p>We will deliver a proof-of-concept website using the
+                        latest web technologies.</p>
                     </div>
                 </div>
             
@@ -226,8 +230,9 @@
                         <i class="fa fa-rocket fa-3x"></i>
                     </div>
                     <div class="service-desc">
-                        <h5>Cloud System</h5>
-                        <p>Vestibulum tincidunt enim in pharetra malesuada. Duis semper magna metus electram accommodare.</p>
+                        <h5>Intellectual Property</h5>
+                        <p>We will deliver all design documents and code back to you so
+                        you have a solid base to take your idea further.</p>
                     </div>
                 </div>
             
@@ -254,57 +259,33 @@
             </div>
             </div>
         </div>
-        <div class="container">
-
-            <div class="row">
-                <div class="col-sm-12 col-md-12 col-lg-12" >
-
-                    <div class="row gallery-item">
-                        <div class="col-md-3">
-                            <a href="img/works/1.jpg" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
-                                <img src="img/works/1.jpg" class="img-responsive" alt="img">
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="img/works/2.jpg" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
-                                <img src="img/works/2.jpg" class="img-responsive" alt="img">
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="img/works/3.jpg" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
-                                <img src="img/works/3.jpg" class="img-responsive" alt="img">
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="img/works/4.jpg" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
-                                <img src="img/works/4.jpg" class="img-responsive" alt="img">
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="img/works/5.jpg" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
-                                <img src="img/works/5.jpg" class="img-responsive" alt="img">
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="img/works/6.jpg" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
-                                <img src="img/works/6.jpg" class="img-responsive" alt="img">
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="img/works/7.jpg" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
-                                <img src="img/works/7.jpg" class="img-responsive" alt="img">
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="img/works/8.jpg" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
-                                <img src="img/works/8.jpg" class="img-responsive" alt="img">
-                            </a>
-                        </div>
-                    </div>
-    
-                </div>
-            </div>  
+        <div class="container my-multicol-3 gallery-item">
+            <a href="{% static 'img/works/1.jpg' %}" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
+                <img src="{% static 'img/works/1.jpg' %}" class="img-responsive" alt="img">
+            </a>
+            <a href="{% static 'img/works/2.jpg' %}" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
+                <img src="{% static 'img/works/2.jpg' %}" class="img-responsive" alt="img">
+            </a>
+            <a href="{% static 'img/works/3.jpg' %}" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
+                <img src="{% static 'img/works/3.jpg' %}" class="img-responsive" alt="img">
+            </a>
+            <a href="{% static 'img/works/4.jpg' %}" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
+                <img src="{% static 'img/works/4.jpg' %}" class="img-responsive" alt="img">
+            </a>
+            <a href="{% static 'img/works/5.jpg' %}" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
+                <img src="{% static 'img/works/5.jpg' %}" class="img-responsive" alt="img">
+            </a>
+            <a href="{% static 'img/works/6.jpg' %}" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
+                <img src="{% static 'img/works/6.jpg' %}" class="img-responsive" alt="img">
+            </a>
+            <a href="{% static 'img/works/7.jpg' %}" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
+                <img src="{% static 'img/works/7.jpg' %}" class="img-responsive" alt="img">
+            </a>  
+            <a href="{% static 'img/works/8.jpg' %}" title="This is an image title" data-lightbox-gallery="gallery1" data-lightbox-hidpi="img/works/1@2x.jpg">
+                <img src="{% static 'img/works/8.jpg' %}" class="img-responsive" alt="img">
+            </a>                                                                      
         </div>
+
     </section>
     <!-- /Section: works -->
 
@@ -317,7 +298,11 @@
     
                     <div class="section-heading">
                     <h2>Get in touch</h2>
-                    <p>Lorem ipsum dolor sit amet, no nisl mentitum recusabo per, vim at blandit qualisque dissentiunt. Diam efficiantur conclusionemque ut has</p>
+                    <p>
+                        Don't wait any longer to let another brilliant idea slip away (like many others in the past)! We can help, and we will be honored to 
+                        work with you to deliver a proof-of-concept so you can flush out 
+                        some details and have a firm grasp of how great your idea can be! 
+                    </p>
                     </div>
                 
                 </div>
@@ -375,18 +360,17 @@
             <div class="widget-contact row">
                  <div class="col-lg-6">
                 <address>
-                  <strong>Ninestars Ltd.</strong><br>
-                  Big Villa 334 Awesome, Beautiful Suite 1200<br>
-                  San Francisco, CA 94107<br>
-                  <abbr title="Phone">P:</abbr> (123) 456-7890
+                  <strong>PY Consulting Ltd.</strong><br>
+                  1236 Beacon St., #1<br>
+                  Brookline, MA 0246<br>
+                  <abbr title="Phone">P:</abbr> (508) 801-1794
                 </address>
                 </div>
                 
                 <div class="col-lg-6">
                 <address>
                   <strong>Email</strong><br>
-                  <a href="mailto:#">email.name@example.com</a><br />
-                   <a href="mailto:#">name.name@example.com</a>
+                  <a href="mailto:feng_xia41103@hotmail.com">feng_xia41103@hotmail.com</a><br />
                 </address>  
             
                 </div>
