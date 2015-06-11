@@ -126,9 +126,16 @@ class AttachmentForm(ModelForm):
 #	App specific models
 #
 #####################################################
+class MySponsor(models.Model):
+	name = models.CharField(
+		max_length = 32,
+		verbose_name = u'Sponsor name'
+	)
+	def __unicode__(self):
+		return self.name
+
 class MyExternalContact(MyBaseModel):
 	email = models.EmailField()
-	phone = USPhoneNumberField()
 
 	def __unicode__(self):
 		return self.name
@@ -136,9 +143,16 @@ class MyExternalContact(MyBaseModel):
 class MyStatus(models.Model):
 	STATUS_CHOICES = (
 		(1,u'initialized'),
-		(2,u'dept submitted'),
-		(3,u'college submitted'),
-		(4,u'approved'),
+		(2,u'dept approval'),
+		(3,u'college approval'),
+		(4,u'route to C&G'),
+		(5,u'contract draft send to sponsor'),
+		(6,u'contract negotiation'),
+		(7,u'contract terms finalized'),
+		(8,u'students signs off'),
+		(9,u'C&G signs off'),
+		(10,u'sponsor signs off - fully executed'),
+		(11,u'college post-award update'),
 	)														
 	status = models.IntegerField(
 		default = 1,
@@ -182,12 +196,24 @@ class MyStatusAudit(models.Model):
 class MyApplication(models.Model):
 	created = models.DateTimeField(
 		auto_now_add=True,
-	)	
+	)
+	sponsor = models.ForeignKey(
+		'MySponsor',
+		null = True,
+		blank = True,
+		verbose_name = u'Sponsor'
+	)
 	application_id = models.CharField(
 		max_length = 64,
 		null = True,
 		blank = True,
 		verbose_name = u'Application ID'
+	)
+	affiliated_id = models.CharField(
+		max_length = 64,
+		null = True,
+		blank = True,
+		verbose_name = u'Affiliated ID'
 	)
 	applicant_name = models.CharField(
 		max_length = 256,
@@ -203,6 +229,15 @@ class MyApplication(models.Model):
 		'MyStatus',
 		verbose_name = u'Application status'
 	)
+	additional = models.TextField(
+		default = '',
+		verbose_name = u'Additional info'
+	)
+	budget = models.IntegerField(
+		default = 0,
+		verbose_name = u'Allocated budget'
+	)
+
 	def _duration_in_days(self):
 		return (self.end_date-self.start_date).days
 	duration_in_days = property(_duration_in_days)	

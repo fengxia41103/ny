@@ -5,7 +5,7 @@ from intern.models import *
 
 class MyContactAdmin(admin.ModelAdmin):
 	list_filter=['name',]
-	list_display=('name','email','phone')
+	list_display=('name','email',)
 admin.site.register(MyExternalContact,MyContactAdmin)
 
 class MyStatusAdmin(admin.ModelAdmin):
@@ -15,3 +15,5 @@ admin.site.register(MyStatus,MyStatusAdmin)
 class MyApplicationAdmin(admin.ModelAdmin):
 	list_display=('applicant_name','start_date','end_date','status')	
 admin.site.register(MyApplication,MyApplicationAdmin)
+
+admin.site.register(MySponsor)

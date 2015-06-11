@@ -142,7 +142,7 @@ class MyApplicationAdd(CreateView):
 	model = MyApplication
 	template_name = 'intern/common/add_form.html'
 	success_url = reverse_lazy('application_list')
-	fields = ['application_id', 'applicant_name','start_date','end_date','status']	
+	# fields = ['application_id', 'applicant_name','start_date','end_date','status']	
 
 	def form_valid(self, form):
 		form.instance.created_by = self.request.user
@@ -214,7 +214,7 @@ class MyApplicationStatusUpdate(TemplateView):
 	def post(self,request):
 		obj_id = request.POST['obj_id']
 		application = MyApplication.objects.get(id=int(obj_id))
-		application.status = MyStatus.objects.get(id=int(request.POST['status_id']))
+		application.status = MyStatus.objects.get(status=int(request.POST['status_id']))
 		application.save()
 
 		return HttpResponse(json.dumps({'status':'ok'}), 

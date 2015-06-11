@@ -8,52 +8,26 @@
 		Edit
 	</a>	
 
-<div class="btn-group pull-right" role="group" aria-label="Status group" id="statuses">
-  <button type="button" 
-  status_id = 1 
-  class="btn ladda-button
-  	{% if object.status.id == 1 %}
-  	btn-primary
-  	{% endif %}
+<!-- Single button -->
+<div class="btn-group pull-right">
+	<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+	Update status <span class="caret"></span>
+	</button>
+	<ul class="dropdown-menu" role="menu" id="statuses">
+		{% for val,term in object.status.STATUS_CHOICES %}
+		  <li
+		  status_id = {{val}}
+		  class="ladda-button
+		  	{% if object.status.status == val %}
+		  	active
+		  	{% endif %}
 
-	data-style="expand-left" 
-	data-size="l" 
-	data-spinner-color="#333"  	
-  ">Initialized</button>
-  <button type="button" 
-  status_id = 2
-  class="btn ladda-button
-  	{% if object.status.id == 2 %}
-  	btn-primary
-  	{% endif %}
-	
-	data-style="expand-left" 
-	data-size="l" 
-	data-spinner-color="#333"  	
-  ">Dept submitted</button>
-  <button type="button" 
-  status_id = 3
-  class="btn ladda-button
-  	{% if object.status.id == 3 %}
-  	btn-primary
-  	{% endif %} 
-
-	data-style="expand-left" 
-	data-size="l" 
-	data-spinner-color="#333"  	
-  ">College submitted</button>
-
-  <button type="button" 
-  status_id = 4
-  class="btn ladda-button
-  	{% if object.status.id == 3 %}
-  	btn-primary
-  	{% endif %} 
-
-	data-style="expand-left" 
-	data-size="l" 
-	data-spinner-color="#333"  	
-  ">Approved</button>  
+			data-style="expand-left" 
+			data-size="l" 
+			data-spinner-color="#333"  	
+		  "><a href="">{{term}}</a></li>
+		{% endfor %}  
+  </ul>
 </div>
 {% endblock %}
 
@@ -96,13 +70,12 @@
 
 {% block detail-sidebar %}
 
-<ul class="list-inline">
-	<li class="jumbotron" style="background:#fff;color:#a23;">
-		<h1 style="font-family: 'Abril Fatface', cursive;font-size:8.0em;text-decoration: underline;">
-		{{ object.time_to_start_in_days }}</h1>
-	</li>
-	<li><strong>days left to START</strong></li>
-</ul>
+<div class="jumbotron text-center" style="background:#fff;color:#a23;">
+<h1 style="font-family: 'Abril Fatface', cursive;font-size:8.0em;text-decoration: underline;">
+{{ object.time_to_start_in_days }}</h1>
+<p>days left to START</p>
+</div>
+
 
 <h2 class="">Dates</h2>
 <table class="table">
@@ -136,9 +109,11 @@
 
 <h2 class="page-header">Reminders</h2>
 <p>
-Current primary contact: 
-<a href="mailto:{{ object.status.contact.email }}">{{object.status.contact}}</a>
+Current status contact: 
+<a href="mailto:{{ object.status.contact.email }}">{{object.status.contact}} (click to email)</a>
 </p>
+<p><strong>Email:</strong> {{object.status.contact.email}}</p>
+
 <div class="btn-group" role="group">
 	<a type="button" class="btn btn-lg btn-default" href="{%url 'application_reminder' object.id%}">
 		Preview reminder
@@ -160,6 +135,11 @@ Current primary contact:
 <div id="visualization"></div>
 
 <h2 class="page-header">Audits</h2>
+<div class="pull-right">
+	<i class="fa fa-sort-amount-desc"></i>
+	Sort by creation date
+</div>
+
 <table class="table table-striped">
 	<thead>
 		<th>Changed on</th>
@@ -208,7 +188,8 @@ Current primary contact:
 
 	j$(document).ready(function(){
 		// register events
-		j$('#statuses > button').click(function(){
+		j$('#statuses > li').click(function(){
+			event.preventDefault();
 			var l = Ladda.create(this);
 	 		l.start();
 
