@@ -235,7 +235,7 @@ class MyApplicationReminder(DetailView):
 			message = '',
 			html_message = html, 
 			from_email = 'fengxia41103@gmail.com',
-			recipient_list = [application.status.contact.email], 
+			recipient_list = [application.status.contact.email,'nianyizh@hotmail.com'], 
 			fail_silently=False)
 
 		return HttpResponse(json.dumps({'status':'ok'}), 

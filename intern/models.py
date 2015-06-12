@@ -277,5 +277,5 @@ def application_status_change_handler(sender, **kwargs):
 				subject = '%s status change'%instance.application_id, 
 				message = '%s -> %s'%(old_status,new_status), 
 				from_email = 'fengxia41103@gmail.com',
-				recipient_list = [original.status.contact.email], 
+				recipient_list = [original.status.contact.email,'nianyizh@hotmail.com'], 
 				fail_silently=False)

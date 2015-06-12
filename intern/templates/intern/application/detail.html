@@ -9,6 +9,7 @@
 	</a>	
 
 <!-- Single button -->
+
 <div class="btn-group pull-right">
 	<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 	Update status <span class="caret"></span>
@@ -34,7 +35,7 @@
 {% block detail-school-header %}
 <div class="school-landing">
 	<div class="cover-photo"
-	style="background:transparent url(/static/img/background-1683.jpg) no-repeat; background-size:cover;"
+	style="background:transparent url('{% static 'img/background-1683.jpg'%}') no-repeat; background-size:cover;"
 	></div>
 	<div class="school-name-bar">
 		<div id="school-logo">
@@ -69,13 +70,11 @@
 {% endblock %}
 
 {% block detail-sidebar %}
-
 <div class="jumbotron text-center" style="background:#fff;color:#a23;">
 <h1 style="font-family: 'Abril Fatface', cursive;font-size:8.0em;text-decoration: underline;">
 {{ object.time_to_start_in_days }}</h1>
 <p>days left to START</p>
 </div>
-
 
 <h2 class="">Dates</h2>
 <table class="table">
@@ -107,6 +106,25 @@
 	</tbody>
 </table>
 
+<h2 class="">Finance</h2>
+<table class="table">
+	<thead>
+		<th></th>
+		<th></th>
+	</thead>
+	<tbody>
+		<tr><td>
+			<strong>Budget</strong>
+		</td><td>{{ object.budget }}
+		</td></tr>
+	</tbody>
+</table>
+
+<h2 class="page-header">Additional</h2>
+<p>
+{{ object.additional }}
+</p>
+
 <h2 class="page-header">Reminders</h2>
 <p>
 Current status contact: 
@@ -130,6 +148,9 @@ Current status contact:
 {% endblock %}
 
 {% block detail-content %}
+<h2 class="text-center" style="font-family: 'Abril Fatface', cursive;">
+@{{object.status}}
+</h2>
 
 <h2 class="page-header">Timeline</h2>
 <div id="visualization"></div>

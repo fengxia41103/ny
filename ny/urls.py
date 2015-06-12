@@ -14,7 +14,7 @@ urlpatterns = patterns('',
     url('', include('social.apps.django_app.urls', namespace='social')),
     url('', include('django.contrib.auth.urls', namespace='auth')),
 
-    url(r'^intern/', include ('intern.urls')),
+    url(r'^ny/', include ('intern.urls')),
 )
 
 if settings.DEBUG:
