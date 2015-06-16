@@ -131,9 +131,13 @@ class MySponsor(models.Model):
 		max_length = 32,
 		verbose_name = u'Sponsor name'
 	)
-	is_return_balance = models.BooleanField(
+	is_to_return_balance = models.BooleanField(
 		default = False,
-		verbose_name = u'To return remaining balance'
+		verbose_name = u'Need to return remaining balance?'
+	)
+	is_sas_paying_student_fees = models.BooleanField(
+		default = False,
+		verbose_name = u'Does SAS pay student fees?'
 	)
 		
 	def __unicode__(self):

@@ -116,6 +116,16 @@
 			<strong>Budget</strong>
 		</td><td>{{ object.budget }}
 		</td></tr>
+
+		<tr><td>
+			<strong>To return remaining balance?</strong>
+		</td><td>{{ object.sponsor.is_to_return_balance }}
+		</td></tr>
+
+		<tr><td>
+			<strong>Is SAS paying student fees?</strong>
+		</td><td>{{ object.sponsor.is_sas_paying_student_fees }}
+		</td></tr>			
 	</tbody>
 </table>
 
@@ -123,18 +133,6 @@
 <p>
 {{ object.additional }}
 </p>
-<table class="table">
-	<thead>
-		<th></th>
-		<th></th>
-	</thead>
-	<tbody>
-		<tr><td>
-			<strong>To return balance</strong>
-		</td><td>{{ object.sponsor.is_return_balance }}
-		</td></tr>	
-	</tbody>
-</table>
 
 <h2 class="page-header">Reminders</h2>
 <p>
