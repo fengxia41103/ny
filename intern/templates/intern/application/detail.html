@@ -101,8 +101,7 @@
 		<tr><td>
 			<strong>Lead (days)</strong>
 		</td><td>{{ object.lead_in_days }}
-		</td></tr>
-
+		</td></tr>	
 	</tbody>
 </table>
 
@@ -124,6 +123,18 @@
 <p>
 {{ object.additional }}
 </p>
+<table class="table">
+	<thead>
+		<th></th>
+		<th></th>
+	</thead>
+	<tbody>
+		<tr><td>
+			<strong>To return balance</strong>
+		</td><td>{{ object.sponsor.is_return_balance }}
+		</td></tr>	
+	</tbody>
+</table>
 
 <h2 class="page-header">Reminders</h2>
 <p>

@@ -116,6 +116,13 @@
 					</a>					
 				</li>	
 
+				<li>
+					<a href="{% url 'application_list' %}">
+					<i class="fa fa-globe"></i>
+					Applications
+					</a>					
+				</li>	
+				
 				{% if user.is_authenticated %}
 				<li>
 					<a href="{% url 'logout' %}">

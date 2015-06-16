@@ -131,6 +131,11 @@ class MySponsor(models.Model):
 		max_length = 32,
 		verbose_name = u'Sponsor name'
 	)
+	is_return_balance = models.BooleanField(
+		default = False,
+		verbose_name = u'To return remaining balance'
+	)
+		
 	def __unicode__(self):
 		return self.name
 
@@ -237,7 +242,6 @@ class MyApplication(models.Model):
 		default = 0,
 		verbose_name = u'Allocated budget'
 	)
-
 	def _duration_in_days(self):
 		return (self.end_date-self.start_date).days
 	duration_in_days = property(_duration_in_days)	
