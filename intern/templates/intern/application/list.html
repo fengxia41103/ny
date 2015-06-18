@@ -20,6 +20,8 @@
 		<th>Start date</th>
 		<th>End date</th>
 		<th>Application ID</th>
+		<th>Does SAS pay student fees?</th>
+		<th>Is to return remaining balance?</th>
 		<th></th>
 	</thead>
 	<tbody>
@@ -53,6 +55,10 @@
 			{{ obj.end_date }}
 		</td><td>
 			{{ obj.application_id }}
+		</td><td>
+			{{ obj.sponsor.is_sas_paying_student_fees }}
+		</td><td>
+			{{ obj.sponsor.is_to_return_balance }}
 		</td><td>
 			<a href="{% url 'application_delete' obj.id %}">Delete</a>
 		</td></tr>

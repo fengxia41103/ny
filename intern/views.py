@@ -161,7 +161,11 @@ class MyApplicationListFilter (FilterSet):
 				'status':['exact'],
 				'applicant_name':['contains'],
 				'start_date':['exact'],
-				'end_date':['exact'],		
+				'end_date':['exact'],
+				'application_id':['contains'],
+				'affiliated_id':['contains'],
+				# 'sponsor__is_sas_paying_student_fees':['exact'],
+				# 'sponsor__is_to_return_balance':['exact']
 				}
 
 class MyApplicationList (FilterView):
