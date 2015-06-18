@@ -118,13 +118,27 @@
 		</td></tr>
 
 		<tr><td>
-			<strong>To return remaining balance?</strong>
-		</td><td>{{ object.sponsor.is_to_return_balance }}
-		</td></tr>
-
-		<tr><td>
-			<strong>Is SAS paying student fees?</strong>
-		</td><td>{{ object.sponsor.is_sas_paying_student_fees }}
+		 <div class="checkbox">
+		    <label>
+		    	{% if object.sponsor.is_to_return_balance %}
+		      		<input type="checkbox" checked>
+		      	{% else %}
+		      		<input type="checkbox">
+		    	{% endif %}
+		    	To return remaining balance?
+		    </label>
+		  </div>
+		</td><td>
+		 <div class="checkbox">
+		    <label>
+		    	{% if object.sponsor.is_sas_paying_student_fees %}
+		      		<input type="checkbox" checked>
+		      	{% else %}
+		      		<input type="checkbox">
+		    	{% endif %}
+		    	Is SAS paying student fees?
+		    </label>
+		  </div>		
 		</td></tr>			
 	</tbody>
 </table>
