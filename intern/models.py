@@ -13,7 +13,7 @@ from datetime import datetime
 from annoying.fields import JSONField # django-annoying
 from django.db.models import Q
 from datetime import datetime as dt
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save,post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from localflavor.us.forms import USPhoneNumberField
@@ -287,3 +287,130 @@ def application_status_change_handler(sender, **kwargs):
 				from_email = 'fengxia41103@gmail.com',
 				recipient_list = [original.status.contact.email,'nianyizh@hotmail.com'], 
 				fail_silently=False)
+
+class MyRoom(models.Model):
+	name = models.CharField(
+		max_length = 32,
+		verbose_name = u'Room name'
+	)
+	tracking = models.CharField(
+		max_length = 32,
+		null = True,
+		blank = True,
+		verbose_name = u'Custom tracking ID'
+	)
+	def __unicode__(self):
+		return self.name
+
+class MyBox(models.Model):
+	BOX_CHOICES = (
+		('','--'),
+		('L',"Large"),
+		('M',"Medium"),
+		('S','Small'),
+	)
+	STATUS_CHOICES = (
+		('','--'),
+		('E','Empty'),
+		('P','Packing'),
+		('S','Sealed'),
+		('R','In route'),
+		('D','Delivered'),
+		('U','Unpacking'),
+		('G','In strorage'),
+		('B','Broken'),
+		('M','Missing'),
+	)
+	VALUABLE_INDEX_CHOICES = (
+		(0,'--'),		
+		(1,'Unimportant'),
+		(2,'Some important'),
+		(3,'Important'),
+		(4,'Very important'),
+		(5,'Must have')
+	)
+	UNPACK_PRIORITY_CHOICES = (
+		(0,'--'),		
+		(1,'Can live without'),
+		(2,'Nice to have'),
+		(3,'Need but can wait'),
+		(4,'Need now'),
+		(5,'Die if missing')
+	)	
+	room = models.ForeignKey(
+		'MyRoom',
+		null = True,
+		blank = True,
+		verbose_name = u'Home room'
+	)
+	size = models.CharField(
+		max_length = 1,
+		choices = BOX_CHOICES,
+		verbose_name = u'Box size'
+	)
+	weight = models.FloatField(
+		default = 0.0,
+		verbose_name = u'Actual weight'
+	)
+	status = models.CharField(
+		max_length = 8,
+		choices = STATUS_CHOICES,
+		verbose_name = u'Status'
+	)
+	valuable_index = models.IntegerField(
+		default = 1,
+		choices = VALUABLE_INDEX_CHOICES,
+		verbose_name = u'How valuable to me'
+	)
+	tracking = models.CharField(
+		max_length = 32,
+		null = True,
+		blank = True,
+		verbose_name = u'Custom tracking ID'
+	)	
+	unpack_priority = models.IntegerField(
+		default = 1,
+		choices = UNPACK_PRIORITY_CHOICES,
+		verbose_name = u'Priority to unpack'
+	)
+
+	def _full_tracking(self):
+		if self.room:
+			if self.room.tracking and self.tracking:
+				return '%s-%s' % (self.room.tracking, self.tracking)
+			elif self.room.tracking:
+				return '%s-%d' % (self.room.tracking, self.id)
+			elif self.tracking:
+				return '%s-%s' % (self.room, self.tracking)
+		else:
+			if self.tracking: return self.tracking
+			else: return str(self.id)
+	full_tracking = property(_full_tracking)
+
+	def __unicode__(self):
+		return self.full_tracking
+
+class MyItem(MyBaseModel):
+	STATUS_CHOICES = (
+		('','--'),
+		('P','Pending'),
+		('G','Goodwill'),
+		('B','Boxed'),
+		('D','Disposed')
+	)
+	boxes = models.ManyToManyField(
+		'MyBox',
+		verbose_name = u'In box'
+	)
+	room = models.ForeignKey(
+		'MyRoom',
+		null = True,
+		blank = True,
+		verbose_name = u'Home room'
+	)
+	status = models.CharField(
+		max_length = 1,
+		choices = STATUS_CHOICES,
+		verbose_name = u'End result for this item'
+	)
+

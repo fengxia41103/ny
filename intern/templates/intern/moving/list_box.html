@@ -1,0 +1,149 @@
+{% extends "intern/common/base.html" %}
+
+{% block page-header %}
+	Boxes
+{% endblock %}
+
+
+{% block content %}
+<h2 class="page-header">
+Summary
+</h2>
+{% regroup object_list|dictsort:"status" by status as status_list %}
+{% for status in status_list %}
+	{{ status.grouper }} ({{status.list|length}})
+	<ul class="my-multicol-5">
+		{% for box in status.list %}
+			<li><a href="{%url 'box_edit' box.id %}">{{box.size}}-{{box}} ({{box.myitem_set.all|length}})</a></li>
+		{% endfor %}
+	</ul>
+{% endfor %}
+
+<h2 class="page-header">
+Search and Filter
+</h2>
+	<table class="table table-striped table-hover my-datatable">
+	<thead>
+		<th>Tracking</th>
+		<th>Size</th>
+		<th>Home room</th>
+		<th>Items</th>
+		<th>Unpacking priority</th>
+		<th>Valuable</th>	
+		<th>Status</th>
+		<th></th>	
+	</thead>
+	<tbody>
+		{% for obj in object_list %}
+		<tr><td>
+			<a href="{% url 'box_edit' obj.id %}">{{ obj }}</a>
+		</td><td>
+			{{ obj.get_size_display }}	
+		</td><td>
+			{{ obj.room }}
+		</td><td>
+			<ol>
+			{% for item in obj.myitem_set.all %}
+				<li>
+					<a href="{% url 'item_edit' item.id %}">
+				{% if item.room != obj.room %}
+					<font color="blue">{{ item }}</font> ({{item.room}})
+				{% else %}
+					{{item}}
+				{% endif %}
+					</a>
+					<a href="{% url 'item_delete' item.id %}">
+						<i class="fa fa-remove"></i>
+					</a>
+				</li>
+			{% endfor %}
+			</ol>
+		</td><td>
+			{{ obj.get_unpack_priority_display }}
+		</td><td>
+			<div class="btn-group">
+				<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				<span data-type="current-valuable-index"> {{ obj.get_valuable_index_display }} </span>
+				 <span class="caret"></span></button>
+
+				<ul class="dropdown-menu" data-type="valuable-index">
+					<li value="5" obj-id="{{ obj.id }}"><a href="#">Must have</a></li>
+					<li value="4" obj-id="{{ obj.id }}"><a href="#">Very important</a></li>
+					<li value="3" obj-id="{{ obj.id }}"><a href="#">Important</a></li>
+					<li value="2" obj-id="{{ obj.id }}"><a href="#">Some important</a></li>
+					<li value="1" obj-id="{{ obj.id }}"><a href="#">Unimporant</a></li>
+					<li role="separator" class="divider"></li>
+					<li value="0" obj-id="{{ obj.id }}"><a href="#">(0) --</a></li>
+				</ul>
+			</div>
+		</td><td>
+			<div class="btn-group">
+				<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				<span data-type="current-status"> {{ obj.get_status_display }} </span>
+				 <span class="caret"></span></button>
+
+				<ul class="dropdown-menu" data-type="status">
+					<li value="E" obj-id="{{ obj.id }}"><a href="#">Empty</a></li>
+					<li value="P" obj-id="{{ obj.id }}"><a href="#">Packing</a></li>
+					<li value="S" obj-id="{{ obj.id }}"><a href="#">Sealed</a></li>
+					<li value="R" obj-id="{{ obj.id }}"><a href="#">In route</a></li>
+					<li value="D" obj-id="{{ obj.id }}"><a href="#">Delivered</a></li>
+					<li value="U" obj-id="{{ obj.id }}"><a href="#">Unpacking</a></li>
+					<li value="G" obj-id="{{ obj.id }}"><a href="#">Storage</a></li>			
+					<li role="separator" class="divider"></li>
+					<li value="B" obj-id="{{ obj.id }}"><a href="#">Broken</a></li>
+					<li value="M" obj-id="{{ obj.id }}"><a href="#">Missing</a></li>	
+				</ul>
+			</div>
+		</td><td>
+			<a href="{% url 'box_delete' obj.id %}">Delete</a>
+		</td></tr>
+    	{% endfor %}
+	</tbody>
+	</table>
+{% endblock %}
+
+{% block custom_js %}
+<script type="text/javascript">
+	j$(document).ready(function(){
+		j$('[data-type="status"] > li').click(function(){
+			var elem = j$(this);
+			var id = j$(this).attr('obj-id');
+			var status = j$(this).attr('value');
+			var new_val = j$(this).find("a").html();
+
+	        j$.post("{% url 'box_update' %}", // passed in from view
+	        	{
+	        		'obj_id':id,
+	        		'status':status
+	        	},
+	            function(resp) { // success callback
+	            	j$(elem).closest('.btn-group').find('[data-type="current-status"]:first').html(new_val);
+	            	toastr.info('Status updated');
+	            },'json'
+	        ).always(function(){     
+	        });	
+		})
+
+		j$('[data-type="valuable-index"] > li').click(function(){
+			var elem = j$(this);
+			var id = j$(this).attr('obj-id');
+			var status = j$(this).attr('value');
+			var new_val = j$(this).find("a").html();
+
+	        j$.post("{% url 'box_update' %}", // passed in from view
+	        	{
+	        		'obj_id':id,
+	        		'valuable':status
+	        	},
+	            function(resp) { // success callback	            	
+	            	j$(elem).closest('.btn-group').find('[data-type="current-valuable-index"]:first').html(new_val);
+	            	toastr.info('Valuable-index updated');
+	            },'json'
+	        ).always(function(){     
+	        });	
+		})		
+	});
+</script>
+{% endblock %}
+

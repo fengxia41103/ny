@@ -17,3 +17,18 @@ class MyApplicationAdmin(admin.ModelAdmin):
 admin.site.register(MyApplication,MyApplicationAdmin)
 
 admin.site.register(MySponsor)
+
+
+class MyRoomAdmin(admin.ModelAdmin):
+	list_display = ('name','tracking')
+admin.site.register(MyRoom,MyRoomAdmin)
+
+class MyBoxAdmin(admin.ModelAdmin):
+	list_display = ('room','size','status','valuable_index')
+	list_filter = ['room','size','valuable_index']
+admin.site.register(MyBox,MyBoxAdmin)
+
+class MyItemAdmin(admin.ModelAdmin):
+	list_display = ('name','status')
+	list_filter=['boxes','room']
+admin.site.register(MyItem,MyItemAdmin)

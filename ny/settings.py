@@ -90,7 +90,7 @@ if DEPLOY_TYPE == 'dev' :
         #}
     	'default': {
     		'ENGINE': 'django.db.backends.mysql', 
-    		'NAME': DEV_DB,
+    		'NAME': 'ny',
     		'USER': DEV_DB_USER,
     		'PASSWORD': DEV_DB_PWD,
     		'HOST': DEV_DB_HOST,   # Or an IP Address that your DB is hosted on

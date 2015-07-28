@@ -27,4 +27,18 @@ urlpatterns = patterns(
 		url(r'^application/(?P<pk>\d+)/reminder/$', views.MyApplicationReminder.as_view(), name='application_reminder'),
 
 		url(r'^status/audit/(?P<pk>\d+)/delete/$', views.MyStatusAuditDelete.as_view(), name='status_audit_delete'),
+
+		# moving 
+		url(r'^items/$', views.MyItemList.as_view(), name='item_list'),
+		url(r'^item/(?P<pk>\d+)/edit/$', views.MyItemEdit.as_view(), name='item_edit'),
+		url(r'^item/(?P<pk>\d+)/delete/$', views.MyItemDelete.as_view(), name='item_delete'),
+
+		url(r'^boxes/$', views.MyBoxList.as_view(), name='box_list'),
+		url(r'^boxes/status/(\w+)/$', views.MyBoxListByStatus.as_view(), name='box_list_by_status'),
+		url(r'^boxes/size/(\w+)/$', views.MyBoxListBySize.as_view(), name='box_list_by_size'),
+		
+		url(r'^box/(?P<pk>\d+)/edit/$', views.MyBoxEdit.as_view(), name='box_edit'),
+		url(r'^box/update/$', views.MyBoxUpdate.as_view(), name='box_update'),
+		url(r'^box/(?P<pk>\d+)/delete/$', views.MyBoxDelete.as_view(), name='box_delete'),
+
 	)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

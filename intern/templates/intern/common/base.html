@@ -116,6 +116,72 @@
 					</a>					
 				</li>	
 				
+				<li class="dropdown">
+					<a href="" class="" data-toggle="dropdown">
+						<i class="fa fa-bar-chart"></i>
+						Moving									
+						<b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li>
+							<a href="{% url 'item_list' %}">
+								<i class="fa fa-pencil"></i>
+								Items
+							</a>						
+						</li>
+						<li>
+							<a href="{% url 'box_list' %}">
+								<i class="fa fa-pencil"></i>
+								Boxes
+							</a>						
+						</li>
+
+						<li class="divider"></li>
+						<li>
+							<a href="{% url 'box_list_by_status' 'G' %}">
+								<i class="fa fa-pencil"></i>
+								In storage
+							</a>						
+						</li>	
+						<li>
+							<a href="{% url 'box_list_by_status' 'R' %}">
+								<i class="fa fa-pencil"></i>
+								In route
+							</a>						
+						</li>					
+						<li>
+							<a href="{% url 'box_list_by_status' 'P' %}">
+								<i class="fa fa-pencil"></i>
+								Packing
+							</a>						
+						</li>	
+						<li>
+							<a href="{% url 'box_list_by_status' 'S' %}">
+								<i class="fa fa-pencil"></i>
+								Sealed
+							</a>
+						</li>	
+						<li>
+							<a href="{% url 'box_list_by_status' 'E' %}">
+								<i class="fa fa-pencil"></i>
+								Empty
+							</a>						
+						</li>
+						<li>
+							<a href="{% url 'box_list_by_size' 'M' %}">
+								<i class="fa fa-pencil"></i>
+								Size - M
+							</a>						
+						</li>
+						<li>
+							<a href="{% url 'box_list_by_size' 'S' %}">
+								<i class="fa fa-pencil"></i>
+								Size - S
+							</a>						
+						</li>																					
+					</ul>
+				</li>
+
 				{% if user.is_authenticated %}
 				<li>
 					<a href="{% url 'logout' %}">

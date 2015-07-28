@@ -261,3 +261,82 @@ class MyStatusAuditDelete (DeleteView):
 		context['title'] = u'Delete status audit'
 		context['list_url'] = reverse_lazy('application_list')
 		return context	
+
+###################################################
+#
+#	Moving views
+#
+###################################################	
+class MyItemList (ListView):
+	model = MyItem
+	template_name = 'intern/moving/list_item.html'
+
+@class_view_decorator(login_required)
+class MyItemEdit (UpdateView):
+	model = MyItem
+	template_name = 'intern/common/edit_form.html'
+	
+	def get_success_url(self):
+		return reverse_lazy('item_list')
+			
+	def get_context_data(self, **kwargs):
+		context = super(UpdateView, self).get_context_data(**kwargs)
+		context['title'] = u'Edit item [%s]' % self.object.__unicode__()
+		context['list_url'] = reverse_lazy('item_list')
+		return context
+
+class MyItemDelete(DeleteView):
+	model = MyItem
+	template_name = 'intern/common/delete_form.html'
+	success_url = reverse_lazy('item_list')
+
+class MyBoxList (ListView):
+	model = MyBox
+	template_name = 'intern/moving/list_box.html'
+
+class MyBoxDelete(DeleteView):
+	model = MyBox
+	template_name = 'intern/common/delete_form.html'
+	success_url = reverse_lazy('box_list')
+
+@class_view_decorator(login_required)
+class MyBoxEdit (UpdateView):
+	model = MyBox
+	template_name = 'intern/common/edit_form.html'
+	
+	def get_success_url(self):
+		return reverse_lazy('box_list')
+			
+	def get_context_data(self, **kwargs):
+		context = super(UpdateView, self).get_context_data(**kwargs)
+		context['title'] = u'Edit box [%s]' % self.object.__unicode__()
+		context['list_url'] = reverse_lazy('box_list')
+		return context
+
+@class_view_decorator(login_required)
+class MyBoxUpdate(TemplateView):
+	template_name = ''
+
+	def post(self,request):
+		obj_id = request.POST['obj_id']
+		box = MyBox.objects.get(id=int(obj_id))
+
+		# update status
+		if 'status' in request.POST:
+			box.status = request.POST['status']
+
+		# update valuable_index
+		if 'valuable' in request.POST:
+			box.valuable_index = int(request.POST['valuable'])
+		
+		box.save()
+		return HttpResponse(json.dumps({'status':'ok'}), 
+			content_type='application/javascript')
+
+class MyBoxListByStatus (MyBoxList):
+    def get_queryset(self):
+        return MyBox.objects.filter(status=self.args[0])
+
+class MyBoxListBySize (MyBoxList):
+    def get_queryset(self):
+        return MyBox.objects.filter(size=self.args[0])        
