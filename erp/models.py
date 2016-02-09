@@ -126,11 +126,6 @@ class Attachment (models.Model):
 	def __unicode__(self):
 		return self.file.name
 
-class AttachmentForm(ModelForm):
-	class Meta:
-		model = Attachment
-		fields = ['description','file']
-
 ######################################################
 #
 #	Notes

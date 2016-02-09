@@ -11,7 +11,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, logout, login
 from django.template import RequestContext
 from django.views.generic import TemplateView, ListView, DetailView
-from django.views.generic.edit import FormView, CreateView, UpdateView, DeleteView
+from django.views.generic.edit import FormView,CreateView,UpdateView,DeleteView
 from django.core.urlresolvers import reverse_lazy, resolve, reverse
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponseRedirect, JsonResponse
@@ -50,6 +50,7 @@ import urllib, lxml.html
 from utility import MyUtility
 
 from erp.models import *
+from erp.forms import *
 
 ###################################################
 #
@@ -130,6 +131,33 @@ class UserRegisterView(FormView):
 			user.save()
 
 			return super(UserRegisterView,self).form_valid(form)
+
+###################################################
+#
+#	Attachment views
+#
+###################################################
+@login_required
+def attachment_delete_view(request,pk):
+	a = Attachment.objects.get(id=pk)
+	
+	# once we set MEDIA_ROOT, we will delete local file from file system also
+	if os.path.exists(a.file.path): os.remove(os.path.join(settings.MEDIA_ROOT,a.file.path))
+	
+	# delete model
+	a.delete()
+	return HttpResponseRedirect(reverse_lazy('item_list'))
+
+def item_attachment_add_view(request, pk):
+	tmp_form = AttachmentForm (request.POST, request.FILES)
+
+	if tmp_form.is_valid():
+		t=tmp_form.save(commit=False)
+		t.name = 'something'
+		t.content_object = MyItem.objects.get(id=pk)
+		t.created_by = request.user
+		t.save()	
+	return HttpResponseRedirect("")
 
 ###################################################
 #
@@ -237,3 +265,13 @@ class MyItemList (FilterView):
 
 	def get_filterset_class(self):
 		return MyItemListFilter
+
+class MyItemDetail(DetailView):
+	model = MyItem
+	template_name = 'erp/item/detail.html'
+
+	def get_context_data(self, **kwargs):
+		context = super(DetailView, self).get_context_data(**kwargs)
+		context['attachment_form'] = AttachmentForm()
+		context['images'] = [img.file.url for img in self.object.attachments.all()]
+		return context

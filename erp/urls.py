@@ -17,12 +17,18 @@ urlpatterns = patterns(
 		url(r'logout/$', views.LogoutView.as_view(), name='logout'),
 		url(r'^register/$', views.UserRegisterView.as_view(), name='user_register'),
 
+		# attachments
+		url(r'^attachment/(?P<pk>\d+)/delete/$', views.attachment_delete_view, name='attachment_delete'),
+		url(r'^attachment/item/(?P<pk>\d+)/add/$', views.item_attachment_add_view, name='item_attachment_add'),
+	
 		url(r'^fiscalyears/$', views.MyFiscalYearList.as_view(), name='fiscalyear_list'),
 		url(r'^fiscalyear/add/$', views.MyFiscalYearAdd.as_view(), name='fiscalyear_add'),
 		url(r'^fiscalyear/(?P<pk>\d+)/delete/$', views.MyFiscalYearDelete.as_view(), name='fiscalyear_delete'),
 
-		url(r'^items/$', views.MyItemList.as_view(), name='item_list'),
+		url(r'^items/$', views.MyItemList.as_view(), name='item_list'),		
 		url(r'^item/add/$', views.MyItemAdd.as_view(), name='item_add'),
+		url(r'^item/(?P<pk>\d+)/$', views.MyItemDetail.as_view(), name='item_detail'),		
 		url(r'^item/(?P<pk>\d+)/edit/$', views.MyItemEdit.as_view(), name='item_edit'),
 		url(r'^item/(?P<pk>\d+)/delete/$', views.MyItemDelete.as_view(), name='item_delete'),
+
 	)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
