@@ -8,94 +8,75 @@ import simplejson as json
 
 # setup Django
 import django
-sys.path.append(os.path.join(os.path.dirname(__file__), 'ny'))
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ny.settings")
+sys.path.append(os.path.join(os.path.dirname(__file__), 'wei'))
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wei.settings")
 from django.conf import settings
 
 from django.utils import timezone
 
 # import models
-from intern.models import *
+from erp.models import *
 
 import xlrd, os.path
-def import_big_moving():
-	pat_sheet = re.compile('(?P<room_name>[^(]+)\((?P<room_index>\d+)')
-	name = '/home/fengxia/Downloads/Big moving.xlsx'
+def import_fa_product():
+	cur_rmb = MyCurrency.objects.get(abbrev = 'RMB')
+
+	name = '/home/fengxia/Downloads/0_item_codes.xls'
 	wk = xlrd.open_workbook(name)
 	for s in wk.sheet_names():
-		tmp = pat_sheet.search(s)
-
-		room, created = MyRoom.objects.get_or_create(tracking = tmp.group('room_index').strip())
-		room.name = tmp.group('room_name').strip()
-		room.save()
-
-		print 'Reading', s
-		in_summary = in_items = False
-
 		sheet = wk.sheet_by_name(s)
-		for row in range(sheet.nrows):
-			first_col = sheet.cell(row,0).value
-			last_col = sheet.cell(row,8).value
+		for row in range(1,sheet.nrows):
+			print 'processing', row
 
-			if not first_col: continue # empty
-			elif first_col == 'Box': 
-				in_summary = True
-				in_items = False
-			elif first_col == 'Items': 
-				in_summary = False
-				in_items = True
+			# currency
+			currency = sheet.cell(row,7).value
+			currency, created = MyCurrency.objects.get_or_create(abbrev = currency.upper().strip())
 
-			if first_col in ['Box', 'Items']: continue
+			vendor = sheet.cell(row,1).value
+			vendor,created = MyCRM.objects.get_or_create(name = vendor.upper().strip(),home_currency = currency)
 
-			if in_summary:
-				home_room = first_col.split('-')[0].strip()
-				r,created = MyRoom.objects.get_or_create(tracking = home_room)
+			# parse season
+			season = sheet.cell(row,2).value
+			season = season.split('|')[1].strip()
+			season, created = MySeason.objects.get_or_create(name = season.upper().strip())
 
-				box = first_col.split('-')[-1].strip()
-				b,created = MyBox.objects.get_or_create(tracking = box,room=room)
 
-				status = sheet.cell(row,1).value
-				if status and status.lower().strip() == 'y':
-					b.status = 'S'
-					b.save()
 
-				unpack = sheet.cell(row,2).value
-				if unpack: 
-					b.unpack_priority = int(unpack)
-					b.save()
+			# parse desp
+			desp = sheet.cell(row,10).value
+			try:
+				style = desp.split('\n')[0].split(':')[1].upper().strip()
+				color = desp.split('\n')[1].split(':')[1].upper().strip()
+				if '.' in color: color = color[:color.find('.')]
+				size = desp.split('\n')[2].split(':')[1].upper().strip()
+			except:
+				print row
 
-			elif in_items and first_col:
-				# create item
-				item = MyItem(name = first_col,status='P',room=room)
-				item.save()
-				if last_col and '-' in last_col:
-					for l in last_col.split('\n'):
-						# print l
-						home_room = l.split('-')[0].strip()
-						r,created = MyRoom.objects.get_or_create(tracking = home_room)
+			# price always in RMB
+			price = sheet.cell(row,6).value
+			item,created= MyItem.objects.get_or_create(
+				name = style,
+				season = season,
+				brand = vendor,
+				color = color,
+				price = price,
+				currency = cur_rmb
+			)
+			item.save()
 
-						box = l.split('-')[-1].strip()
-						b,created = MyBox.objects.get_or_create(tracking = box,room=r)
-						
-						# it is boxed
-						item.boxes.add(b)
-						item.status = 'B'
-						item.save()
+			cost = sheet.cell(row,9).value
+			vendor_item,created = MyVendorItem.objects.get_or_create(
+				vendor = vendor,
+				product = item,
+				price = cost,
+				currency = vendor.home_currency
+			)
+			vendor_item.save()
 
 def main():
 	django.setup()
 
-	# import_big_moving()
-	for box in MyBox.objects.all():
-		if box.full_tracking.replace(' ','') in ['1-18','1-19','5-3','5-1','3-3','3-10','3-9','1-3','1-2','1-4','1-14','1-17','1-11','1-13','1-16','1-10','4-3']:
-			box.status='S'
-			print box.full_tracking, box.status
-		
-		elif box.full_tracking.replace(' ','') in ['1-5','4-3','1-1','1-15']:
-			box.status='P'
-		elif box.status == 'S': continue
-		else: box.status = 'E'
-		box.save()
+	import_fa_product()
 
 if __name__ == '__main__':
 	main()

@@ -1,0 +1,44 @@
+{% extends "erp/common/base.html" %}
+
+{% block page-header %}
+	Fiscal years
+	<a href="{% url 'fiscalyear_add' %}" class="btn btn-xs addlink">
+		<i class="fa fa-plus"></i>
+		Add
+	</a>
+{% endblock %}
+
+
+{% block content %}
+	{% include "erp/common/filter.html" %}
+	<table class="table table-striped table-hover">
+	<thead>
+		<th>Fiscal Year Begin</th>
+		<th>Fiscal Year End</th>
+		<th>Closed</th>
+		<th></th>
+	</thead>
+	<tbody>
+		{% for obj in object_list %}
+		<tr><td>
+			{{ obj.begin }}
+		</td><td>
+			{{ obj.end }}
+		</td><td>
+			{{ obj.is_active }}
+		</td><td>
+			<a href="{% url 'fiscalyear_delete' obj.id %}">
+				<i class="fa fa-cross"></i>Delete
+			</a>
+		</td></tr>
+    	{% endfor %}
+	</tbody>
+	</table>
+
+
+<script type="text/javascript">
+	j$(document).ready(function(){
+	});
+</script>
+{% endblock %}
+
