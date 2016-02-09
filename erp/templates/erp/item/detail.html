@@ -3,32 +3,115 @@
 {% load crispy_forms_tags %}
 
 {% block page-header %}
-	{{ object.name }}
+	
 	<a href="{% url 'item_list' %}" class="btn btn-xs listlink">
 		<i class="fa fa-plus"></i>
-		List
+		Item list
 	</a>
 {% endblock %}
 
-
 {% block content %}
-{% for img in images %}
-	<img src="{{ img }}" style="width:100px;height:100px;"> {{ img.name }}
-{% endfor %}
+<ol class="breadcrumb">
+  <li><a href="{% url "home" %}">Home</a></li>
+  <li><a href="#">{{ object.season }}</a></li>
+  <li><a href="">{{ object.brand }}</a></li>
+  <li class="active">{{ object.name }}</li>
+</ol>
+<div class="row">
+	<div class="col-md-2">
+		<ul class="list-inline">
+		{% for img in object.attachments.all %}
+			<li>
+				<img src="{{ img.file.url }}" 
+				data-type="attachment-thumbnail" class="img-responsive img-thumbnail"
+				style="width:100px;height:100px;">
+			</li>
+		{% endfor %}
+		</ul>
+	</div>
+	<div class="col-md-6">
+		{% with object.attachments.all|first as img %} 
+			<a href="{{ img.file.url }}" data-toggle="lightbox" data-gallery="multiimages" data-parent data-title="{{img.name}}" data-footer="{{img.description}}">
+				<img src="{{img.file.url}}" class="img-responsive center-block"
+				style="margin-bottom:20px;">
+			</a>			
+			<p>{{ img.description }}</p>
+		{% endwith %}
+	</div>
 
-<form id="fileupload" action="{% url 'item_attachment_add' object.id %}" method="POST" enctype="multipart/form-data">
-	{% csrf_token %}
-	{{ attachment_form|crispy }}
+	<div class="col-md-4">
+		<h1>{{ object.name|title }}</h1>
+		<p><span class="item-label">SKU:</span>{{ object.sku }}</p>
+		<p class="item-style">{{object.currency}} {{ object.price|floatformat:2 }}</p>
+		
+		{# Available colors #}
+		<span class="item-label">COLOR:</span><span class="item-value">{{ object.color }}</span>
+		<ul class="list-inline">
+		{% for style in same_styles %}
+			<li><a href="{% url 'item_detail' style.id %}">
+			<img src="{{ style.attachments.all.0.file.url }}" 
+			title="{{ style.color }}"
+			style="width:35px;height:35px;">
+			</a></li>
+		{% endfor %}
+		</ul>
 
-	<button type="submit" class="btn btn-primary start">
-		<i class="glyphicon glyphicon-upload"></i>
-		<span>Start upload</span>
-	</button>	
-</form>
+		{# Sizes #}
+		<p><span class="item-label">SIZE SELECTION</span>: XL</p>
+		<ul class="list-inline">
+			<li><span class="item-size">XS</span></li>
+			<li><span class="item-size">S</span></li>
+			<li><span class="item-size">M</span></li>
+			<li><span class="item-size">L</span></li>
+			<li><span class="item-size">XL</span></li>
+		</ul>
+
+		{# QTY #}
+		<p><span class="item-label">QTY:</span></p>
+		<select style="width:86px;height:35px;background-color:white;color:#8c8c8c;padding-left:10px;">
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+		</select>
+
+		<p>
+		<button class="btn btn-default btn-add-to-shopping-cart" type="submit">
+			Add to cart
+			<i class='fa fa-shopping-cart'></i>
+		</button>
+		</p>
+	</div>
+</div>	
+
+<div class="">
+	<form id="fileupload" action="{% url 'item_attachment_add' object.id %}" method="POST" enctype="multipart/form-data">
+		{% csrf_token %}
+		{{ attachment_form|crispy }}
+
+		<button type="submit" class="btn btn-primary start">
+			<i class="glyphicon glyphicon-upload"></i>
+			<span>Start upload</span>
+		</button>	
+	</form>
+</div>
+
 
 <script type="text/javascript">
-	j$(document).ready(function(){
-	});
+j$(document).ready(function(){
+	j$(document).delegate('*[data-toggle="lightbox"]', 'click', function(e) {
+	    e.preventDefault();
+	    j$(this).ekkoLightbox();
+	}); 
+
+	j$('[data-type="attachment-thumbnail"]').click(function(){
+		var url = j$(this).attr('src');
+		j$(this).closest('section').find('[data-toggle="lightbox"]').attr('href',url);
+		j$(this).closest('section').find('[data-toggle="lightbox"]').find('img:first-child').attr('src',url);
+	});			
+});
 </script>
 {% endblock %}
 

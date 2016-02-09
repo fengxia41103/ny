@@ -274,4 +274,5 @@ class MyItemDetail(DetailView):
 		context = super(DetailView, self).get_context_data(**kwargs)
 		context['attachment_form'] = AttachmentForm()
 		context['images'] = [img.file.url for img in self.object.attachments.all()]
+		context['same_styles'] = MyItem.objects.filter(name=self.object.name)
 		return context

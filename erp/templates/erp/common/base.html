@@ -161,25 +161,28 @@
 	
 {% block main %}
 	<div class="col-sm-1">
-		<ul class="nav nav-stacked affix">
 		{% block nav-sidebar %}
+		<ul class="nav nav-stacked affix">		
+		</ul>		
 		{% endblock %}
-		</ul>
 	</div>
 
 	{% block custom_tags %}
 	{% endblock %}
 	<div id="wrap">
-	<div class="container">
+	<div class="container ">
 		{% block page-info %}
 		{% endblock %}
 		
+		{% block common-header %}
 		<div class="page-header">
 			<h1>
 				{% block page-header %}
 				{% endblock %}
 			</h1>
 		</div><!-- end of block header -->
+		{% endblock %}
+		
 		{% block message %}
 		{% endblock %}
 				

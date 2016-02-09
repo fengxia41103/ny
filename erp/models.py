@@ -2,7 +2,6 @@
 
 from django.db import models
 from django.contrib import admin
-from django.forms import ModelForm
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.generic import GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -299,11 +298,6 @@ class MyItem(MyBaseModel):
 	'''
 	Attachment would be item photos.
 	'''
-	SKU = models.CharField(
-		max_length = 32,
-		null = True,
-		blank = True
-	)
 	season = models.ForeignKey('MySeason')
 	brand = models.ForeignKey('MyCRM', verbose_name=u'品牌')
 	color = models.CharField(
@@ -320,6 +314,10 @@ class MyItem(MyBaseModel):
 		null = True,
 		blank = True,
 	)
+
+	def _sku(self):
+		return u'%s-%s' %(self.name,self.color)
+	sku = property(_sku)
 
 	def __unicode__(self):
 		return u'%s | %s' %(self.name,self.color)
