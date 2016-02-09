@@ -1,7 +1,7 @@
 {% extends "erp/common/base.html" %}
 
 {% load crispy_forms_tags %}
-
+{% load static %}
 {% block page-header %}
 	
 	<a href="{% url 'item_list' %}" class="btn btn-xs listlink">
@@ -27,6 +27,12 @@
 				style="width:100px;height:100px;">
 			</li>
 		{% endfor %}
+			<li>			
+				<img src="{% static "images/upload.png" %}"
+				data-type="attachment-thumbnail" class="img-responsive img-thumbnail"
+				style="width:100px;height:100px;opacity: 0.3;"
+				data-toggle="modal" data-target="#upload-form">				
+			</li>
 		</ul>
 	</div>
 	<div class="col-md-6">
@@ -86,17 +92,40 @@
 	</div>
 </div>	
 
-<div class="">
-	<form id="fileupload" action="{% url 'item_attachment_add' object.id %}" method="POST" enctype="multipart/form-data">
-		{% csrf_token %}
-		{{ attachment_form|crispy }}
+<!-- Modal -->
+<div id="upload-form" class="modal fade" role="dialog">
+  <div class="modal-dialog">
 
-		<button type="submit" class="btn btn-primary start">
-			<i class="glyphicon glyphicon-upload"></i>
-			<span>Start upload</span>
-		</button>	
-	</form>
+    <!-- Modal content-->
+    <div class="modal-content">
+    	{# Modal header #}
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Upload images</h4>
+      </div>
+
+      {# Modal body #}
+      <div class="modal-body">
+		<form id="fileupload" action="{% url 'item_attachment_add' object.id %}" method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+			{{ attachment_form|crispy }}
+
+			<button type="submit" class="btn btn-primary start">
+				<i class="glyphicon glyphicon-upload"></i>
+				<span>Start upload</span>
+			</button>	
+		</form>
+      </div>
+
+      {# Modal footer #}
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
 </div>
+
 
 
 <script type="text/javascript">
