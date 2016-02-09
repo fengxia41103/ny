@@ -17,6 +17,7 @@
 			<div class="my-filter-form">
 				<form action="" method="get" class="form-inline" role="form">
 						{% csrf_token %}
+						
 						{{ filter.form|crispy }}
 					
 					<button class="my-btn" type="submit" id="id_btn_search_submit">Search</button>

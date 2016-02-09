@@ -35,7 +35,7 @@ from crispy_forms.layout import Submit
 # django-filters
 from django_filters import FilterSet, BooleanFilter,ModelChoiceFilter,AllValuesFilter
 from django_filters.views import FilterView
-import django_filters
+from django_filters.widgets import LinkWidget
 
 # django emails
 from django.core.mail import send_mail
@@ -210,23 +210,24 @@ class MyItemDelete (DeleteView):
 		return context		
 
 class MyItemListFilter (FilterSet):
-	brand = ModelChoiceFilter(queryset=MyCRM.objects.filter(crm_type='V').order_by('name'))
+	brand = ModelChoiceFilter(queryset=MyCRM.objects.filter(crm_type='V').order_by('name'),widget=LinkWidget)
+	season = ModelChoiceFilter(queryset=MySeason.objects.all().order_by('name'),widget=LinkWidget)
+
 	class Meta:
 		model = MyItem
-		fields = {
-				'brand':['exact'],
-				'season':['exact'],
-				'name':['contains'],
-				}
+		fields = ['brand','season','name']
+		order_by = ['brand']
+		together = ['season']
 
 class MyItemList (FilterView):
 	template_name = 'erp/item/list.html'
-	paginate_by = 10
+	paginate_by = 25
 
 	def get_context_data(self, **kwargs):
 		context = super(FilterView, self).get_context_data(**kwargs)
 		searches = context['filter']
-		context['filters'] = {}
+		context['filters'] = {} # my customized filter display values
+
 		for f,val in searches.data.iteritems():
 			if val and f != "csrfmiddlewaretoken" and f != "page":
 				if f == 'brand': context['filters']['brand'] = MyCRM.objects.get(id=int(val))

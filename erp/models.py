@@ -304,8 +304,13 @@ class MyItem(MyBaseModel):
 	'''
 	Attachment would be item photos.
 	'''
+	SKU = models.CharField(
+		max_length = 32,
+		null = True,
+		blank = True
+	)
 	season = models.ForeignKey('MySeason')
-	brand = models.ForeignKey('MyCRM')
+	brand = models.ForeignKey('MyCRM', verbose_name=u'品牌')
 	color = models.CharField(
 		max_length = 128,
 		default = '',
