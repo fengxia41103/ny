@@ -233,22 +233,23 @@ class MyLocation (models.Model):
 		max_length = 32,
 		verbose_name = u'名称'
 	)	
-	abbrev = models.CharField(
-		max_length = 8,
-		null = True,
-		blank = True,
-		verbose_name = u'Abbreviation'
-	)	
+	def _code(self):
+		return u'%s-%s' %(self.crm,self.name)
+	code = property(_code)
+
 	address = models.TextField()
+
+	def __unicode__(self):
+		return self.code
 
 class MyStorage (models.Model):
 	location = models.ForeignKey('MyLocation')
-	abbrev = models.CharField(
-		max_length = 32,
-		null = True,
-		blank = True,
-		verbose_name = u'Abbreviation'
-	)
+	def _code(self):
+		return u'%s-%d' %(self.location,self.id)
+	code = property(_code)
+
+	def __unicode__(self):
+		return self.code
 
 class MyCRM(MyBaseModel):
 	CRM_TYPE_CHOICES = (
@@ -319,6 +320,24 @@ class MyItem(MyBaseModel):
 		return u'%s-%s' %(self.name,self.color)
 	sku = property(_sku)
 
+	def _multiplier(self):
+		vendor_item = MyVendorItem.objects.filter(product=self,vendor=self.brand)[0]
+		exchange_rate = None
+		converted_cost = 0
+		try:
+			exchange_rate = MyExchangeRate.objects.get(home=self.currency, foreign=vendor_item.currency)
+			converted_cost = vendor_item.price / exchange_rate.rate
+		except: pass
+
+		if not exchange_rate:
+			try:
+				exchange_rate = MyExchangeRate.objects.get(foreign=self.currency, home=vendor_item.currency)
+				converted_cost = vendor_item.price * exchange_rate.rate
+			except: pass
+		if converted_cost: return self.price / converted_cost
+		else: return None
+	multiplier = property(_multiplier)
+
 	def __unicode__(self):
 		return u'%s | %s' %(self.name,self.color)
 
@@ -330,7 +349,11 @@ class MyItemInventory(models.Model):
 		default = ''
 	)
 	storage = models.ForeignKey('MyStorage')
-	withdrawable = models.BooleanField(default = False)
+	withdrawable = models.BooleanField(default = True)
+
+class MyItemInventoryAdjustment(models.Model):
+	# against this inventory we are adjusting
+	inv = models.ForeignKey('MyItemInventory')
 
 class MySalesOrder(models.Model):
 	customer = models.ForeignKey('MyCRM')

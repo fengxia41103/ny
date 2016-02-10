@@ -4,19 +4,19 @@
 {% load static %}
 {% block page-header %}
 	
-	<a href="{% url 'item_list' %}" class="btn btn-xs listlink">
-		<i class="fa fa-plus"></i>
-		Item list
-	</a>
+	
+<ol class="breadcrumb">
+  <li><a href="{% url 'item_list' %}" 
+		<i class="fa fa-list-ul"></i>
+		ALL
+	</a></li>
+  <li><a href="#">{{ object.season }}</a></li>
+  <li class="active"><a href="">{{ object.brand }}</a></li>
+</ol>	
 {% endblock %}
 
 {% block content %}
-<ol class="breadcrumb">
-  <li><a href="{% url "home" %}">Home</a></li>
-  <li><a href="#">{{ object.season }}</a></li>
-  <li><a href="">{{ object.brand }}</a></li>
-  <li class="active">{{ object.name }}</li>
-</ol>
+
 <div class="row">
 	<div class="col-md-2">
 		<ul class="list-inline">
@@ -29,8 +29,9 @@
 		{% endfor %}
 			<li>			
 				<img src="{% static "images/upload.png" %}"
+				title="Add more images"
 				data-type="attachment-thumbnail" class="img-responsive img-thumbnail"
-				style="width:100px;height:100px;opacity: 0.3;"
+				style="width:100px;height:100px;opacity: 0.2;"
 				data-toggle="modal" data-target="#upload-form">				
 			</li>
 		</ul>
@@ -46,7 +47,7 @@
 	</div>
 
 	<div class="col-md-4">
-		<h1>{{ object.name|title }}</h1>
+		<h1 style="font-weight:bold;font-size:40px;">{{ object.name|upper }}</h1>
 		<p><span class="item-label">SKU:</span>{{ object.sku }}</p>
 		<p class="item-style">{{object.currency}} {{ object.price|floatformat:2 }}</p>
 		

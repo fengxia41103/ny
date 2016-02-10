@@ -153,15 +153,26 @@ def item_attachment_add_view(request, pk):
 
 	if tmp_form.is_valid():
 		t=tmp_form.save(commit=False)
-		t.name = 'something'
+		t.name = request.FILES['file'].name
 		t.content_object = MyItem.objects.get(id=pk)
 		t.created_by = request.user
 		t.save()	
-	return HttpResponseRedirect("")
+	return HttpResponseRedirect("#")
+
+def crm_attachment_add_view(request, pk):
+	tmp_form = AttachmentForm (request.POST, request.FILES)
+
+	if tmp_form.is_valid():
+		t=tmp_form.save(commit=False)
+		t.name = request.FILES['file'].name
+		t.content_object = MyCRM.objects.get(id=pk)
+		t.created_by = request.user
+		t.save()	
+	return HttpResponseRedirect("#")
 
 ###################################################
 #
-#	MyApplication views
+#	MyFiscalYear views
 #
 ###################################################
 class MyFiscalYearList(ListView):
@@ -192,6 +203,12 @@ class MyFiscalYearDelete (DeleteView):
 		context['list_url'] = reverse_lazy('fiscalyear_list')
 		return context	
 
+###################################################
+#
+#	MyItem views
+#
+###################################################
+
 class MyItemAdd(CreateView):
 	model = MyItem
 	template_name = 'erp/common/add_form.html'
@@ -200,7 +217,6 @@ class MyItemAdd(CreateView):
 
 	def form_valid(self, form):
 		form.instance.created_by = self.request.user
-
 		currency,created = MyCurrency.objects.get_or_create(abbrev='RMB')
 		form.instance.currency = currency
 		return super(CreateView, self).form_valid(form)
@@ -238,13 +254,12 @@ class MyItemDelete (DeleteView):
 		return context		
 
 class MyItemListFilter (FilterSet):
-	brand = ModelChoiceFilter(queryset=MyCRM.objects.filter(crm_type='V').order_by('name'),widget=LinkWidget)
-	season = ModelChoiceFilter(queryset=MySeason.objects.all().order_by('name'),widget=LinkWidget)
+	brand = ModelChoiceFilter(queryset=MyCRM.objects.filter(crm_type='V').order_by('name'))
+	season = ModelChoiceFilter(queryset=MySeason.objects.all().order_by('name'))
 
 	class Meta:
 		model = MyItem
 		fields = ['brand','season','name']
-		order_by = ['brand']
 		together = ['season']
 
 class MyItemList (FilterView):
@@ -253,14 +268,18 @@ class MyItemList (FilterView):
 
 	def get_context_data(self, **kwargs):
 		context = super(FilterView, self).get_context_data(**kwargs)
+
+		# filters
 		searches = context['filter']
 		context['filters'] = {} # my customized filter display values
-
 		for f,val in searches.data.iteritems():
 			if val and f != "csrfmiddlewaretoken" and f != "page":
 				if f == 'brand': context['filters']['brand'] = MyCRM.objects.get(id=int(val))
 				if f == 'season': context['filters']['season'] = MySeason.objects.get(id=int(val))
 				if 'name' in f: context['filters']['name__contains'] = val
+
+		# vendors included in queryset
+		context['vendors'] = [MyCRM.objects.get(id=v) for v in set(self.object_list.values_list('brand',flat=True))]
 		return context		
 
 	def get_filterset_class(self):
@@ -274,5 +293,93 @@ class MyItemDetail(DetailView):
 		context = super(DetailView, self).get_context_data(**kwargs)
 		context['attachment_form'] = AttachmentForm()
 		context['images'] = [img.file.url for img in self.object.attachments.all()]
-		context['same_styles'] = MyItem.objects.filter(name=self.object.name)
+		context['same_styles'] = MyItem.objects.filter(name=self.object.name,brand=self.object.brand)
 		return context
+
+###################################################
+#
+#	MyCRM views
+#
+###################################################
+
+class MyVendorList(ListView):
+	model = MyCRM
+	template_name = 'erp/crm/vendor_list.html'
+
+	def get_queryset(self):
+		return MyCRM.objects.filter(Q(crm_type='V')|Q(crm_type='B'))
+
+class MyVendorAdd(CreateView):
+	model = MyCRM
+	template_name = 'erp/common/add_form.html'
+	success_url = reverse_lazy('vendor_list')
+	fields = ['contact','phone','home_currency','std_discount']
+
+	def form_valid(self, form):
+		form.instance.crm_type = 'V'
+		return super(CreateView, self).form_valid(form)
+
+	def get_context_data(self, **kwargs):
+		context = super(CreateView, self).get_context_data(**kwargs)
+		context['title'] = u'New Vendor'
+		context['list_url'] = self.success_url
+		context['objects'] = MyCRM.objects.all()
+		return context
+
+@class_view_decorator(login_required)
+class MyVendorEdit (UpdateView):
+	model = MyCRM
+	template_name = 'erp/common/edit_form.html'
+	
+	def get_success_url(self):
+		return reverse_lazy('vendor_list', kwargs={'pk':self.get_object().id})
+			
+	def get_context_data(self, **kwargs):
+		context = super(UpdateView, self).get_context_data(**kwargs)
+		context['title'] = u'Edit Vendor'
+		context['list_url'] = reverse_lazy('vendor_list')
+		return context		
+
+class MyCustomerList(ListView):
+	model = MyCRM
+	template_name = 'erp/crm/customer_list.html'
+
+	def get_queryset(self):
+		return MyCRM.objects.filter(Q(crm_type='C')|Q(crm_type='B'))
+
+class MyCustomerAdd(CreateView):
+	model = MyCRM
+	template_name = 'erp/common/add_form.html'
+	success_url = reverse_lazy('customer_list')
+	fields = ['contact','phone','home_currency','std_discount']
+
+	def form_valid(self, form):
+		form.instance.crm_type = 'C'
+		return super(CreateView, self).form_valid(form)
+
+	def get_context_data(self, **kwargs):
+		context = super(CreateView, self).get_context_data(**kwargs)
+		context['title'] = u'New Customer'
+		context['list_url'] = self.success_url
+		context['objects'] = MyCRM.objects.all()
+		return context
+
+@class_view_decorator(login_required)
+class MyCustomerEdit (UpdateView):
+	model = MyCRM
+	template_name = 'erp/common/edit_form.html'
+	
+	def get_success_url(self):
+		return reverse_lazy('customer_list', kwargs={'pk':self.get_object().id})
+			
+	def get_context_data(self, **kwargs):
+		context = super(UpdateView, self).get_context_data(**kwargs)
+		context['title'] = u'Edit Customer'
+		context['list_url'] = reverse_lazy('customer_list')
+		return context		
+
+###################################################
+#
+#	MyLocation & MyStorage views
+#
+###################################################

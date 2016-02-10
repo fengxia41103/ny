@@ -108,11 +108,46 @@
 					你好 {{ user }}
 					</a>
 				</li>	
-				
+
 				<li class="dropdown">
 					<a href="" class="" data-toggle="dropdown">
 						<i class="fa fa-bar-chart"></i>
-						Setup									
+						CRM						
+						<b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li>
+							<a href="{% url 'customer_list' %}">
+								<i class="fa fa-list"></i>
+								Customers
+							</a>						
+						</li>					
+						<li>
+							<a href="{% url 'vendor_list' %}">
+								<i class="fa fa-list"></i>
+								Vendors
+							</a>						
+						</li>														
+						<li class="divider"></li>
+						<li>
+							<a href="{% url 'customer_add' %}">
+								<i class="fa fa-pencil"></i>
+								New customer
+							</a>						
+						</li>					
+						<li>
+							<a href="{% url 'vendor_add' %}">
+								<i class="fa fa-pencil"></i>
+								New vendor
+							</a>						
+						</li>														
+					</ul>									
+				</li>
+
+				<li class="dropdown">
+					<a href="" class="" data-toggle="dropdown">
+						<i class="fa fa-bar-chart"></i>
+						Admin									
 						<b class="caret"></b>
 					</a>
 					<ul class="dropdown-menu">					
@@ -122,6 +157,23 @@
 								Fiscal year
 							</a>						
 						</li>										
+						<li class="divider"></li>					
+					</ul>
+				</li>
+
+				<li class="dropdown">
+					<a href="" class="" data-toggle="dropdown">
+						<i class="fa fa-search"></i>
+						Product									
+						<b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">					
+						<li>
+							<a href="{% url 'item_list' %}">
+								<i class="fa fa-pencil"></i>
+								Search product
+							</a>						
+						</li>										
 
 						<li class="divider"></li>					
 					</ul>
@@ -129,19 +181,18 @@
 
 				<li class="dropdown">
 					<a href="" class="" data-toggle="dropdown">
-						<i class="fa fa-bar-chart"></i>
-						Search									
+						<i class="fa fa-search"></i>
+						Inventory									
 						<b class="caret"></b>
 					</a>
-					<ul class="dropdown-menu">					
+					<ul class="dropdown-menu">
+						<li class="divider"></li>							
 						<li>
-							<a href="{% url 'item_list' %}">
+							<a href="">
 								<i class="fa fa-pencil"></i>
-								Items
+								Adjustment
 							</a>						
-						</li>										
-
-						<li class="divider"></li>					
+						</li>														
 					</ul>
 				</li>
 
@@ -182,7 +233,7 @@
 			</h1>
 		</div><!-- end of block header -->
 		{% endblock %}
-		
+
 		{% block message %}
 		{% endblock %}
 				
