@@ -3,8 +3,6 @@
 {% load crispy_forms_tags %}
 {% load static %}
 {% block page-header %}
-	
-	
 <ol class="breadcrumb">
   <li><a href="{% url 'item_list' %}" 
 		<i class="fa fa-list-ul"></i>
@@ -48,7 +46,7 @@
 
 	<div class="col-md-4">
 		<h1 style="font-weight:bold;font-size:40px;">{{ object.name|upper }}</h1>
-		<p><span class="item-label">SKU:</span>{{ object.sku }}</p>
+		<p><span class="item-label">CODE:</span>{{ object.code }}</p>
 		<p class="item-style">{{object.currency}} {{ object.price|floatformat:2 }}</p>
 		
 		{# Available colors #}

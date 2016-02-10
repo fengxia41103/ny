@@ -380,6 +380,43 @@ class MyCustomerEdit (UpdateView):
 
 ###################################################
 #
-#	MyLocation & MyStorage views
+#	MyItemInventory views
 #
 ###################################################
+
+class MyItemInventoryAdjustment(FormView):
+	template_name = 'erp/item/inv_adjust.html'
+	form_class = ItemInventoryAddForm
+	success_url = '#'
+
+	def form_valid(self, form):
+		messages.info(
+            self.request,
+            "You have successfully changed your email notifications"
+        )		
+		errors = {}
+		items = []
+		for line_no, line in enumerate(form.cleaned_data['items'].strip().split('\n')):
+			tmp = line.split(',')
+			style = tmp[0]
+			color = tmp[1]
+
+			item = MyItem.objects.filter(name__icontains=style,color__icontains=color)
+			if not item or len(item)==0: 
+				errors[line_no+1] = line
+				print 'not found'
+				continue
+			elif len(item) > 1:
+				errors[line_no+1] = line
+				print 'multiple matches'
+				continue
+			items.append(item[0])
+
+			qty_pair = []
+			for i in tmp[2:]:
+				qty_pair.append((i.split('-')[0].upper(),int(i.split('-')[1])))
+			print qty_pair
+			
+		print errors
+		print items
+		return super(FormView, self).form_valid(form)

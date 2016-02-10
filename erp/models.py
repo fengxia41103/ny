@@ -316,9 +316,9 @@ class MyItem(MyBaseModel):
 		blank = True,
 	)
 
-	def _sku(self):
+	def _code(self):
 		return u'%s-%s' %(self.name,self.color)
-	sku = property(_sku)
+	code = property(_code)
 
 	def _multiplier(self):
 		vendor_item = MyVendorItem.objects.filter(product=self,vendor=self.brand)[0]
@@ -338,11 +338,24 @@ class MyItem(MyBaseModel):
 		else: return None
 	multiplier = property(_multiplier)
 
+	def _physical(self):
+		qty = 0
+		for inv in MyItemInventory.objects.filter(item = self):
+			if inv.withdrawable: qty += inv.physical
+		return qty
+	physical = property(_physical)
+
+	def _theoretical(self):
+		qty = 0
+		for inv in MyItemInventory.objects.filter(item = self):
+			if inv.withdrawable: qty += inv.theoretical
+		return qty
+	theoretical = property(_theoretical)
+
 	def __unicode__(self):
 		return u'%s | %s' %(self.name,self.color)
 
 class MyItemInventory(models.Model):
-	qty = models.IntegerField(default = 0)
 	item = models.ForeignKey('MyItem')
 	size = models.CharField(
 		max_length = 4,
@@ -351,12 +364,58 @@ class MyItemInventory(models.Model):
 	storage = models.ForeignKey('MyStorage')
 	withdrawable = models.BooleanField(default = True)
 
-class MyItemInventoryAdjustment(models.Model):
-	# against this inventory we are adjusting
+	physical = models.IntegerField(default = 0)
+
+	def _theoretical(self):
+		inv = 0
+		for audit in MyItemInventoryAudit.objects.filter(inv = self):
+			if audit.out: inv -= audit.qty
+			else: inv += audit.qty
+		return inv
+	theoretical = property(_theoretical)
+
+
+class MyItemInventoryAudit(models.Model):
+	created_on = models.DateField(auto_now_add = True)
+
+	# instance fields
+	created_by = models.ForeignKey (
+		User,
+		blank = True,
+		null = True,
+		default = None,
+		verbose_name = u'创建用户',
+		help_text = ''
+	)
+
+	# Against this inventory we are adjusting
 	inv = models.ForeignKey('MyItemInventory')
 
+	# If True, we are depleting qty.
+	out = models.BooleanField(default = False)
+	qty = models.IntegerField(default = 0)
+
+	# Linked PO or SO
+	so = models.ForeignKey(
+		'MySalesOrderFullfillment',
+		null = True,
+		blank = True,
+	)
+
+	# Reason
+	REASON_CHOICES = (
+		('SO','Qty is being adjusted due to fullfillment of a sales order.'),
+		('INITIAL','Qty is being adjusted as an initial setup.'),
+		('DAMAGE','Qty is being adjusted due to a damaged goods.'),
+	)
+	reason = models.CharField(
+		max_length = 8,
+		choices = REASON_CHOICES
+	)
+
 class MySalesOrder(models.Model):
-	customer = models.ForeignKey('MyCRM')
+	supplier = models.ForeignKey('MyCRM', related_name='supplier')
+	customer = models.ForeignKey('MyCRM', related_name='customer')
 	created_on = models.DateField(auto_now_add = True)
 
 	# instance fields
