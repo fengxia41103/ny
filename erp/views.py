@@ -396,10 +396,14 @@ def adjust_inventory(storage,quick_notion,out,reason,created_by):
 	for line_no, line in enumerate(quick_notion.split('\n')):
 		tmp = line.split(',')
 		style = tmp[0]
-		color = tmp[1]
+
+		# Optional, can be blank, since some styles have only a single color.
+		color = tmp[1] 
 
 		# Find MyItem object
-		item = MyItem.objects.filter(name__icontains=style,color__icontains=color)
+		if color: item = MyItem.objects.filter(name__icontains=style,color__icontains=color)
+		else: item = MyItem.objects.filter(name__icontains=style)
+
 		if not item or len(item)==0: 
 			errors[line_no+1] = line
 			print 'not found'
@@ -427,7 +431,7 @@ def adjust_inventory(storage,quick_notion,out,reason,created_by):
 			)
 
 			# Create MyItemInventoryAudit
-			audit = MyItemInventoryAudit(
+			audit = MyItemInventoryMoveAudit(
 				created_by = created_by,
 				inv = item_inv,
 				out = False, # We are adding to inventory

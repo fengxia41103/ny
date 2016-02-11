@@ -248,6 +248,16 @@ class MyStorage (models.Model):
 		return u'%s-%d' %(self.location,self.id)
 	code = property(_code)
 
+	def _physical(self):
+		qty = [inv_item.physical for inv_item in MyItemInventory.objects.filter(storage=self)]
+		return sum(qty)
+	physical = property(_physical)
+
+	def _theoretical(self):
+		qty = [inv_item.theoretical for inv_item in MyItemInventory.objects.filter(storage=self)]
+		return sum(qty)
+	theoretical = property(_theoretical)
+
 	def __unicode__(self):
 		return self.code
 
@@ -338,17 +348,25 @@ class MyItem(MyBaseModel):
 		else: return None
 	multiplier = property(_multiplier)
 
+	def _total_physical(self):
+		return sum(self.physical.values())
+	total_physical = property(_total_physical)
+
+	def _total_theoretical(self):
+		return sum(self.theoretical.values())
+	total_theoretical = property(_total_theoretical)
+
 	def _physical(self):
-		qty = 0
-		for inv in MyItemInventory.objects.filter(item = self):
-			if inv.withdrawable: qty += inv.physical
+		qty = {}
+		for inv_item in MyItemInventory.objects.filter(item = self):
+			if inv_item.withdrawable: qty[inv_item.size] = inv_item.physical
 		return qty
 	physical = property(_physical)
 
 	def _theoretical(self):
-		qty = 0
-		for inv in MyItemInventory.objects.filter(item = self):
-			if inv.withdrawable: qty += inv.theoretical
+		qty = {}
+		for inv_item in MyItemInventory.objects.filter(item = self):
+			qty[inv_item.size] = inv_item.theoretical
 		return qty
 	theoretical = property(_theoretical)
 
@@ -368,14 +386,13 @@ class MyItemInventory(models.Model):
 
 	def _theoretical(self):
 		inv = 0
-		for audit in MyItemInventoryAudit.objects.filter(inv = self):
+		for audit in MyItemInventoryMoveAudit.objects.filter(inv = self):
 			if audit.out: inv -= audit.qty
 			else: inv += audit.qty
 		return inv
 	theoretical = property(_theoretical)
 
-
-class MyItemInventoryAudit(models.Model):
+class MyItemInventoryMoveAudit(models.Model):
 	created_on = models.DateField(auto_now_add = True)
 
 	# instance fields
