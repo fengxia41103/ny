@@ -462,3 +462,124 @@ class MyItemInventoryAdd(FormView):
 		)
 
 		return super(FormView, self).form_valid(form)
+
+###################################################
+#
+#	Sales Order views
+#
+###################################################
+
+def create_so(customer,sales,quick_notion,created_by,applied_discount,is_sold_at_cost):
+	errors = {}	
+
+	# Create sales order
+	so = MySalesOrder(
+		customer = customer,
+		sales = sales,
+		created_by = created_by,
+		discount = applied_discount
+	)
+	so.save()
+
+	# Parse items
+	items = []
+	for line_no, line in enumerate(quick_notion.split('\n')):
+		tmp = line.split(',')
+		style = tmp[0]
+
+		# Optional, can be blank, since some styles have only a single color.
+		color = tmp[1] 
+
+		# Find MyItem object
+		if color: item = MyItem.objects.filter(name__icontains=style,color__icontains=color)
+		else: item = MyItem.objects.filter(name__icontains=style)
+
+		if not item or len(item)==0: 
+			errors[line_no+1] = line
+			print 'not found'
+			continue
+		elif len(item) > 1:
+			errors[line_no+1] = line
+			print 'multiple matches'
+			continue
+		item = item[0]
+		items.append(item)
+
+		# Qty pairs
+		qty_pair = []
+		for i in tmp[2:]:
+			qty_pair.append((i.split('-')[0].upper(),int(i.split('-')[1])))
+
+		# Create order
+		for (size,qty) in qty_pair:
+			# Get MyItemInventory obj
+			item_inv, created = MyItemInventory.objects.get_or_create(
+				item = item,
+				size = size.upper(),
+			)
+
+			# Create SO line item
+			if is_sold_at_cost: price = item.converted_cost
+			else: price = item.price
+
+			line_item = MySalesOrderLineItem(
+				order = so,
+				item = item_inv,
+				price = price,
+				qty = qty
+			).save()
+
+	return {'errors':errors, 'items':items}
+
+class MySalesOrderAdd(FormView):
+	template_name = 'erp/so/add.html'
+	form_class = SalesOrderAddForm
+	success_url = '#'
+
+	def form_valid(self, form):
+		messages.info(
+            self.request,
+            "You have successfully changed your email notifications"
+        )		
+
+		# Call utility function to parse
+		result = create_so(
+			form.cleaned_data['customer'], # customer
+			form.cleaned_data['sales'],
+			form.cleaned_data['items'].strip(), # input shorhand notion
+			self.request.user, # created by user
+			form.cleaned_data['applied_discount'],
+			form.cleaned_data['is_sold_at_cost']
+		)
+
+		return super(FormView, self).form_valid(form)
+
+class MySalesOrderListFilter (FilterSet):
+	customer = ModelChoiceFilter(queryset=MyCRM.objects.filter(crm_type='C').order_by('name'))
+	class Meta:
+		model = MySalesOrder
+		fields = {
+			'customer':['exact'],
+			'is_sold_at_cost':['exact'],
+			'sales':['exact'],
+		}
+
+class MySalesOrderList (FilterView):
+	template_name = 'erp/so/list.html'
+	paginate_by = 25
+
+	def get_filterset_class(self):
+		return MySalesOrderListFilter
+
+	def get_context_data(self, **kwargs):
+		context = super(FilterView, self).get_context_data(**kwargs)
+
+		# filters
+		searches = context['filter']
+		context['filters'] = {} # my customized filter display values
+		for f,val in searches.data.iteritems():
+			if val and f != "csrfmiddlewaretoken" and f != "page":
+				if f == 'customer': context['filters']['customer'] = MyCRM.objects.get(id=int(val))
+				if f == 'sales': context['filters']['sales'] = User.objects.get(id=int(val))
+
+		return context

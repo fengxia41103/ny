@@ -1,0 +1,26 @@
+{% extends "erp/common/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block page-header %}
+	Create Sales Order
+{% endblock %}
+
+
+{% block content %}
+<form action="" method="POST">
+	{% csrf_token %}
+	{{ form|crispy }}
+
+	<button type="submit" class="btn btn-primary start">
+		<i class="fa fa-plus-square"></i>
+		<span>Create order</span>
+	</button>	
+</form>
+
+<script type="text/javascript">
+	j$(document).ready(function(){
+	});
+</script>
+{% endblock %}
+

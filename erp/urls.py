@@ -44,4 +44,8 @@ urlpatterns = patterns(
 		url(r'^customer/add/$', views.MyCustomerAdd.as_view(), name='customer_add'),		
 		url(r'^customer/(?P<pk>\d+)/edit/$', views.MyCustomerEdit.as_view(), name='customer_edit'),
 
+		# Sales Order
+		url(r'^so/$', views.MySalesOrderList.as_view(), name='so_list'),	
+		url(r'^so/add/$', views.MySalesOrderAdd.as_view(), name='so_add'),		
+
 	)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

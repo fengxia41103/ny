@@ -1,0 +1,79 @@
+{% extends "erp/common/base.html" %}
+
+{% block page-header %}
+	Sales Order
+	<a href="{% url 'so_add' %}" class="btn btn-xs addlink">
+		<i class="fa fa-plus"></i>
+		Add
+	</a>
+{% endblock %}
+
+
+{% block content %}
+	{% include "erp/common/filter.html" %}
+
+	<table class="table table-striped table-hover">
+	<thead>
+		<tr>
+		<th rowspan="2"></th>
+		<th rowspan="2">Code</th>
+		<th rowspan="2">Customer</th>
+		<th rowspan="2">Sales</th>
+		<th colspan="5">Order</th>
+		<th colspan="3">Fullfill</th>
+		</tr>
+
+		<tr>
+			{# order details #}
+			<th>Line Item Qty</th>
+			<th>QTY</th>
+			<th>STD Value</th>
+			<th>Discount Value</th>
+			<th>Implied Discount</th>
+
+			{# fullfillment #}
+			<th>Qty</th>
+			<th>Sales Value</th>
+			<th>Rate by QTY</th>
+			<th>Rate by Value</th>
+		<tr>
+	</thead>
+	<tbody>
+		{% for obj in object_list %}
+		<tr><td>
+		</td><td>
+			{{ obj.code }}
+		</td><td>
+			{{ obj.customer }}
+		</td><td>
+			{{ obj.sales }}
+		</td><td>
+			{{ obj.line_item_qty }}
+		</td><td>
+			{{ obj.total_qty}}
+		</td><td>
+			{{ obj.total_std_value }}
+		</td><td>
+			{{ obj.total_discount_value }}
+		</td><td>
+			{{ obj.implied_discount }}
+		</td><td>
+			{{ obj.fullfill_qty }}
+		</td><td>
+			{{ obj.fullfill_std_value }}
+		</td><td>
+			{{ obj.fullfull_rate_by_qty }}
+		</td><td>
+			{{ obj.fullfill_rate_by_value }}
+		</td></tr>
+    	{% endfor %}
+	</tbody>
+	</table>
+
+
+<script type="text/javascript">
+	j$(document).ready(function(){
+	});
+</script>
+{% endblock %}
+

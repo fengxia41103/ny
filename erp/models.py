@@ -287,6 +287,9 @@ class MyCRM(MyBaseModel):
 	balance = models.FloatField(default = 0)
 	home_currency = models.ForeignKey('MyCurrency')
 	std_discount = models.FloatField(default=0.25)
+
+	def __unicode__(self):
+		return self.name
 	
 class MyVendorItem(models.Model):
 	vendor = models.ForeignKey('MyCRM')
@@ -330,7 +333,7 @@ class MyItem(MyBaseModel):
 		return u'%s-%s' %(self.name,self.color)
 	code = property(_code)
 
-	def _multiplier(self):
+	def _converted_cost(self):
 		vendor_item = MyVendorItem.objects.filter(product=self,vendor=self.brand)[0]
 		exchange_rate = None
 		converted_cost = 0
@@ -344,7 +347,11 @@ class MyItem(MyBaseModel):
 				exchange_rate = MyExchangeRate.objects.get(foreign=self.currency, home=vendor_item.currency)
 				converted_cost = vendor_item.price * exchange_rate.rate
 			except: pass
-		if converted_cost: return self.price / converted_cost
+		return converted_cost		
+	converted_cost = property(_converted_cost)
+
+	def _multiplier(self):
+		if self.converted_cost: return self.price / self.converted_cost
 		else: return None
 	multiplier = property(_multiplier)
 
@@ -421,8 +428,8 @@ class MyItemInventoryMoveAudit(models.Model):
 	reason = models.TextField(default='')
 
 class MySalesOrder(models.Model):
-	supplier = models.ForeignKey('MyCRM', related_name='supplier')
-	customer = models.ForeignKey('MyCRM', related_name='customer')
+	customer = models.ForeignKey('MyCRM')
+	sales = models.ForeignKey(User, related_name='sales')
 	created_on = models.DateField(auto_now_add = True)
 
 	# instance fields
@@ -432,25 +439,140 @@ class MySalesOrder(models.Model):
 		null = True,
 		default = None,
 		verbose_name = u'创建用户',
-		help_text = ''
+		help_text = '',
+		related_name='logger'
 	)
 	discount = models.FloatField(default = 0)
 
+	# Set this flag to True for internal customers.
+	# This will force line item price to use item's converted cost instead of RP.
+	is_sold_at_cost = models.BooleanField(default=False)
+
+	# Order status
+	STATUS_CHOICES = (
+		('N','New'),
+		('C','Closed'),
+		('R','In Review'),
+		('F','Fullfilling'),
+	)
+	status = models.CharField(
+		max_length = 16,
+		null = True,
+		blank = True,
+		default = 'N',
+		choices = STATUS_CHOICES
+	)
+
+	def _code(self):
+		return '%s %d-%5d'%('SZ',dt.now().year,self.id)
+	code = property(_code)
+
+	def _life(self):
+		return dt.now()-self.created_on
+	life = property(_life)
+
+	def _line_item_qty(self):
+		return len(MySalesOrderLineItem.objects.filter(order=self).values_list('id',flat=True))
+	line_item_qty = property(_line_item_qty)
+
+	def _total_qty(self):
+		return sum(MySalesOrderLineItem.objects.filter(order=self).values_list('qty',flat=True))
+	total_qty = property(_total_qty)
+
+	def _total_std_value(self):
+		vals = [line.std_value for line in MySalesOrderLineItem.objects.filter(order=self)]
+		return sum(vals)
+	total_std_value = property(_total_std_value)
+
+	def _total_discount_value(self):
+		vals = [line.discount_value for line in MySalesOrderLineItem.objects.filter(order=self)]
+		return sum(vals)
+	total_discount_value = property(_total_discount_value)
+
+	def _implied_discount(self):
+		return 1-self.total_discount_value/self.total_std_value
+	implied_discount = property(_implied_discount)
+
+	def _fullfill_qty(self):
+		vals = [line.fullfill_qty for line in MySalesOrderLineItem.objects.filter(order=self)]
+		return sum(vals)
+	fullfill_qty = property(_fullfill_qty)
+
+	def _fullfill_std_value(self):
+		return sum([line.fullfill_qty*line.price for line in MySalesOrderLineItem.objects.filter(order=self)])
+	fullfill_std_value = property(_fullfill_std_value)
+
+	def _fullfill_discount_value(self):
+		return sum([line.fullfill_qty*line.discount_value for line in MySalesOrderLineItem.objects.filter(order=self)])
+	fullfill_discount_value = property(_fullfill_discount_value)
+
+	def _fullfill_rate_by_qty(self):
+		return self.fullfill_qty/self.total_qty
+	fullfill_rate_by_qty = property(_fullfill_rate_by_qty)
+
+	def _fullfill_rate_by_value(self):
+		return self.fullfill_std_value / self.total_std_value
+	fullfill_rate_by_value = property(_fullfill_rate_by_value)
+
+	def _last_fullfill_date(self):
+		return MySalesOrderFullfillment.objects.filter(order=self).order_by('-created_on')[0]
+	last_fullfill_date = property(_last_fullfill_date)
+
 class MySalesOrderLineItem(models.Model):
 	order = models.ForeignKey('MySalesOrder')
-	item = models.ForeignKey('MyItem')
-	size = models.CharField(
-		max_length = 4,
-		default = ''
-	)
+	item = models.ForeignKey('MyItemInventory')
 	qty = models.IntegerField(default = 0)
-	price = models.FloatField(default = 0)
-	value = models.FloatField(default = 0)
 
-	# This value will be updated whenever 
-	# there is a new MySalesOrderFullfillmentLineItem created.
-	fullfilled = models.IntegerField(default = 0)
-	fullfill_rate = models.FloatField(default = 0)
+	# Price is a snapshot in time since xchange rate would fluctuate overtime.
+	price = models.FloatField(default = 0)
+
+	def _std_value(self):
+		return self.qty*self.price
+	std_value = property(_std_value)
+
+	def _discount_value(self):
+		if self.order.is_sold_at_cost: return self.std_value
+		else: return self.std_value * self.order.discount
+	discount_value = property(_discount_value)
+
+	def _fullfill_qty(self):
+		qty=MySalesOrderFullfillmentLineItem.objects.filter(so_line_item=self).values('fullfill_qty',flat=True)
+		return sum(qty)
+	fullfill_qty = property(_fullfill_qty)
+
+	def _fullfill_rate(self):
+		return self.fullfill_qty/self.qty
+	fullfill_rate = property(_fullfill_rate)
+
+class MySalesOrderFullfillment(MyBaseModel):
+	'''
+	Fullfillment would require an associated PO.
+	'''
+	so = models.ForeignKey('MySalesOrder')
+	po = models.ForeignKey(
+		'MyPurchaseOrder',
+		blank = True,
+		null = True
+	)
+	created_on = models.DateField(auto_now_add = True)
+	created_by = models.ForeignKey (
+		User,
+		blank = True,
+		null = True,
+		default = None,
+		verbose_name = u'创建用户',
+		help_text = ''
+	)
+
+class MySalesOrderFullfillmentLineItem(models.Model):
+	so_fullfillment = models.ForeignKey('MySalesOrderFullfillment')
+	po_line_item = models.ForeignKey(
+		'MyPurchaseOrderLineItem',
+		null = True,
+		blank = True
+	)
+	so_line_item = models.ForeignKey('MySalesOrderLineItem')
+	fullfill_qty = models.IntegerField(default = 0)
 
 class MyPurchaseOrder(MyBaseModel):
 	'''
@@ -503,24 +625,3 @@ class MyPurchaseOrderLineItem(models.Model):
 		choices = ESTIMATED_MONTH_CHOICES
 	)
 
-class MySalesOrderFullfillment(MyBaseModel):
-	'''
-	Fullfillment would require an associated PO.
-	'''
-	so = models.ForeignKey('MySalesOrder')
-	po = models.ForeignKey('MyPurchaseOrder')
-	created_on = models.DateField(auto_now_add = True)
-	created_by = models.ForeignKey (
-		User,
-		blank = True,
-		null = True,
-		default = None,
-		verbose_name = u'创建用户',
-		help_text = ''
-	)
-
-class MySalesOrderFullfillmentLineItem(models.Model):
-	so_fullfillment = models.ForeignKey('MySalesOrderFullfillment')
-	po_line_item = models.ForeignKey('MyPurchaseOrderLineItem')
-	so_line_item = models.ForeignKey('MySalesOrderLineItem')
-	fullfill_qty = models.IntegerField(default = 0)
