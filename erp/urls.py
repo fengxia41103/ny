@@ -33,7 +33,7 @@ urlpatterns = patterns(
 		url(r'^item/(?P<pk>\d+)/$', views.MyItemDetail.as_view(), name='item_detail'),		
 		url(r'^item/(?P<pk>\d+)/edit/$', views.MyItemEdit.as_view(), name='item_edit'),
 		url(r'^item/(?P<pk>\d+)/delete/$', views.MyItemDelete.as_view(), name='item_delete'),
-		url(r'^items/adjust/$', views.MyItemInventoryAdjustment.as_view(), name='item_inv_adjust'),	
+		url(r'^item/inv/add/$', views.MyItemInventoryAdd.as_view(), name='item_inv_add'),	
 
 		# crms
 		url(r'^vendors/$', views.MyVendorList.as_view(), name='vendor_list'),		

@@ -383,9 +383,62 @@ class MyCustomerEdit (UpdateView):
 #	MyItemInventory views
 #
 ###################################################
+def adjust_inventory(storage,quick_notion,out,reason,created_by):
+	errors = {}	
+	
+	# Set "withdrawable" flag. Customer inventory is used to
+	# track how many items we have ever shipped to them, so they are not drawable.
+	if storage.location.crm.crm_type == 'C': withdrawable = False
+	else: withdrawable = True
 
-class MyItemInventoryAdjustment(FormView):
-	template_name = 'erp/item/inv_adjust.html'
+	# Parse items
+	items = []
+	for line_no, line in enumerate(quick_notion.split('\n')):
+		tmp = line.split(',')
+		style = tmp[0]
+		color = tmp[1]
+
+		# Find MyItem object
+		item = MyItem.objects.filter(name__icontains=style,color__icontains=color)
+		if not item or len(item)==0: 
+			errors[line_no+1] = line
+			print 'not found'
+			continue
+		elif len(item) > 1:
+			errors[line_no+1] = line
+			print 'multiple matches'
+			continue
+		item = item[0]
+		items.append(item)
+
+		# Qty pairs
+		qty_pair = []
+		for i in tmp[2:]:
+			qty_pair.append((i.split('-')[0].upper(),int(i.split('-')[1])))
+
+		# Adjust inventory
+		for (size,qty) in qty_pair:
+			# Get MyItemInventory obj
+			item_inv, created = MyItemInventory.objects.get_or_create(
+				item = item,
+				size = size.upper(),
+				storage = storage,
+				withdrawable = withdrawable
+			)
+
+			# Create MyItemInventoryAudit
+			audit = MyItemInventoryAudit(
+				created_by = created_by,
+				inv = item_inv,
+				out = False, # We are adding to inventory
+				qty = qty,
+				reason = reason,
+			).save()
+
+	return {'errors':errors, 'items':items}
+
+class MyItemInventoryAdd(FormView):
+	template_name = 'erp/item/inv_add.html'
 	form_class = ItemInventoryAddForm
 	success_url = '#'
 
@@ -394,29 +447,14 @@ class MyItemInventoryAdjustment(FormView):
             self.request,
             "You have successfully changed your email notifications"
         )		
-		errors = {}
-		items = []
-		for line_no, line in enumerate(form.cleaned_data['items'].strip().split('\n')):
-			tmp = line.split(',')
-			style = tmp[0]
-			color = tmp[1]
 
-			item = MyItem.objects.filter(name__icontains=style,color__icontains=color)
-			if not item or len(item)==0: 
-				errors[line_no+1] = line
-				print 'not found'
-				continue
-			elif len(item) > 1:
-				errors[line_no+1] = line
-				print 'multiple matches'
-				continue
-			items.append(item[0])
+		# Call utility function to parse
+		result = adjust_inventory(
+			form.cleaned_data['storage'], # storyage
+			form.cleaned_data['items'].strip(), # input shorhand notion
+			False, # add to inventory
+			form.cleaned_data['reason'], # reason for this adjustment
+			self.request.user, # created by user
+		)
 
-			qty_pair = []
-			for i in tmp[2:]:
-				qty_pair.append((i.split('-')[0].upper(),int(i.split('-')[1])))
-			print qty_pair
-			
-		print errors
-		print items
 		return super(FormView, self).form_valid(form)

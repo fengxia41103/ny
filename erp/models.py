@@ -401,17 +401,7 @@ class MyItemInventoryAudit(models.Model):
 		null = True,
 		blank = True,
 	)
-
-	# Reason
-	REASON_CHOICES = (
-		('SO','Qty is being adjusted due to fullfillment of a sales order.'),
-		('INITIAL','Qty is being adjusted as an initial setup.'),
-		('DAMAGE','Qty is being adjusted due to a damaged goods.'),
-	)
-	reason = models.CharField(
-		max_length = 8,
-		choices = REASON_CHOICES
-	)
+	reason = models.TextField(default='')
 
 class MySalesOrder(models.Model):
 	supplier = models.ForeignKey('MyCRM', related_name='supplier')

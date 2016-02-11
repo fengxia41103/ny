@@ -28,6 +28,7 @@
 		<th>Color</th>
 		<th>Price</th>
 		<th>Multiplier</th>
+		<th>Theoreticals</th>
 	</thead>
 	<tbody>
 		{% for obj in object_list %}
@@ -46,6 +47,8 @@
 			{{obj.currency}} {{ obj.price|floatformat:0 }}
 		</td><td>
 			{{ obj.multiplier|floatformat:2 }}
+		</td><td>
+			{{ obj.theoretical }}
 		</td></tr>
     	{% endfor %}
 	</tbody>
