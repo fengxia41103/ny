@@ -19,20 +19,20 @@
 		<th rowspan="2">Code</th>
 		<th rowspan="2">Customer</th>
 		<th rowspan="2">Sales</th>
-		<th colspan="5">Order</th>
-		<th colspan="3">Fullfill</th>
+		<th colspan="5">Order Summary</th>
+		<th colspan="4">Fullfillment Summary</th>
 		</tr>
 
 		<tr>
 			{# order details #}
-			<th>Line Item Qty</th>
+			<th>Line Item</th>
 			<th>QTY</th>
 			<th>STD Value</th>
 			<th>Discount Value</th>
 			<th>Implied Discount</th>
 
 			{# fullfillment #}
-			<th>Qty</th>
+			<th>QTY</th>
 			<th>Sales Value</th>
 			<th>Rate by QTY</th>
 			<th>Rate by Value</th>
@@ -41,7 +41,11 @@
 	<tbody>
 		{% for obj in object_list %}
 		<tr><td>
+			<a href="{% url 'so_detail' obj.id %}">Detail</a> | 
 		</td><td>
+			{% if obj.is_sold_at_cost %}
+				<i class='fa fa-flag-o'></i>
+			{% endif %}
 			{{ obj.code }}
 		</td><td>
 			{{ obj.customer }}

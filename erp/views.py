@@ -393,6 +393,7 @@ def adjust_inventory(storage,quick_notion,out,reason,created_by):
 
 	# Parse items
 	items = []
+	pat = re.compile("(?P<size>\w+)-?(?P<qty>\d+)")	
 	for line_no, line in enumerate(quick_notion.split('\n')):
 		tmp = line.split(',')
 		style = tmp[0]
@@ -418,7 +419,8 @@ def adjust_inventory(storage,quick_notion,out,reason,created_by):
 		# Qty pairs
 		qty_pair = []
 		for i in tmp[2:]:
-			qty_pair.append((i.split('-')[0].upper(),int(i.split('-')[1])))
+			tmp = pat.search(i)
+			if tmp: qty_pair.append((tmp.group('size').upper(),int(tmp.group('qty'))))
 
 		# Adjust inventory
 		for (size,qty) in qty_pair:
@@ -469,7 +471,7 @@ class MyItemInventoryAdd(FormView):
 #
 ###################################################
 
-def create_so(customer,sales,quick_notion,created_by,applied_discount,is_sold_at_cost):
+def create_so(customer,sales,quick_notion,created_by,applied_discount,is_sold_at_cost,storage):
 	errors = {}	
 
 	# Create sales order
@@ -483,6 +485,7 @@ def create_so(customer,sales,quick_notion,created_by,applied_discount,is_sold_at
 
 	# Parse items
 	items = []
+	pat = re.compile("(?P<size>\w+)-?(?P<qty>\d+)")
 	for line_no, line in enumerate(quick_notion.split('\n')):
 		tmp = line.split(',')
 		style = tmp[0]
@@ -508,7 +511,8 @@ def create_so(customer,sales,quick_notion,created_by,applied_discount,is_sold_at
 		# Qty pairs
 		qty_pair = []
 		for i in tmp[2:]:
-			qty_pair.append((i.split('-')[0].upper(),int(i.split('-')[1])))
+			tmp = pat.search(i)
+			if tmp: qty_pair.append((tmp.group('size').upper(),int(tmp.group('qty'))))
 
 		# Create order
 		for (size,qty) in qty_pair:
@@ -516,25 +520,31 @@ def create_so(customer,sales,quick_notion,created_by,applied_discount,is_sold_at
 			item_inv, created = MyItemInventory.objects.get_or_create(
 				item = item,
 				size = size.upper(),
+				storage = storage
 			)
 
 			# Create SO line item
 			if is_sold_at_cost: price = item.converted_cost
 			else: price = item.price
 
-			line_item = MySalesOrderLineItem(
-				order = so,
-				item = item_inv,
-				price = price,
-				qty = qty
-			).save()
+			existing = MySalesOrderLineItem.objects.filter(order=so,item=item_inv)
+			if len(existing): 
+				existing[0].qty += qty
+				existing[0].save()
+			else:
+				line_item = MySalesOrderLineItem(
+					order = so,
+					item = item_inv,
+					price = price,
+					qty = qty
+				).save()
 
 	return {'errors':errors, 'items':items}
 
 class MySalesOrderAdd(FormView):
 	template_name = 'erp/so/add.html'
 	form_class = SalesOrderAddForm
-	success_url = '#'
+	success_url = reverse_lazy('so_list')
 
 	def form_valid(self, form):
 		messages.info(
@@ -549,7 +559,8 @@ class MySalesOrderAdd(FormView):
 			form.cleaned_data['items'].strip(), # input shorhand notion
 			self.request.user, # created by user
 			form.cleaned_data['applied_discount'],
-			form.cleaned_data['is_sold_at_cost']
+			form.cleaned_data['is_sold_at_cost'],
+			form.cleaned_data['storage']
 		)
 
 		return super(FormView, self).form_valid(form)
@@ -560,7 +571,6 @@ class MySalesOrderListFilter (FilterSet):
 		model = MySalesOrder
 		fields = {
 			'customer':['exact'],
-			'is_sold_at_cost':['exact'],
 			'sales':['exact'],
 		}
 
@@ -581,5 +591,31 @@ class MySalesOrderList (FilterView):
 			if val and f != "csrfmiddlewaretoken" and f != "page":
 				if f == 'customer': context['filters']['customer'] = MyCRM.objects.get(id=int(val))
 				if f == 'sales': context['filters']['sales'] = User.objects.get(id=int(val))
-
 		return context
+
+class MySalesOrderDetail(DetailView):
+	model = MySalesOrder
+	template_name = 'erp/so/detail.html'
+
+	def get_context_data(self, **kwargs):
+		context = super(DetailView,self).get_context_data(**kwargs)
+		line_items = MySalesOrderLineItem.objects.filter(order = self.object)
+		print len(line_items)
+
+		items = {}
+		for i in line_items:
+			item = i.item.item
+
+			# Get vendor
+			brand = item.brand
+			if brand not in items: items[brand] = {}
+
+			# Get item
+			if item not in items[brand]: items[brand][item] = {'so_line_items':[],'qty':0,'value':0}
+
+			# Get size and qty
+			items[brand][item]['so_line_items'].append(i)
+			items[brand][item]['qty'] += i.qty
+			items[brand][item]['value'] += i.discount_value
+		context['items'] = items
+		return context	

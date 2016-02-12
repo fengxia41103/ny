@@ -47,7 +47,7 @@
 	<div class="col-md-4">
 		<h1 style="font-weight:bold;font-size:40px;">{{ object.name|upper }}</h1>
 		<p><span class="item-label">CODE:</span>{{ object.code }}</p>
-		<p class="item-style">{{object.currency}} {{ object.price|floatformat:2 }}</p>
+		<p class="item-style">{{object.currency}} {{ object.price|floatformat:0 }}</p>
 		
 		{# Available colors #}
 		<span class="item-label">COLOR:</span><span class="item-value">{{ object.color }}</span>

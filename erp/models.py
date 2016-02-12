@@ -285,7 +285,7 @@ class MyCRM(MyBaseModel):
 		verbose_name = u'Vendor phone'
 	)
 	balance = models.FloatField(default = 0)
-	home_currency = models.ForeignKey('MyCurrency')
+	currency = models.ForeignKey('MyCurrency')
 	std_discount = models.FloatField(default=0.25)
 
 	def __unicode__(self):
@@ -318,7 +318,7 @@ class MyItem(MyBaseModel):
 		max_length = 128,
 		default = '',
 	)
-	price = models.FloatField(default = 0)
+	price = models.FloatField(default = 0) # retail price
 	currency = models.ForeignKey('MyCurrency')
 
 	# If we know when is the deadline to place SO
@@ -530,9 +530,13 @@ class MySalesOrderLineItem(models.Model):
 		return self.qty*self.price
 	std_value = property(_std_value)
 
+	def _discount_price(self):
+		return self.price*(1-self.order.discount)
+	discount_price = property(_discount_price)
+
 	def _discount_value(self):
-		if self.order.is_sold_at_cost: return self.std_value
-		else: return self.std_value * self.order.discount
+		if self.order.is_sold_at_cost: return self.item.item.converted_cost
+		else: return self.std_value * (1-self.order.discount)
 	discount_value = property(_discount_value)
 
 	def _fullfill_qty(self):
