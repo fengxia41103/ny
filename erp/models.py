@@ -430,6 +430,7 @@ class MyItemInventoryMoveAudit(models.Model):
 class MySalesOrder(models.Model):
 	customer = models.ForeignKey('MyCRM')
 	sales = models.ForeignKey(User, related_name='sales')
+	default_storage = models.ForeignKey('MyStorage',null=True,blank=True)
 	created_on = models.DateField(auto_now_add = True)
 
 	# instance fields
@@ -467,9 +468,9 @@ class MySalesOrder(models.Model):
 		return '%s %d-%5d'%('SZ',dt.now().year,self.id)
 	code = property(_code)
 
-	def _life(self):
-		return dt.now()-self.created_on
-	life = property(_life)
+	def _life_in_days(self):
+		return (dt.now()-self.created_on).days
+	life_in_days = property(_life_in_days)
 
 	def _line_item_qty(self):
 		return len(MySalesOrderLineItem.objects.filter(order=self).values_list('id',flat=True))
@@ -515,8 +516,12 @@ class MySalesOrder(models.Model):
 	fullfill_rate_by_value = property(_fullfill_rate_by_value)
 
 	def _last_fullfill_date(self):
-		return MySalesOrderFullfillment.objects.filter(order=self).order_by('-created_on')[0]
+		return MySalesOrderFullfillment.objects.filter(so=self).order_by('-created_on')[0]
 	last_fullfill_date = property(_last_fullfill_date)
+
+	def _fullfillments(self):
+		return MySalesOrderFullfillment.objects.filter(so=self).order_by('-created_on')
+	fullfillments = property(_fullfillments)
 
 class MySalesOrderLineItem(models.Model):
 	order = models.ForeignKey('MySalesOrder')

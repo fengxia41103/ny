@@ -8,10 +8,91 @@
 
 {% block content %}
 {# order header #}
-<label>Customer</label>{{ object.customer }}
-<label>Sales</label>{{ object.sales }}
+<h2>Summary</h2>
+<div class="panel panel-default">
+  	<div class="panel-body">
+	<div class="row ">
+		<div class="col-md-2"><label>Customer</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.customer }}</div>
+		<div class="col-md-1"></div>
+		<div class="col-md-2"><label>Sales</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.sales }}</div>
+		<div class="col-md-1"></div>		
+	</div><div class="row">
+		<div class="col-md-2"><label>Created On</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.created_on }}</div>
+		<div class="col-md-1"></div>		
+		<div class="col-md-2"><label>Created By</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.created_by }}</div>
+		<div class="col-md-1"></div>		
+	</div><div class="row">
+		<div class="col-md-2"><label>Is Sold At Cost</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.is_sold_at_cost }}</div>
+		<div class="col-md-1"></div>		
+		<div class="col-md-2"><label>Default Storage</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.default_storage }}</div>
+		<div class="col-md-1"></div>		
+	</div><div class="row">
+		<div class="col-md-2"><label>Discount</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.discount }}</div>
+		<div class="col-md-1"></div>		
+		<div class="col-md-2"><label>Status</label></div>
+		<div class="col-md-3 my-sf-display-border">
+		<label class="label label-info">{{ object.status }}</label></div>
+		<div class="col-md-1"></div>		
+	</div><div class="row">
+		<div class="col-md-2"><label>Total Line Items</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.line_item_qty }}</div>
+		<div class="col-md-1"></div>		
+		<div class="col-md-2"><label>Total QTY</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.total_qty }}</div>		
+		<div class="col-md-1"></div>		
+	</div><div class="row">
+		<div class="col-md-2"><label>STD Value</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.total_std_value }}</div>
+		<div class="col-md-1"></div>		
+		<div class="col-md-2"><label>Value After Discount</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.total_discount_value }}</div>
+		<div class="col-md-1"></div>
+	</div>
+  </div>
+</div>
+
+<h2>Fullfillment</h2>
+<div class="panel panel-default">
+  	<div class="panel-body">
+	<div class="row">
+		<div class="col-md-2"><label>Last Fullfillment Date</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.last_fullfillment_date }}&nbsp;</div>
+		<div class="col-md-1"></div>
+		<div class="col-md-2"><label>Fullfillments</label></div>
+		<div class="col-md-3 my-sf-display-border">
+			&nbsp;
+			{% for f in object.fullfillments %}
+			{{ f }}
+			{% endfor %}
+		</div>
+		<div class="col-md-1"></div>
+	</div><div class="row">
+		<div class="col-md-2"><label>Fullfilled QTY</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.fullfill_qty }}&nbsp;</div>
+		<div class="col-md-1"></div>	
+		<div class="col-md-2"><label>Fullfill Rate By QTY</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.fullfill_rate_by_qty }}&nbsp;</div>
+		<div class="col-md-1"></div>				
+	</div><div class="row">
+		<div class="col-md-2"><label>Fullfilled Value</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.fullfill_discount_value }}&nbsp;</div>
+		<div class="col-md-1"></div>	
+		<div class="col-md-2"><label>Fullfill Rate By Value</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.fullfill_rate_by_value }}&nbsp;</div>			
+		<div class="col-md-1"></div>	
+	</div>
+	</div>
+</div>
 
 {# order details #}
+<h2>Order Details</h2>
 <ul class="nav nav-tabs" role="tablist">
 	{% for brand,data in items.iteritems %}
 	<li class="active">
@@ -37,7 +118,14 @@
 				{% endwith %}
 			</div>		
 			<div class="col-md-5">
-				<h4 style="font-weight:bold;font-size:20px;">{{ item.name|upper }}</h4>
+				<h4 style="font-weight:bold;font-size:20px;">
+				{{ item.name|upper }}
+				</h4>
+				<p>
+				<a href="{% url 'item_detail' item.id %}">
+					<i class="fa fa-hand-o-right">learn more</i>
+				</a>
+				</p>				
 				
 				{# color #}
 				<p>

@@ -56,9 +56,9 @@
 		</td><td>
 			{{ obj.total_qty}}
 		</td><td>
-			{{ obj.total_std_value }}
+			{{ obj.total_std_value|floatformat:0 }}
 		</td><td>
-			{{ obj.total_discount_value }}
+			{{ obj.total_discount_value|floatformat:2 }}
 		</td><td>
 			{{ obj.implied_discount }}
 		</td><td>
