@@ -62,18 +62,20 @@
 		</ul>
 
 		{# Sizes #}
-		<p><span class="item-label">SIZE SELECTION</span>: XL</p>
-		<ul class="list-inline">
-			<li><span class="item-size">XS</span></li>
-			<li><span class="item-size">S</span></li>
-			<li><span class="item-size">M</span></li>
-			<li><span class="item-size">L</span></li>
-			<li><span class="item-size">XL</span></li>
+		<p><span class="item-label">SIZE SELECTION</span>:
+		</p>
+		
+		<ul class="list-inline" id="size-chart">
+			{% for item_inv in object.myiteminventory_set.all %}
+			<li data-object="{{ item_inv.id }}"><span class="item-size">
+				{{ item_inv.size }}
+			</span></li>
+			{% endfor %}
 		</ul>
 
 		{# QTY #}
 		<p><span class="item-label">QTY:</span></p>
-		<select style="width:86px;height:35px;background-color:white;color:#8c8c8c;padding-left:10px;">
+		<select class="my-select" id="qty">
 			<option value="1">1</option>
 			<option value="2">2</option>
 			<option value="3">3</option>
@@ -82,12 +84,14 @@
 			<option value="6">6</option>
 		</select>
 
-		<p>
-		<button class="btn btn-default btn-add-to-shopping-cart" type="submit">
-			Add to cart
-			<i class='fa fa-shopping-cart'></i>
-		</button>
-		</p>
+		<div>
+			<button class="btn btn-default"
+			data-toggle="modal" data-target="#select-cart"
+			id="btn-add-to-shopping-cart">
+				Add to order
+				<i class='fa fa-briefcase'></i>
+			</button>
+		</div>
 	</div>
 </div>	
 
@@ -125,10 +129,52 @@
   </div>
 </div>
 
+<!-- Modal -->
+<div id="select-cart" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+
+    	{# Modal header #}
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Select an order</h4>
+      </div>
+
+      {# Modal body #}
+      <div class="modal-body">		
+			{% csrf_token %}
+			<div class="form-group">
+				<input name="item-inv" id="item-inv" val="" type="hidden">
+				<input name="qty" id="selected-qty" val="" type="hidden">
+				<select class="my-select" name="so" id="so">
+					<option value="0">Create a new order</option>
+					{% for so in sales_orders %}
+					<option value="{{ so.id }}">{{ so }}</option>
+					{% endfor %}
+				</select>
+			</div>				
+      </div>
+
+      {# Modal footer #}
+      <div class="modal-footer">
+		<button class="btn btn-primary start" id="btn-so-add-item">
+			<i class="fa fa-plus"></i>
+			<span>Add Item</span>
+		</button>      
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 <script type="text/javascript">
+var j$ = jQuery.noConflict();
 j$(document).ready(function(){
+	// add-item-to-so button is disabled by default
+	j$('#btn-add-to-shopping-cart').prop('disabled',true);
+
 	j$(document).delegate('*[data-toggle="lightbox"]', 'click', function(e) {
 	    e.preventDefault();
 	    j$(this).ekkoLightbox();
@@ -138,7 +184,53 @@ j$(document).ready(function(){
 		var url = j$(this).attr('src');
 		j$(this).closest('section').find('[data-toggle="lightbox"]').attr('href',url);
 		j$(this).closest('section').find('[data-toggle="lightbox"]').find('img:first-child').attr('src',url);
-	});			
+	});	
+
+	j$('#size-chart > li').click(function(){
+		j$(this).siblings().find('span:first-child').removeClass('item-size-selected');
+		var me = j$(this).find('span:first-child');
+		me.toggleClass('item-size-selected');
+		if (me.hasClass('item-size-selected')){
+			var qty = j$('#qty').val();
+			j$('#selected-qty').val(qty);
+
+			var item_inv = j$(this).attr("data-object");
+			j$('#item-inv').val(item_inv);
+
+			// enable buttont to click
+			j$('#btn-add-to-shopping-cart').prop('disabled',false);
+		}else{
+			j$('#item-inv').val('');
+			j$('#selected-qty').val('');
+
+			// disable buttont to click
+			j$('#btn-add-to-shopping-cart').prop('disabled',true);
+
+		}
+	});
+
+	j$('#qty').change(function(){
+		if (j$('#size-chart > li > span').hasClass('item-size-selected')){
+			var qty = j$('#qty').val();
+			j$('#selected-qty').val(qty);			
+		}
+	});
+
+	j$('#btn-so-add-item').click(function(){
+        j$.post("{% url 'so_add_item' %}", // passed in from view
+			{
+				'so': j$('#so').val(),
+				'item-inv':j$('#item-inv').val(),
+				'qty':j$('#selected-qty').val()
+			},
+            function(resp) { // success callback
+            	console.log(resp);
+            	toastr.success('Item added to SO');
+            }
+        ).always(function(){
+			j$('#select-cart').modal('hide');
+        });		
+	})
 });
 </script>
 {% endblock %}

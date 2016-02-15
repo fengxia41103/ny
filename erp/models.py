@@ -464,6 +464,9 @@ class MySalesOrder(models.Model):
 		choices = STATUS_CHOICES
 	)
 
+	def __unicode__(self):
+		return u'%s, %s'%(self.code,self.customer)
+
 	def _code(self):
 		return '%s %d-%5d'%('SZ',dt.now().year,self.id)
 	code = property(_code)

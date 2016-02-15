@@ -157,7 +157,7 @@ def item_attachment_add_view(request, pk):
 		t.content_object = MyItem.objects.get(id=pk)
 		t.created_by = request.user
 		t.save()	
-	return HttpResponseRedirect("#")
+	return HttpResponseRedirect(reverse_lazy('item_detail',kwargs={'pk':pk}))
 
 def crm_attachment_add_view(request, pk):
 	tmp_form = AttachmentForm (request.POST, request.FILES)
@@ -168,7 +168,7 @@ def crm_attachment_add_view(request, pk):
 		t.content_object = MyCRM.objects.get(id=pk)
 		t.created_by = request.user
 		t.save()	
-	return HttpResponseRedirect("#")
+	return HttpResponseRedirect('')
 
 ###################################################
 #
@@ -294,6 +294,9 @@ class MyItemDetail(DetailView):
 		context['attachment_form'] = AttachmentForm()
 		context['images'] = [img.file.url for img in self.object.attachments.all()]
 		context['same_styles'] = MyItem.objects.filter(name=self.object.name,brand=self.object.brand)
+
+		# List all open SO that user can add this item to
+		context['sales_orders'] = MySalesOrder.objects.filter(status='N')
 		return context
 
 ###################################################
@@ -383,7 +386,7 @@ class MyCustomerEdit (UpdateView):
 #	MyItemInventory views
 #
 ###################################################
-def adjust_inventory(storage,quick_notion,out,reason,created_by):
+def add_to_inventory(storage,quick_notion,out,reason,created_by):
 	errors = {}	
 	
 	# Set "withdrawable" flag. Customer inventory is used to
@@ -455,7 +458,7 @@ class MyItemInventoryAdd(FormView):
         )		
 
 		# Call utility function to parse
-		result = adjust_inventory(
+		result = add_to_inventory(
 			form.cleaned_data['storage'], # storyage
 			form.cleaned_data['items'].strip(), # input shorhand notion
 			False, # add to inventory
@@ -471,17 +474,19 @@ class MyItemInventoryAdd(FormView):
 #
 ###################################################
 
-def create_so(customer,sales,quick_notion,created_by,applied_discount,is_sold_at_cost,storage):
+def add_to_sales_order(customer,sales,quick_notion,created_by,applied_discount,is_sold_at_cost,storage,so=None):
 	errors = {}	
 
 	# Create sales order
-	so = MySalesOrder(
-		customer = customer,
-		sales = sales,
-		created_by = created_by,
-		discount = applied_discount
-	)
-	so.save()
+	if not so:
+		so = MySalesOrder(
+			customer = customer,
+			sales = sales,
+			created_by = created_by,
+			discount = applied_discount,
+			is_sold_at_cost = is_sold_at_cost
+		)
+		so.save()
 
 	# Parse items
 	items = []
@@ -553,7 +558,7 @@ class MySalesOrderAdd(FormView):
         )		
 
 		# Call utility function to parse
-		result = create_so(
+		result = add_to_sales_order(
 			form.cleaned_data['customer'], # customer
 			form.cleaned_data['sales'],
 			form.cleaned_data['items'].strip(), # input shorhand notion
@@ -600,7 +605,6 @@ class MySalesOrderDetail(DetailView):
 	def get_context_data(self, **kwargs):
 		context = super(DetailView,self).get_context_data(**kwargs)
 		line_items = MySalesOrderLineItem.objects.filter(order = self.object)
-		print len(line_items)
 
 		items = {}
 		for i in line_items:
@@ -618,4 +622,27 @@ class MySalesOrderDetail(DetailView):
 			items[brand][item]['qty'] += i.qty
 			items[brand][item]['value'] += i.discount_value
 		context['items'] = items
-		return context	
+		return context
+
+class MySalesOrderAddItem(TemplateView):
+	def post(self,request):
+		so = request.POST['so']
+		item_inv = request.POST['item-inv']
+		qty = request.POST['qty']
+
+		so = MySalesOrder.objects.get(id=int(so))
+		item_inv = MyItemInventory.objects.get(id=int(item_inv))
+
+		if so.is_sold_at_cost: price = item_inv.item.converted_cost
+		else: price = item_inv.item.price
+
+		line_item = MySalesOrderLineItem(
+					order = so,
+					item = item_inv,
+					price = price,
+					qty = qty
+				).save()
+
+
+		return HttpResponse(json.dumps({'status':'ok'}), 
+			content_type='application/javascript')		
