@@ -569,6 +569,10 @@ class MySalesOrderLineItem(models.Model):
 		return self.price*(1-self.order.discount)
 	discount_price = property(_discount_price)
 
+	def _you_save(self):
+		return self.price*self.order.discount
+	you_save = property(_you_save)
+	
 	def _discount_value(self):
 		if self.order.is_sold_at_cost: return self.item.item.converted_cost
 		else: return self.std_value * (1-self.order.discount)

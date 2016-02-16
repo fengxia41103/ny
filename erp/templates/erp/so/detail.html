@@ -29,7 +29,7 @@
 		<div class="col-md-2"><label>Is Sold At Cost</label></div>
 		<div class="col-md-3 my-sf-display-border">{{ object.is_sold_at_cost }}</div>
 		<div class="col-md-1"></div>		
-		<div class="col-md-2"><label>Default Storage</label></div>
+		<div class="col-md-2"><label>Fullfiller</label></div>
 		<div class="col-md-3 my-sf-display-border">{{ object.default_storage }}</div>
 		<div class="col-md-1"></div>		
 	</div><div class="row">
@@ -49,10 +49,14 @@
 		<div class="col-md-1"></div>		
 	</div><div class="row">
 		<div class="col-md-2"><label>STD Value</label></div>
-		<div class="col-md-3 my-sf-display-border">{{ object.total_std_value }}</div>
+		<div class="col-md-3 my-sf-display-border">
+		{{object.customer.currency}}
+		{{ object.total_std_value }}</div>
 		<div class="col-md-1"></div>		
 		<div class="col-md-2"><label>Value After Discount</label></div>
-		<div class="col-md-3 my-sf-display-border">{{ object.total_discount_value }}</div>
+		<div class="col-md-3 my-sf-display-border">
+		{{object.customer.currency}}
+		{{ object.total_discount_value }}</div>
 		<div class="col-md-1"></div>
 	</div>
   </div>
@@ -82,7 +86,9 @@
 		<div class="col-md-1"></div>				
 	</div><div class="row">
 		<div class="col-md-2"><label>Fullfilled Value</label></div>
-		<div class="col-md-3 my-sf-display-border">{{ object.fullfill_discount_value }}&nbsp;</div>
+		<div class="col-md-3 my-sf-display-border">
+		{{object.customer.currency}}
+		{{ object.fullfill_discount_value }}&nbsp;</div>
 		<div class="col-md-1"></div>	
 		<div class="col-md-2"><label>Fullfill Rate By Value</label></div>
 		<div class="col-md-3 my-sf-display-border">{{ object.fullfill_rate_by_value }}&nbsp;</div>			
@@ -108,7 +114,7 @@
 {% for brand,data in items.iteritems %}
 	<div class="tab-pane fade active in" id="brand-{{brand.id}}">
 		{% for item,detail in data.iteritems %}
-		<div class="row" style="border-bottom:1px dashed #bcbcbc;">
+		<div class="row" style="border-bottom:1px dashed #bcbcbc; padding:10px 0px;">
 			{# item image #}
 			<div class="col-md-2">
 				{% with item.attachments.all.0 as item_img %}
@@ -142,26 +148,46 @@
 					{{ detail.so_line_items.0.discount_price|floatformat:2 }}
 				</p>
 				<p>
-					{{ detail.so_line_items.0.order.discount }} off
+					<span class="badge">You save: </span>{{object.customer.currency}}{{ detail.so_line_items.0.you_save|floatformat:0 }}
 				</p>
 			</div>
 
 			{# fullfillment details #}
 			<div class="col-md-3">
-				<h4><span class="item-label">Order Qty:</span> {{ detail.qty }}</h4>			
+				<h4 class="my-section-header">
+				<span class="item-label">Order Value:</span> 
+				<span class="">
+					{{object.customer.currency}}
+					{{ detail.value|floatformat:2 }}
+				</span>
+				</h4>			
+
+				{# order QTY details #}
 				<dl class="dl-horizontal" style="margin-top:20px;">
+					<dt>Size:</dt><dd></dd>
 				{% for so_line_item in detail.so_line_items %}
-				<dt>{{so_line_item.item.size}}</dt>
+				
+				{# size #}
+				<dt>
+					{{so_line_item.item.size}}
+				</dt>
+
+				{# qty #}
 				<dd><input type="number" value="{{so_line_item.qty}}" style="width:50px;"></dd>
 				{% endfor %}
 				</dl>
 
-				<div style="border-top:1px solid #dcdcdc;" class="pull-right">
-				<label class="label label-default">Total</label>
-				<span class="item-value">
-					{{object.customer.currency}}
-					{{ detail.value|floatformat:2 }}
-				</span>
+				<div style="border-top:1px solid #dcdcdc;" class="">
+					<dl class='dl-horizontal'>
+						<dt>
+							<label class="label label-default">Total QTY</label>
+						</dt>
+						<dd>
+							<span class="item-value">
+								{{ detail.qty }}
+							</span>
+						</dd>
+					</dl>
 				</div>
 			</div>
 		</div>
