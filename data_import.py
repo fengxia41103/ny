@@ -73,10 +73,17 @@ def import_fa_product():
 			)
 			vendor_item.save()
 
+def populate_item_inventory():
+	storage = MyStorage.objects.get(id=1)
+	for item in MyItem.objects.all():
+		for size in item.size_chart.size.split(','):
+			item_inv,created = MyItemInventory.objects.get_or_create(item=item,size=size,storage=storage)
+		print item, 'done'
+
 def main():
 	django.setup()
 
-	import_fa_product()
-
+	# import_fa_product()
+	populate_item_inventory()
 if __name__ == '__main__':
 	main()

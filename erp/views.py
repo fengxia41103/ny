@@ -303,6 +303,11 @@ class MyItemDetail(DetailView):
 		# vendor item form
 		vendor_item, created = MyVendorItem.objects.get_or_create(product = self.object)
 		context['vendor_item_form'] = VendorItemForm(instance = vendor_item )
+
+		# related sales orders
+		item_invs = MyItemInventory.objects.filter(item=self.object)
+		related_sales_order_ids = set(MySalesOrderLineItem.objects.filter(item__in=item_invs).values_list('order',flat=True))
+		context['related_sales_orders'] = MySalesOrder.objects.filter(id__in=related_sales_order_ids)
 		return context
 
 class MyItemListByVendor(TemplateView):

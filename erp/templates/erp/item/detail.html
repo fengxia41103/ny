@@ -15,7 +15,6 @@
 {% endblock %}
 
 {% block content %}
-
 <div class="row">
 	<div class="col-md-2">
 		<ul class="list-inline">
@@ -54,7 +53,10 @@
 
 	<div class="col-md-4">
 		{% if user.is_superuser %}
-			<a href="{% url 'item_edit' object.id %}">Edit</a>
+			<a href="{% url 'item_edit' object.id %}">
+				<i class="fa fa-pencil"></i>
+				Edit
+			</a>
 		{% endif %}
 
 		<h1 style="font-weight:bold;font-size:40px;">{{ object.name|upper }}</h1>
@@ -63,27 +65,20 @@
 		
 		{# Available colors #}
 		<span class="item-label">COLOR:</span><span class="item-value">{{ object.color }}</span>
-		<ul class="list-inline">
-		{% for style in same_styles %}
-			<li><a href="{% url 'item_detail' style.id %}">
-			<img src="{{ style.attachments.all.0.file.url }}" 
-			title="{{ style.color }}"
-			style="width:35px;height:35px;">
-			</a></li>
-		{% endfor %}
-		</ul>
 
 		{# Sizes #}
-		<p><span class="item-label">SIZE SELECTION</span>:
-		</p>
-		
-		<ul class="list-inline" id="size-chart">
-			{% for item_inv in object.myiteminventory_set.all %}
-			<li data-object="{{ item_inv.id }}"><span class="item-size">
-				{{ item_inv.size }}
-			</span></li>
-			{% endfor %}
-		</ul>
+		<div style="margin-top:20px;">
+			<p><span class="item-label">SIZE SELECTION</span>:
+			</p>
+			
+			<ul class="list-inline" id="size-chart">
+				{% for item_inv in object.myiteminventory_set.all %}
+				<li data-object="{{ item_inv.id }}"><span class="item-size">
+					{{ item_inv.size }}
+				</span></li>
+				{% endfor %}
+			</ul>
+		</div>
 
 		{# QTY #}
 		<p><span class="item-label">QTY:</span></p>
@@ -104,8 +99,59 @@
 				<i class='fa fa-briefcase'></i>
 			</button>
 		</div>
+
+		{# Related colors, same style #}
+		<div>
+			<h5 class="page-header">Available Colors</h5>
+
+			<ul class="list-inline">
+			{% for style in same_styles %}
+				<li>
+					<a href="{% url 'item_detail' style.id %}">
+						<img src="{{ style.attachments.all.0.file.url }}" 
+						title="{{ style.product_id }}"
+						data-toggle="tooltip"
+						style="width:35px;height:35px;">
+						{{ style.color }}
+					</a>
+				</li>
+			{% endfor %}
+			</ul>
+		</div>		
 	</div>
 </div>	
+
+{# Related Order Section #}
+<h2 class="page-header">
+<i class="fa fa-book"></i>
+Related Sales Orders
+</h2>
+<table class="table">
+	<thead>
+		<th></th>
+		<th>#</th>
+		<th>Customer</th>
+		<th>Fullfilled By</th>
+		<th>Status</th>
+	</thead>
+	<tbody>
+	{% for so in related_sales_orders %}
+	<tr><td>
+		<a href="{% url 'so_detail' so.id %}">
+			View detail
+		</a>
+	</td><td>
+		{{ so.code }}	
+	</td><td>
+		{{ so.customer }}
+	</td><td>
+		{{ so.default_storage }}
+	</td><td>
+		<span class="btn btn-default">{{ so.status }}</span>
+	</td></tr>
+	{% endfor %}
+	</tbody>
+</table>
 {% endblock %}
 
 {% block modal %}
@@ -164,6 +210,7 @@
 				<input name="item-inv" id="item-inv" val="" type="hidden">
 				<input name="qty" id="selected-qty" val="" type="hidden">
 				<div class="col-md-5">
+
 					<select class="my-select" name="so" id="so">
 						<option value="0">Create a new order</option>
 						{% for so in sales_orders %}

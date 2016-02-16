@@ -51,12 +51,12 @@
 		<div class="col-md-2"><label>STD Value</label></div>
 		<div class="col-md-3 my-sf-display-border">
 		{{object.customer.currency}}
-		{{ object.total_std_value }}</div>
+		{{ object.total_std_value|floatformat:0 }}</div>
 		<div class="col-md-1"></div>		
 		<div class="col-md-2"><label>Value After Discount</label></div>
 		<div class="col-md-3 my-sf-display-border">
 		{{object.customer.currency}}
-		{{ object.total_discount_value }}</div>
+		{{ object.total_discount_value|floatformat:2 }}</div>
 		<div class="col-md-1"></div>
 	</div>
   </div>
@@ -129,7 +129,8 @@
 				</h4>
 				<p>
 				<a href="{% url 'item_detail' item.id %}">
-					<i class="fa fa-hand-o-right">learn more</i>
+					<i class="fa fa-hand-o-right"></i>
+					{{ item.product_id }}
 				</a>
 				</p>				
 				
