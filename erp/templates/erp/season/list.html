@@ -1,0 +1,72 @@
+{% extends "erp/common/base.html" %}
+
+{% block page-header %}
+<ol class="breadcrumb">
+  <li><a href="{% url 'item_list' %}" 
+		<i class="fa fa-list-ul"></i>
+		ALL
+	</a></li>
+  <li class="active">{{ object }}</a></li>
+</ol>	
+{% endblock %}
+
+
+{% block content %}
+<div class="my-multicol-3">
+{% for vendor,num_of_items in vendors %}
+<section class="pin-card" style="" id="{{vendor.id}}">
+	<div class="page-header">
+		<h4>
+			{{vendor.name}}
+			<a class="pull-right" 
+			title="View product detail" 
+			data-toggle="tooltip" 
+			href="{% url 'item_list_by_vendor' object.id vendor.id %}">
+				<i class="fa fa-external-link"></i>
+			</a>
+		</h4>
+	</div>
+
+	<div class="" style="padding:0px 0;">
+		{% if vendor.attachments.all|length %}
+		{% with vendor.attachments.all.0 as item_img %}
+		<a href="{{ item_img.file.url }}" 
+		data-toggle="lightbox" 
+		data-gallery="multiimages" 
+		data-parent data-title="{{vendor.name}}" 
+		data-footer="{{ vendor.description }}">
+			<img src="{{item_img.file.url}}" class="img-responsive center-block"
+			style="margin-bottom:20px;">
+		</a>	
+		{% endwith %}
+		{% endif %}			
+	</div>	
+
+	<div class="" style="border-top: 1px solid #dddddd;padding:10px 0;">
+		<span class="text-right item-label pull-right">			
+		<i class="fa fa-tag"></i>
+		{{ num_of_items }}
+		</span>
+	</div>
+</section>
+{% endfor %}
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script type="text/javascript">
+var j$ = jQuery.noConflict();
+j$(document).ready(function(){
+	j$(document).delegate('*[data-toggle="lightbox"]', 'click', function(e) {
+	    e.preventDefault();
+	    j$(this).ekkoLightbox();
+	}); 
+
+	j$('[data-type="attachment-thumbnail"]').click(function(){
+		var url = j$(this).attr('src');
+		j$(this).closest('section').find('[data-toggle="lightbox"]').attr('href',url);
+		j$(this).closest('section').find('[data-toggle="lightbox"]').find('img:first-child').attr('src',url);
+	});		
+});
+</script>
+{% endblock %}
