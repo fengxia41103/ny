@@ -34,6 +34,8 @@ urlpatterns = patterns(
 		url(r'^item/(?P<pk>\d+)/edit/$', views.MyItemEdit.as_view(), name='item_edit'),
 		url(r'^item/(?P<pk>\d+)/delete/$', views.MyItemDelete.as_view(), name='item_delete'),
 		url(r'^item/inv/add/$', views.MyItemInventoryAdd.as_view(), name='item_inv_add'),	
+		url(r'^items/(?P<season>\d+)/(?P<brand>\d+)/$', views.MyItemListByVendor.as_view(), name='item_list_by_vendor'),		
+
 
 		# crms
 		url(r'^vendors/$', views.MyVendorList.as_view(), name='vendor_list'),		

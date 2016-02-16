@@ -9,7 +9,8 @@
 		ALL
 	</a></li>
   <li><a href="#">{{ object.season }}</a></li>
-  <li class="active"><a href="">{{ object.brand }}</a></li>
+  <li><a href="{%url 'item_list_by_vendor' object.season.id object.brand.id %}">{{ object.brand }}</a></li>
+  <li class="active">#{{ object.id }}</li>
 </ol>	
 {% endblock %}
 
@@ -29,6 +30,8 @@
 				{% endif %}
 			</li>
 		{% endfor %}
+
+		{% if user.is_superuser %}
 			<li>			
 				<img src="{% static "images/upload.png" %}"
 				title="Add more images"
@@ -36,6 +39,7 @@
 				style="width:100px;height:100px;opacity: 0.2;"
 				data-toggle="modal" data-target="#upload-form">				
 			</li>
+		{% endif %}
 		</ul>
 	</div>
 	<div class="col-md-6">
@@ -148,22 +152,51 @@
     	{# Modal header #}
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Select an order</h4>
+        <h4 class="modal-title">Add product to order</h4>
       </div>
 
       {# Modal body #}
       <div class="modal-body">		
 			{% csrf_token %}
-			<div class="form-group">
+
+			<h5 class="my-section-header">Select an order</h5>
+			<div class="row">
 				<input name="item-inv" id="item-inv" val="" type="hidden">
 				<input name="qty" id="selected-qty" val="" type="hidden">
-				<select class="my-select" name="so" id="so">
-					<option value="0">Create a new order</option>
-					{% for so in sales_orders %}
-					<option value="{{ so.id }}">{{ so }}</option>
-					{% endfor %}
-				</select>
-			</div>				
+				<div class="col-md-5">
+					<select class="my-select" name="so" id="so">
+						<option value="0">Create a new order</option>
+						{% for so in sales_orders %}
+						<option value="{{ so.id }}">{{ so }}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="col-md-1"></div>
+			</div>
+
+			<h5 class="my-section-header">Review product information</h5>
+			<div class="row">
+				<div class="col-md-2"><label>Brand</label></div>
+				<div class="col-md-3 my-sf-display-border">{{ object.brand }}</div>
+				<div class="col-md-1"></div>
+				<div class="col-md-2"><label>Product</label></div>
+				<div class="col-md-3 my-sf-display-border">{{ object.name }}</div>
+				<div class="col-md-1"></div>
+			</div><div class="row ">
+				<div class="col-md-2"><label>Color</label></div>
+				<div class="col-md-3 my-sf-display-border">{{ object.color }}</div>
+				<div class="col-md-1"></div>
+				<div class="col-md-2"><label>Price</label></div>
+				<div class="col-md-3 my-sf-display-border">{{object.currency}}{{ object.price|floatformat:0 }}</div>
+				<div class="col-md-1"></div>
+			</div><div class="row ">
+				<div class="col-md-2"><label>Size</label></div>
+				<div class="col-md-3 my-sf-display-border" id="selected-size-display"></div>
+				<div class="col-md-1"></div>
+				<div class="col-md-2"><label>QTY</label></div>
+				<div class="col-md-3 my-sf-display-border" id="selected-qty-display"></div>
+				<div class="col-md-1"></div>
+			</div>
       </div>
 
       {# Modal footer #}
@@ -172,7 +205,7 @@
 			<i class="fa fa-plus"></i>
 			<span>Add Item</span>
 		</button>      
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
       </div>
     </div>
   </div>
@@ -204,15 +237,19 @@ j$(document).ready(function(){
 		if (me.hasClass('item-size-selected')){
 			var qty = j$('#qty').val();
 			j$('#selected-qty').val(qty);
+			j$('#selected-qty-display').html(qty);
 
 			var item_inv = j$(this).attr("data-object");
 			j$('#item-inv').val(item_inv);
+			j$('#selected-size-display').html(j$(this).find('span:first-child').html());
 
 			// enable buttont to click
 			j$('#btn-add-to-shopping-cart').prop('disabled',false);
 		}else{
 			j$('#item-inv').val('');
+			j$('#selected-size-display').html();
 			j$('#selected-qty').val('');
+			j$('#selected-qty-display').html();
 
 			// disable buttont to click
 			j$('#btn-add-to-shopping-cart').prop('disabled',true);
@@ -223,7 +260,8 @@ j$(document).ready(function(){
 	j$('#qty').change(function(){
 		if (j$('#size-chart > li > span').hasClass('item-size-selected')){
 			var qty = j$('#qty').val();
-			j$('#selected-qty').val(qty);			
+			j$('#selected-qty').val(qty);
+			j$('#selected-qty-display').html(qty);			
 		}
 	});
 

@@ -305,6 +305,21 @@ class MyItemDetail(DetailView):
 		context['vendor_item_form'] = VendorItemForm(instance = vendor_item )
 		return context
 
+class MyItemListByVendor(TemplateView):
+	template_name = 'erp/item/list_by_vendor.html'
+
+	def get_context_data(self,**kwargs):
+		context = super(TemplateView,self).get_context_data(**kwargs)
+
+		vendor = MyCRM.objects.get(id=int(kwargs['brand']))
+		context['brand'] = vendor
+
+		season = MySeason.objects.get(id=int(kwargs['season']))
+		context['season'] = season
+
+		context['items'] = MyItem.objects.filter(brand=vendor,season=season)
+		return context
+
 ###################################################
 #
 #	MyCRM views

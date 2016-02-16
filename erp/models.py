@@ -351,6 +351,11 @@ class MyItem(MyBaseModel):
 		return u'%s-%s' %(self.name,self.color)
 	code = property(_code)
 
+	def _available_left_in_days():
+		if self.order_deadline: return (dt.now()-self.order_deadline).days
+		else: return '-'
+	available_left_in_days = property(_available_left_in_days)
+
 	def _converted_cost(self):
 		vendor_item = MyVendorItem.objects.filter(product=self,vendor=self.brand)[0]
 		exchange_rate = None
