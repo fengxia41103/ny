@@ -233,17 +233,20 @@ class MyLocation (models.Model):
 		max_length = 32,
 		verbose_name = u'名称'
 	)	
+	address = models.TextField(default='')
+	users = models.ManyToManyField(User,null=True,blank=True)
+
 	def _code(self):
 		return u'%s-%s' %(self.crm,self.name)
 	code = property(_code)
-
-	address = models.TextField()
 
 	def __unicode__(self):
 		return self.code
 
 class MyStorage (models.Model):
 	location = models.ForeignKey('MyLocation')
+	is_primary = models.BooleanField(default=True)
+
 	def _code(self):
 		return u'%s-%d' %(self.location,self.id)
 	code = property(_code)
@@ -308,6 +311,14 @@ class MySeason(models.Model):
 	def __unicode__(self):
 		return self.name
 
+class MySizeChart(models.Model):
+	# CSV format, eg "S,M,L", "0,2,4,6","XS,S,M,L,XL"
+	size = models.CharField(
+		max_length = 128
+	)
+	def __unicode__(self):
+		return self.size
+
 class MyItem(MyBaseModel):
 	'''
 	Attachment would be item photos.
@@ -327,6 +338,13 @@ class MyItem(MyBaseModel):
 	order_deadline = models.DateField(
 		null = True,
 		blank = True,
+	)
+
+	# size chart
+	size_chart = models.ForeignKey(
+		'MySizeChart',
+		null = True,
+		blank = True
 	)
 
 	def _code(self):
@@ -356,24 +374,24 @@ class MyItem(MyBaseModel):
 	multiplier = property(_multiplier)
 
 	def _total_physical(self):
-		return sum(self.physical.values())
+		return sum([qty for size,qty in self.physical])
 	total_physical = property(_total_physical)
 
 	def _total_theoretical(self):
-		return sum(self.theoretical.values())
+		return sum([qty for size,qty in self.theoretical])
 	total_theoretical = property(_total_theoretical)
 
 	def _physical(self):
-		qty = {}
+		qty = []
 		for inv_item in MyItemInventory.objects.filter(item = self):
-			if inv_item.withdrawable: qty[inv_item.size] = inv_item.physical
+			if inv_item.withdrawable: qty.append((inv_item.size,inv_item.physical))
 		return qty
 	physical = property(_physical)
 
 	def _theoretical(self):
-		qty = {}
-		for inv_item in MyItemInventory.objects.filter(item = self):
-			qty[inv_item.size] = inv_item.theoretical
+		qty = []
+		for inv_item in MyItemInventory.objects.filter(item = self).order_by('size'):
+			qty.append((inv_item.size,inv_item.theoretical))
 		return qty
 	theoretical = property(_theoretical)
 

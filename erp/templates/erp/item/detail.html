@@ -23,6 +23,10 @@
 				<img src="{{ img.file.url }}" 
 				data-type="attachment-thumbnail" class="img-responsive img-thumbnail"
 				style="width:100px;height:100px;">
+				{% if user.is_superuser %}
+					<a href="{% url 'attachment_delete' img.id %}">
+					<i class="fa fa-trash"></i></a>
+				{% endif %}
 			</li>
 		{% endfor %}
 			<li>			
@@ -45,6 +49,10 @@
 	</div>
 
 	<div class="col-md-4">
+		{% if user.is_superuser %}
+			<a href="{% url 'item_edit' object.id %}">Edit</a>
+		{% endif %}
+
 		<h1 style="font-weight:bold;font-size:40px;">{{ object.name|upper }}</h1>
 		<p><span class="item-label">CODE:</span>{{ object.code }}</p>
 		<p class="item-style">{{object.currency}} {{ object.price|floatformat:0 }}</p>
@@ -94,7 +102,9 @@
 		</div>
 	</div>
 </div>	
+{% endblock %}
 
+{% block modal %}
 <!-- Modal -->
 <div id="upload-form" class="modal fade" role="dialog">
   <div class="modal-dialog">
@@ -167,8 +177,9 @@
     </div>
   </div>
 </div>
+{% endblock %}
 
-
+{% block custom_js %}
 <script type="text/javascript">
 var j$ = jQuery.noConflict();
 j$(document).ready(function(){
@@ -222,9 +233,8 @@ j$(document).ready(function(){
 				'so': j$('#so').val(),
 				'item-inv':j$('#item-inv').val(),
 				'qty':j$('#selected-qty').val()
-			},
-            function(resp) { // success callback
-            	console.log(resp);
+			}
+		).done(function(resp) { // success callback
             	toastr.success('Item added to SO');
             }
         ).always(function(){

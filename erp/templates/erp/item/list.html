@@ -60,12 +60,12 @@
 							<table class="table table-sm">
 								<thead>
 								<tr>
-								{% for size,qty in obj.theoretical.iteritems %}
+								{% for size,qty in obj.theoretical %}
 									<th>{{size}}</th>
 								{% endfor %}
 								</tr></thead>
 								<tbody><tr>
-								{% for size,qty in obj.theoretical.iteritems %}
+								{% for size,qty in obj.theoretical %}
 									<td>{{qty}}</td>
 								{% endfor %}				
 								</tr></tbody>

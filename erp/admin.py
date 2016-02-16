@@ -21,14 +21,22 @@ class MyExchangeRateAdmin(admin.ModelAdmin):
 	list_filter=['home','foreign','rate']
 admin.site.register(MyExchangeRate,MyExchangeRateAdmin)
 
+class MyItemAdmin(admin.ModelAdmin):
+	list_filter=['season','brand']
+	list_display = ['season','brand','name','color','price','order_deadline','size_chart']
+admin.site.register(MyItem,MyItemAdmin)
+
+class MyVendorItemAdmin(admin.ModelAdmin):
+	list_filter=['vendor','currency']
+	list_display=('vendor','product','price')
+admin.site.register(MyVendorItem,MyVendorItemAdmin)
+
 admin.site.register(MyUOM)
 admin.site.register(MyFiscalYear)
 admin.site.register(MyStorage)
 admin.site.register(MyLocation)
 admin.site.register(MyCRM)
-admin.site.register(MyVendorItem)
 admin.site.register(MySeason)
-admin.site.register(MyItem)
 admin.site.register(MyItemInventory)
 admin.site.register(MySalesOrder)
 admin.site.register(MySalesOrderLineItem)
@@ -36,3 +44,4 @@ admin.site.register(MyPurchaseOrder)
 admin.site.register(MyPurchaseOrderLineItem)
 admin.site.register(MySalesOrderFullfillment)
 admin.site.register(MySalesOrderFullfillmentLineItem)
+admin.site.register(MySizeChart)

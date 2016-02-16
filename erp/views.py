@@ -140,13 +140,14 @@ class UserRegisterView(FormView):
 @login_required
 def attachment_delete_view(request,pk):
 	a = Attachment.objects.get(id=pk)
+	object_id = a.object_id
 	
 	# once we set MEDIA_ROOT, we will delete local file from file system also
 	if os.path.exists(a.file.path): os.remove(os.path.join(settings.MEDIA_ROOT,a.file.path))
 	
 	# delete model
 	a.delete()
-	return HttpResponseRedirect(reverse_lazy('item_list'))
+	return HttpResponseRedirect(reverse_lazy('item_detail',kwargs={'pk':object_id}))
 
 def item_attachment_add_view(request, pk):
 	tmp_form = AttachmentForm (request.POST, request.FILES)
@@ -213,7 +214,7 @@ class MyItemAdd(CreateView):
 	model = MyItem
 	template_name = 'erp/common/add_form.html'
 	success_url = reverse_lazy('item_list')
-	fields = ['brand','season','name','color','price']	
+	fields = ['brand','season','name','color','price','size_chart']	
 
 	def form_valid(self, form):
 		form.instance.created_by = self.request.user
@@ -231,7 +232,8 @@ class MyItemAdd(CreateView):
 class MyItemEdit (UpdateView):
 	model = MyItem
 	template_name = 'erp/common/edit_form.html'
-	
+	fields = ['name','description','help_text','season','brand','color','price','order_deadline','size_chart','is_active']
+
 	def get_success_url(self):
 		return reverse_lazy('item_detail', kwargs={'pk':self.get_object().id})
 			
@@ -297,6 +299,10 @@ class MyItemDetail(DetailView):
 
 		# List all open SO that user can add this item to
 		context['sales_orders'] = MySalesOrder.objects.filter(status='N')
+
+		# vendor item form
+		vendor_item, created = MyVendorItem.objects.get_or_create(product = self.object)
+		context['vendor_item_form'] = VendorItemForm(instance = vendor_item )
 		return context
 
 ###################################################
@@ -625,24 +631,27 @@ class MySalesOrderDetail(DetailView):
 		return context
 
 class MySalesOrderAddItem(TemplateView):
-	def post(self,request):
-		so = request.POST['so']
-		item_inv = request.POST['item-inv']
-		qty = request.POST['qty']
+	template_name = ''
 
-		so = MySalesOrder.objects.get(id=int(so))
+	def post(self,request):
+		so = int(request.POST['so'])
+		item_inv = request.POST['item-inv']
+		qty = int(request.POST['qty'])
+
+		so = MySalesOrder.objects.get(id=so)
 		item_inv = MyItemInventory.objects.get(id=int(item_inv))
 
 		if so.is_sold_at_cost: price = item_inv.item.converted_cost
 		else: price = item_inv.item.price
 
-		line_item = MySalesOrderLineItem(
-					order = so,
-					item = item_inv,
-					price = price,
-					qty = qty
-				).save()
-
+		# Create line item
+		line_item,created = MySalesOrderLineItem.objects.get_or_create(
+				order = so,
+				item = item_inv
+		)
+		if created: line_item.price = price
+		line_item.qty += qty
+		line_item.save()
 
 		return HttpResponse(json.dumps({'status':'ok'}), 
 			content_type='application/javascript')		
