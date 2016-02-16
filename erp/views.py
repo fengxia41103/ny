@@ -169,7 +169,7 @@ def crm_attachment_add_view(request, pk):
 		t.content_object = MyCRM.objects.get(id=pk)
 		t.created_by = request.user
 		t.save()	
-	return HttpResponseRedirect('')
+	return HttpResponseRedirect('#')
 
 ###################################################
 #
@@ -317,6 +317,7 @@ class MyItemListByVendor(TemplateView):
 		season = MySeason.objects.get(id=int(kwargs['season']))
 		context['season'] = season
 
+		# Group item colors under the same item style
 		context['items'] = MyItem.objects.filter(brand=vendor,season=season)
 		return context
 
@@ -362,6 +363,7 @@ class MyVendorEdit (UpdateView):
 		context = super(UpdateView, self).get_context_data(**kwargs)
 		context['title'] = u'Edit Vendor'
 		context['list_url'] = reverse_lazy('vendor_list')
+		context['attachment_form'] = AttachmentForm()
 		return context		
 
 class MyCustomerList(ListView):
@@ -670,3 +672,24 @@ class MySalesOrderAddItem(TemplateView):
 
 		return HttpResponse(json.dumps({'status':'ok'}), 
 			content_type='application/javascript')		
+
+###################################################
+#
+#	MySeason views
+#
+###################################################		
+
+class MySeasonDetail(DetailView):
+	model = MySeason
+	template_name = 'erp/season/list.html'
+
+	def get_context_data(self,**kwargs):
+		context = super(DetailView,self).get_context_data(**kwargs)
+		vendors = set(MyItem.objects.filter(season=self.object).values_list('brand',flat=True))
+		
+		vendor_stats = []
+		for v in [MyCRM.objects.get(id=int(v)) for v in vendors]:
+			num_of_items = MyItem.objects.filter(season=self.object,brand=v).count()
+			vendor_stats.append((v,num_of_items))
+		context['vendors'] = vendor_stats
+		return context

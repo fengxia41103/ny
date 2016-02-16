@@ -6,7 +6,7 @@
 		<i class="fa fa-list-ul"></i>
 		ALL
 	</a></li>
-  <li><a href="#">{{ season }}</a></li>
+  <li><a href="{% url 'season_detail' season.id %}">{{ season }}</a></li>
   <li class="active">{{ brand }}</li>
 </ol>	
 {% endblock %}
@@ -26,6 +26,7 @@
 				<i class="fa fa-external-link"></i>
 			</a>
 		</h4>
+		<em>{{ obj.product_id }}</em>
 	</div>
 
 	<div class="" style="padding:0px 0;">
@@ -96,6 +97,7 @@
 </section>
 {% endfor %}
 </div>
+
 {% endblock %}
 
 {% block custom_js %}

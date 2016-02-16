@@ -22,6 +22,7 @@
 	<table class="table table-striped table-hover">
 	<thead>
 		<th></th>
+		<th>Product ID</th>
 		<th>Season</th>
 		<th>Brand</th>
 		<th>Name</th>
@@ -35,6 +36,8 @@
 		<tr><td>
 			<a href="{% url 'item_edit' obj.id %}">Edit</a> | 
 			<a href="{% url 'item_detail' obj.id %}">Detail</a>
+		</td><td>
+			{{ obj.product_id }}
 		</td><td>
 			{{ obj.season }}
 		</td><td>

@@ -351,6 +351,10 @@ class MyItem(MyBaseModel):
 		return u'%s-%s' %(self.name,self.color)
 	code = property(_code)
 
+	def _product_id(self):
+		return '#%06d' % self.id
+	product_id = property(_product_id)
+
 	def _available_left_in_days():
 		if self.order_deadline: return (dt.now()-self.order_deadline).days
 		else: return '-'
