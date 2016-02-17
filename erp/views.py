@@ -371,6 +371,16 @@ class MyVendorEdit (UpdateView):
 		context['attachment_form'] = AttachmentForm()
 		return context		
 
+class MyVendorSeasonList(DetailView):
+	model = MyCRM
+	template_name = 'erp/crm/vendor_season_list.html'
+
+	def get_context_data(self,**kwargs):
+		context = super(DetailView,self).get_context_data(**kwargs)
+		seasons = MyItem.objects.filter(brand=self.object).values_list('season',flat=True)
+		context['seasons'] = MySeason.objects.filter(id__in = seasons)
+		return context
+
 class MyCustomerList(ListView):
 	model = MyCRM
 	template_name = 'erp/crm/customer_list.html'
@@ -678,6 +688,14 @@ class MySalesOrderAddItem(TemplateView):
 		return HttpResponse(json.dumps({'status':'ok'}), 
 			content_type='application/javascript')		
 
+class MySalesOrderLineItemDelete(DeleteView):
+	model = MySalesOrderLineItem
+	template_name = 'erp/so/remove_item.html'
+
+	def get_success_url(self):
+		return reverse_lazy('sales_detail',kwargs={'pk':self.object.order.id})
+
+
 ###################################################
 #
 #	MySeason views
@@ -709,3 +727,4 @@ class MySeasonDetail(DetailView):
 
 		# Other seasons
 		return context
+

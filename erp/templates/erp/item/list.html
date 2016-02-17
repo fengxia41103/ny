@@ -13,7 +13,11 @@
 	{% if vendors %}
 	<span class="item-label">Applicable vendors:</span>
 	<ul class="list-inline">
-		{% for v in vendors %}<li>{{ v }}</li>{% endfor %}
+		{% for v in vendors %}
+			<li>
+				<a href="">{{ v }}</a>
+			</li>
+		{% endfor %}
 	</ul>
 	{% endif %}
 

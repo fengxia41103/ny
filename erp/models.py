@@ -502,7 +502,7 @@ class MySalesOrder(models.Model):
 	)
 
 	def __unicode__(self):
-		return u'%s, %s'%(self.code,self.customer)
+		return u'%s for %s'%(self.code,self.customer)
 
 	def _code(self):
 		return '%s %d-%5d'%('SZ',dt.now().year,self.id)

@@ -29,14 +29,20 @@ class ItemInventoryAddForm(ItemInventoryAdjustForm):
 
 class SalesOrderAddForm(forms.Form):
 	customer = forms.ModelChoiceField(queryset=MyCRM.objects.filter(Q(crm_type='C')|Q(crm_type='B')))
-	sales = forms.ModelChoiceField(queryset=User.objects.all())
-	storage = forms.ModelChoiceField(queryset = MyStorage.objects.all())
+	sales = forms.ModelChoiceField(
+		queryset = User.objects.all(),
+		label = u'Sales'
+	)
+	storage = forms.ModelChoiceField(
+		queryset = MyStorage.objects.all(),
+		label = u'Default fullfiller'
+	)
 	is_sold_at_cost = forms.BooleanField(
 		initial=False,
 		required=False,
 		label= u'Are items sold at cost?'
 	)
-	applied_discount = forms.FloatField(initial=0.25)
+	customer_discount = forms.FloatField(initial=0.25)
 	items = forms.CharField(
 		widget=forms.Textarea,
 		help_text = u'''Put one item per line, using syntax <span class="item-label">style #, color, size-qty</span>. 

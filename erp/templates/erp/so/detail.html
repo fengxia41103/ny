@@ -166,16 +166,26 @@
 				{# order QTY details #}
 				<dl class="dl-horizontal" style="margin-top:20px;">
 					<dt>Size:</dt><dd></dd>
-				{% for so_line_item in detail.so_line_items %}
-				
-				{# size #}
-				<dt>
-					{{so_line_item.item.size}}
-				</dt>
 
-				{# qty #}
-				<dd><input type="number" value="{{so_line_item.qty}}" style="width:50px;"></dd>
-				{% endfor %}
+					{% for so_line_item in detail.so_line_items %}
+					
+					{# size #}
+					<dt>
+						{{so_line_item.item.size}}
+					</dt>
+
+					{# qty #}
+					<dd>
+
+						{# qty input box #}
+						<input type="number" value="{{so_line_item.qty}}" style="width:50px;">
+
+						{# remove line item #}
+						<a href="{% url 'so_remove_item' so_line_item.id %}">
+							<i class="fa fa-trash"></i>
+						</a>
+					</dd>
+					{% endfor %}
 				</dl>
 
 				<div style="border-top:1px solid #dcdcdc;" class="">

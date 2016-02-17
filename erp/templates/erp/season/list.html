@@ -32,11 +32,7 @@
 		{% for brand in season.brands %}
 		{{ brand.name }}
 		{% with brand.attachments.all.0 as img %}
-			<a href="{{ img.file.url }}" 
-			data-toggle="lightbox" 
-			data-gallery="multiimages" 
-			data-parent data-title="{{season}} {{brand.name}}" 
-			data-footer="{{ brand.description }}">
+			<a href="{% url 'item_list_by_vendor' season.id brand.id %}" >
 				<img src="{{img.file.url}}" class="img-responsive center-block"
 				style="margin-bottom:20px;max-width:50%;">
 			</a>

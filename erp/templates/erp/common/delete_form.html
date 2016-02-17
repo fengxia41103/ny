@@ -1,18 +1,21 @@
 {% extends "erp/common/base.html" %}
 
+{% load crispy_forms_tags %}
+
 {% block page-header %}
 	{{ title }}
 	<a href="{{ list_url }}" class="btn btn-xs addlink">
-		<span class="glyphicon glyphicon-plus"></span>
+		<span class="fa fa-plus"></span>
 		List
 	</a>
 {% endblock %}
 
 
 {% block content %}
-
-{% load crispy_forms_tags %}
+{% block record-detail %}
 You are about to delete this record. Are you sure?
+{% endblock %}
+
 <form action="" method="post">
 	{% csrf_token %}
 	<div class="form-actions">
@@ -22,6 +25,5 @@ You are about to delete this record. Are you sure?
 		</div>
 	</div>
 </form>
-
 {% endblock %}
 

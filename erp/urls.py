@@ -54,5 +54,6 @@ urlpatterns = patterns(
 		url(r'^so/add/$', views.MySalesOrderAdd.as_view(), name='so_add'),		
 		url(r'^so/(?P<pk>\d+)/$', views.MySalesOrderDetail.as_view(), name='so_detail'),
 		url(r'^so/add/item/$', views.MySalesOrderAddItem.as_view(), name='so_add_item'),
+		url(r'^so/remove/item/(?P<pk>\d+)/$', views.MySalesOrderLineItemDelete.as_view(), name='so_remove_item'),
 
 	)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
