@@ -316,6 +316,11 @@ class MySeason(models.Model):
 	def __unicode__(self):
 		return self.name
 
+	def _brands(self):
+		brand_ids = set(MyItem.objects.filter(season=self).values_list('brand',flat=True))
+		return MyCRM.objects.filter(id__in = brand_ids)
+	brands = property(_brands)
+
 class MySizeChart(models.Model):
 	# CSV format, eg "S,M,L", "0,2,4,6","XS,S,M,L,XL"
 	size = models.CharField(
