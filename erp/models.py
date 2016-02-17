@@ -287,6 +287,11 @@ class MyCRM(MyBaseModel):
 		blank = True,
 		verbose_name = u'Vendor phone'
 	)
+	url = models.URLField(
+		null = True,
+		blank = True,
+		default='',
+	)
 	balance = models.FloatField(default = 0)
 	currency = models.ForeignKey('MyCurrency')
 	std_discount = models.FloatField(default=0.25)

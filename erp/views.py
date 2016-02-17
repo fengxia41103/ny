@@ -169,7 +169,7 @@ def crm_attachment_add_view(request, pk):
 		t.content_object = MyCRM.objects.get(id=pk)
 		t.created_by = request.user
 		t.save()	
-	return HttpResponseRedirect('#')
+	return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 ###################################################
 #
@@ -684,17 +684,28 @@ class MySalesOrderAddItem(TemplateView):
 #
 ###################################################		
 
-class MySeasonDetail(DetailView):
+class MySeasonList(ListView):
 	model = MySeason
 	template_name = 'erp/season/list.html'
+
+class MySeasonDetail(DetailView):
+	model = MySeason
+	template_name = 'erp/season/detail.html'
 
 	def get_context_data(self,**kwargs):
 		context = super(DetailView,self).get_context_data(**kwargs)
 		vendors = set(MyItem.objects.filter(season=self.object).values_list('brand',flat=True))
 		
+		# Get vendor stats
 		vendor_stats = []
 		for v in [MyCRM.objects.get(id=int(v)) for v in vendors]:
 			num_of_items = MyItem.objects.filter(season=self.object,brand=v).count()
 			vendor_stats.append((v,num_of_items))
 		context['vendors'] = vendor_stats
+
+		# Attachment for to upload vendor images
+		# TODO: auto download from Pinterest.
+		context['attachment_form'] = AttachmentForm()
+
+		# Other seasons
 		return context

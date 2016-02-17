@@ -1,57 +1,47 @@
 {% extends "erp/common/base.html" %}
 
+{% load crispy_forms_tags %}
+{% load static %}
+
 {% block page-header %}
 <ol class="breadcrumb">
-  <li><a href="{% url 'item_list' %}" 
-		<i class="fa fa-list-ul"></i>
-		ALL
-	</a></li>
-  <li class="active">{{ object }}</a></li>
+  <li>
+	ALL SEASONS
+  </li>
 </ol>	
 {% endblock %}
 
 
 {% block content %}
 <div class="my-multicol-3">
-{% for vendor,num_of_items in vendors %}
+{% for season in object_list %}
 <section class="pin-card" style="" id="{{vendor.id}}">
 	<div class="page-header">
 		<h4>
-			{{vendor.name}}
+			{{ season.name}}
 			<a class="pull-right" 
-			title="View product detail" 
+			title="View season detail" 
 			data-toggle="tooltip" 
-			href="{% url 'item_list_by_vendor' object.id vendor.id %}">
+			href="{% url 'season_detail' season.id %}">
 				<i class="fa fa-external-link"></i>
 			</a>
 		</h4>
 	</div>
 
-	<div class="" style="padding:0px 0;">
-		{% if vendor.attachments.all|length %}
-		{% with vendor.attachments.all.0 as item_img %}
-		<a href="{{ item_img.file.url }}" 
-		data-toggle="lightbox" 
-		data-gallery="multiimages" 
-		data-parent data-title="{{vendor.name}}" 
-		data-footer="{{ vendor.description }}">
-			<img src="{{item_img.file.url}}" class="img-responsive center-block"
-			style="margin-bottom:20px;">
-		</a>	
-		{% endwith %}
-		{% endif %}			
+	<div class="" style="padding:0px 0;">	
 	</div>	
 
 	<div class="" style="border-top: 1px solid #dddddd;padding:10px 0;">
 		<span class="text-right item-label pull-right">			
 		<i class="fa fa-tag"></i>
-		{{ num_of_items }}
+		some counter
 		</span>
 	</div>
 </section>
 {% endfor %}
 </div>
 {% endblock %}
+
 
 {% block custom_js %}
 <script type="text/javascript">

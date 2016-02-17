@@ -37,6 +37,7 @@ urlpatterns = patterns(
 		url(r'^items/(?P<season>\d+)/(?P<brand>\d+)/$', views.MyItemListByVendor.as_view(), name='item_list_by_vendor'),		
 
 		# season
+		url(r'^seasons/$', views.MySeasonList.as_view(), name='season_list'),		
 		url(r'^season/(?P<pk>\d+)/$', views.MySeasonDetail.as_view(), name='season_detail'),		
 
 		# crms

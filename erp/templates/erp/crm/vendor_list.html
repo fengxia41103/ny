@@ -15,6 +15,7 @@
 		<th></th>
 		<th>Name</th>
 		<th>Description</th>
+		<th>Official Website</th>
 		<th>Phone</th>
 		<th>Home Currency</th>
 		<th>Std Discount</th>
@@ -27,6 +28,10 @@
 			{{ obj.name }}
 		</td><td>
 			{{ obj.description }}
+		</td><td>
+			{% if obj.url %}
+				<a href="{{ obj.url }}">view home site</a>
+			{% endif %}
 		</td><td>
 			{{ obj.phone }}
 		</td><td>
