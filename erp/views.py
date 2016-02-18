@@ -521,6 +521,7 @@ def add_to_sales_order(customer,sales,quick_notion,created_by,applied_discount,i
 			customer = customer,
 			sales = sales,
 			created_by = created_by,
+			default_storage = storage,
 			discount = applied_discount,
 			is_sold_at_cost = is_sold_at_cost
 		)
@@ -531,29 +532,22 @@ def add_to_sales_order(customer,sales,quick_notion,created_by,applied_discount,i
 	pat = re.compile("(?P<size>\w+)-?(?P<qty>\d+)")
 	for line_no, line in enumerate(quick_notion.split('\n')):
 		tmp = line.split(',')
-		style = tmp[0]
-
-		# Optional, can be blank, since some styles have only a single color.
-		color = tmp[1] 
+		sku = tmp[0]
 
 		# Find MyItem object
-		if color: item = MyItem.objects.filter(name__icontains=style,color__icontains=color)
-		else: item = MyItem.objects.filter(name__icontains=style)
-
-		if not item or len(item)==0: 
-			errors[line_no+1] = line
-			print 'not found'
+		tmp_items = MyItem.objects.filter(id=int(sku))
+		if len(tmp_items) == 0: 
+			errors[line_no+1]={'line':line,'reason':'not found'}
 			continue
-		elif len(item) > 1:
-			errors[line_no+1] = line
-			print 'multiple matches'
+		elif len(tmp_items) > 1:
+			errors[line_no+1] = {'line':line,'reason':'multiple matches'}
 			continue
-		item = item[0]
+		item = tmp_items[0]
 		items.append(item)
 
 		# Qty pairs
 		qty_pair = []
-		for i in tmp[2:]:
+		for i in tmp[1:]:
 			tmp = pat.search(i)
 			if tmp: qty_pair.append((tmp.group('size').upper(),int(tmp.group('qty'))))
 
@@ -582,12 +576,17 @@ def add_to_sales_order(customer,sales,quick_notion,created_by,applied_discount,i
 					qty = qty
 				).save()
 
-	return {'errors':errors, 'items':items}
+	print errors
+	return {'errors':errors, 'items':items, 'so':so}
 
 class MySalesOrderAdd(FormView):
 	template_name = 'erp/so/add.html'
 	form_class = SalesOrderAddForm
-	success_url = reverse_lazy('so_list')
+	order = None
+
+	def get_success_url(self):
+		if self.order: return reverse_lazy('so_detail',kwargs={'pk',self.order.id})
+		else: return reverse_lazy('so_list')
 
 	def form_valid(self, form):
 		messages.info(
@@ -601,10 +600,11 @@ class MySalesOrderAdd(FormView):
 			form.cleaned_data['sales'],
 			form.cleaned_data['items'].strip(), # input shorhand notion
 			self.request.user, # created by user
-			form.cleaned_data['applied_discount'],
+			form.cleaned_data['customer_discount'],
 			form.cleaned_data['is_sold_at_cost'],
 			form.cleaned_data['storage']
 		)
+		self.order = result.so
 
 		return super(FormView, self).form_valid(form)
 

@@ -127,7 +127,7 @@
 <h2>Order Details</h2>
 <ul class="nav nav-tabs" role="tablist">
 	{% for brand,data in items.iteritems %}
-	<li class="active">
+	<li class="">
 	  <a href="#brand-{{brand.id}}" role="tab" data-toggle="tab">
 	      <icon class="fa fa-home"></icon> {{ brand }}
 	  </a>
@@ -138,7 +138,7 @@
 <!-- Tab panes -->
 <div class="tab-content">
 {% for brand,data in items.iteritems %}
-	<div class="tab-pane fade active in" id="brand-{{brand.id}}">
+	<div class="tab-pane" id="brand-{{brand.id}}">
 		{% for item,detail in data.items.iteritems %}
 		<div class="row" style="border-bottom:1px dashed #bcbcbc; padding:10px 0px;">
 			{# item image #}
@@ -252,9 +252,15 @@
 	</div>
 {% endfor %}
 </div>    
+{% endblock %}
 
+{% block custom_js %}
 <script type="text/javascript">
+var j$ = jQuery.noConflict();
 j$(document).ready(function(){
+	// starting first tab
+	j$('[data-toggle="tab"]:first').tab('show');
+
 	j$(document).delegate('*[data-toggle="lightbox"]', 'click', function(e) {
 	    e.preventDefault();
 	    j$(this).ekkoLightbox();

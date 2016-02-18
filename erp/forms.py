@@ -45,8 +45,8 @@ class SalesOrderAddForm(forms.Form):
 	customer_discount = forms.FloatField(initial=0.25)
 	items = forms.CharField(
 		widget=forms.Textarea,
-		help_text = u'''Put one item per line, using syntax <span class="item-label">style #, color, size-qty</span>. 
-		You can also use item's SKU instead of its style # for convenience. Both style # field and color field would be
+		help_text = u'''Put one item per line, using syntax <span class="item-label">SKU #, color, size-qty</span>. 
+		Color field would be
 		used for partial matching so that you don't have to type in the entire string as they are shown on clothes tag. 
 		To enter size and qty, use syntax "S-1, M-2". This field is case insensitive.
 		'''
