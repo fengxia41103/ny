@@ -34,7 +34,7 @@
 		<div class="col-md-1"></div>		
 	</div><div class="row">
 		<div class="col-md-2"><label>Discount</label></div>
-		<div class="col-md-3 my-sf-display-border">{{ object.discount }}</div>
+		<div class="col-md-3 my-sf-display-border">{{ object.discount_in_pcnt }}</div>
 		<div class="col-md-1"></div>		
 		<div class="col-md-2"><label>Status</label></div>
 		<div class="col-md-3 my-sf-display-border">
@@ -45,18 +45,44 @@
 		<div class="col-md-3 my-sf-display-border">{{ object.line_item_qty }}</div>
 		<div class="col-md-1"></div>		
 		<div class="col-md-2"><label>Total QTY</label></div>
-		<div class="col-md-3 my-sf-display-border">{{ object.total_qty }}</div>		
+		<div class="col-md-3 my-sf-display-border dropdown">
+			<span class="dropdown-toggle" id="total-qty-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				{{ object.total_qty }}
+				<span class="caret"></span>
+			</span>
+			<ul class="dropdown-menu" aria-labelledby="total-qty-dropdown">
+				{% for brand,data in items.iteritems %}
+					<li>
+						<a href=""><label>{{ brand }}:</label> {{ data.total_qty }}</a>
+					</li>
+				{% endfor %}
+			</ul>		
+		</div>		
 		<div class="col-md-1"></div>		
 	</div><div class="row">
-		<div class="col-md-2"><label>STD Value</label></div>
+		<div class="col-md-2"><label>Retail Value</label></div>
 		<div class="col-md-3 my-sf-display-border">
-		{{object.customer.currency}}
-		{{ object.total_std_value|floatformat:0 }}</div>
+			{{object.customer.currency}}
+			{{ object.total_std_value|floatformat:0 }}
+		</div>
 		<div class="col-md-1"></div>		
 		<div class="col-md-2"><label>Value After Discount</label></div>
-		<div class="col-md-3 my-sf-display-border">
-		{{object.customer.currency}}
-		{{ object.total_discount_value|floatformat:2 }}</div>
+		<div class="col-md-3 my-sf-display-border dropdown">
+			<span class="dropdown-toggle" id="total-value-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				{{object.customer.currency}}
+				{{ object.total_discount_value|floatformat:2 }}
+				<span class="caret"></span>
+			</span>
+			<ul class="dropdown-menu" aria-labelledby="total-value-dropdown">
+				{% for brand,data in items.iteritems %}
+					<li>
+						<a href=""><label>{{ brand }}:</label> 
+						{{object.customer.currency}}{{ data.total_value|floatformat:2 }}
+						</a>
+					</li>
+				{% endfor %}
+			</ul>		
+		</div>
 		<div class="col-md-1"></div>
 	</div>
   </div>
@@ -113,7 +139,7 @@
 <div class="tab-content">
 {% for brand,data in items.iteritems %}
 	<div class="tab-pane fade active in" id="brand-{{brand.id}}">
-		{% for item,detail in data.iteritems %}
+		{% for item,detail in data.items.iteritems %}
 		<div class="row" style="border-bottom:1px dashed #bcbcbc; padding:10px 0px;">
 			{# item image #}
 			<div class="col-md-2">
@@ -176,14 +202,20 @@
 
 					{# qty #}
 					<dd>
+						{% if so_line_item.fullfill_qty > 0 %}
+							{# qty input box #}
+							<input type="number" value="{{so_line_item.qty}}" style="width:50px;" disabled>
 
-						{# qty input box #}
-						<input type="number" value="{{so_line_item.qty}}" style="width:50px;">
+							<label>Fullfilled</label>{{ so_line_item.fullfill_qty }}
+						{% else %}
+							{# qty input box #}
+							<input type="number" value="{{so_line_item.qty}}" style="width:50px;">
 
-						{# remove line item #}
-						<a href="{% url 'so_remove_item' so_line_item.id %}">
-							<i class="fa fa-trash"></i>
-						</a>
+							{# remove line item #}
+							<a href="{% url 'so_remove_item' so_line_item.id %}">
+								<i class="fa fa-trash"></i>
+							</a>
+						{% endif %}
 					</dd>
 					{% endfor %}
 				</dl>
@@ -191,7 +223,7 @@
 				<div style="border-top:1px solid #dcdcdc;" class="">
 					<dl class='dl-horizontal'>
 						<dt>
-							<label class="label label-default">Total QTY</label>
+							<label class="label label-default">Subtotal QTY</label>
 						</dt>
 						<dd>
 							<span class="item-value">
@@ -203,6 +235,20 @@
 			</div>
 		</div>
 		{% endfor %}
+
+		<div class="row">
+			<div class="col-md-offset-6 col-md-6">
+				<p>
+					<label class="">{{brand}} Total QTY:</label>
+					<span class="item-total">{{ data.total_qty }}</span>
+				</p><p>
+					<label class="">{{brand}} Total Value:</label>
+					<span class="item-total">
+					{{object.customer.currency}}{{ data.total_value|floatformat:2 }}
+					</span>
+				</p>
+			</div>
+		</div>
 	</div>
 {% endfor %}
 </div>    

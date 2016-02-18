@@ -563,6 +563,10 @@ class MySalesOrder(models.Model):
 		return MySalesOrderFullfillment.objects.filter(so=self).order_by('-created_on')
 	fullfillments = property(_fullfillments)
 
+	def _discount_in_pcnt(self):
+		return '%d%%' % (self.discount*100)
+	discount_in_pcnt = property(_discount_in_pcnt)
+
 class MySalesOrderLineItem(models.Model):
 	order = models.ForeignKey('MySalesOrder')
 	item = models.ForeignKey('MyItemInventory')

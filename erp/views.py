@@ -644,22 +644,26 @@ class MySalesOrderDetail(DetailView):
 		context = super(DetailView,self).get_context_data(**kwargs)
 		line_items = MySalesOrderLineItem.objects.filter(order = self.object)
 
+		# Group same item sizes
 		items = {}
 		for i in line_items:
 			item = i.item.item
 
 			# Get vendor
 			brand = item.brand
-			if brand not in items: items[brand] = {}
+			if brand not in items: items[brand] = {'total_qty':0,'total_value':0, 'items':{}}
+			items[brand]['total_qty'] += i.qty
+			items[brand]['total_value'] += i.discount_value
 
 			# Get item
-			if item not in items[brand]: items[brand][item] = {'so_line_items':[],'qty':0,'value':0}
+			if item not in items[brand]['items']: items[brand]['items'][item] = {'so_line_items':[],'qty':0,'value':0}
 
 			# Get size and qty
-			items[brand][item]['so_line_items'].append(i)
-			items[brand][item]['qty'] += i.qty
-			items[brand][item]['value'] += i.discount_value
+			items[brand]['items'][item]['so_line_items'].append(i)
+			items[brand]['items'][item]['qty'] += i.qty
+			items[brand]['items'][item]['value'] += i.discount_value
 		context['items'] = items
+
 		return context
 
 class MySalesOrderAddItem(TemplateView):
@@ -693,7 +697,7 @@ class MySalesOrderLineItemDelete(DeleteView):
 	template_name = 'erp/so/remove_item.html'
 
 	def get_success_url(self):
-		return reverse_lazy('sales_detail',kwargs={'pk':self.object.order.id})
+		return reverse_lazy('so_detail',kwargs={'pk':self.object.order.id})
 
 
 ###################################################
