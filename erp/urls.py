@@ -44,6 +44,7 @@ urlpatterns = patterns(
 		url(r'^vendors/$', views.MyVendorList.as_view(), name='vendor_list'),		
 		url(r'^vendor/add/$', views.MyVendorAdd.as_view(), name='vendor_add'),
 		url(r'^vendor/(?P<pk>\d+)/edit/$', views.MyVendorEdit.as_view(), name='vendor_edit'),
+		url(r'^vendor/(?P<pk>\d+)/$', views.MyVendorDetail.as_view(), name='vendor_detail'),
 
 		url(r'^customers/$', views.MyCustomerList.as_view(), name='customer_list'),	
 		url(r'^customer/add/$', views.MyCustomerAdd.as_view(), name='customer_add'),		

@@ -370,14 +370,20 @@ class MyVendorEdit (UpdateView):
 		context['attachment_form'] = AttachmentForm()
 		return context		
 
-class MyVendorSeasonList(DetailView):
+class MyVendorDetail(DetailView):
 	model = MyCRM
-	template_name = 'erp/crm/vendor_season_list.html'
+	template_name = 'erp/crm/vendor_detail.html'
 
 	def get_context_data(self,**kwargs):
 		context = super(DetailView,self).get_context_data(**kwargs)
 		seasons = MyItem.objects.filter(brand=self.object).values_list('season',flat=True)
-		context['seasons'] = MySeason.objects.filter(id__in = seasons)
+
+		tmp = {}
+		for season in MySeason.objects.filter(id__in = seasons).order_by('name'):
+			items = MyItem.objects.filter(brand=self.object,season=season)
+			samples = reduce(lambda x,y:x+y,[list(item.attachments.all()) for item in items])
+			tmp[season] = samples
+		context['seasons'] = tmp
 		return context
 
 class MyCustomerList(ListView):

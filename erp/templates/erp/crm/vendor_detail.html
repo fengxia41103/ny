@@ -1,0 +1,74 @@
+{% extends "erp/common/base.html" %}
+
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block page-header %}
+<ol class="breadcrumb">
+  <li><a href="{% url 'vendor_list' %}" 
+		<i class="fa fa-list-ul"></i>
+		ALL
+	</a></li>
+  <li class="active">{{ object }}</a></li>
+</ol>	
+{% endblock %}
+
+
+{% block content %}
+{% for season,samples in seasons.iteritems %}
+<h2 class="page-header text-right">
+{{ season }}
+<a class="" 
+title="View season detail" 
+data-toggle="tooltip" 
+href="{% url 'item_list_by_vendor' season.id object.id %}">
+	<i class="fa fa-external-link"></i>
+</a>
+</h2>
+
+	<div class="" style="padding:0px 0;">
+		{% if samples|length %}
+		<ul class="list-inline">
+		{% for sample in samples %}
+			<li>
+				<a href="{{ sample.file.url }}" 
+				data-toggle="lightbox" 
+				data-gallery="multiimages" 
+				data-parent data-title="{{ sample.description }}" 
+				data-footer="">
+					<img src="{{sample.file.url}}" class="img-responsive center-block"
+					style="margin-bottom:20px; max-width:100px;">
+				</a>
+
+				{# link to item detail page #}
+				<a href="{% url 'item_detail' sample.object_id %}">
+					<i class="fa fa-external-link"></i>
+					View detail
+				</a>
+			</li>
+		{% endfor %}
+		</ul>
+		{% endif %}
+	</div>	
+{% endfor %}
+</div>
+{% endblock %}
+
+
+{% block custom_js %}
+<script type="text/javascript">
+var j$ = jQuery.noConflict();
+j$(document).ready(function(){
+	j$(document).delegate('*[data-toggle="lightbox"]', 'click', function(e) {
+	    e.preventDefault();
+	    j$(this).ekkoLightbox();
+	}); 
+
+	j$('[data-type="attachment-thumbnail"]').click(function(){
+		var url = j$(this).attr('src');
+		j$(this).closest('section').find('[data-toggle="lightbox"]').attr('href',url);
+		j$(this).closest('section').find('[data-toggle="lightbox"]').find('img:first-child').attr('src',url);
+	});		
+});
+</script>
+{% endblock %}
