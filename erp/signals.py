@@ -52,3 +52,7 @@ def myitem_pre_save_handler(sender, instance, **kwargs):
 						size = new_size,
 						storage = storage
 					).save()
+
+@receiver(pre_save, sender=MyBusinessModel)
+def mybusinessmodel_pre_save_handler(sender, instance, **kwargs):
+	instance.name = instance.name.upper()	

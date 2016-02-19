@@ -49,11 +49,15 @@ urlpatterns = patterns(
 		url(r'^customer/add/$', views.MyCustomerAdd.as_view(), name='customer_add'),		
 		url(r'^customer/(?P<pk>\d+)/edit/$', views.MyCustomerEdit.as_view(), name='customer_edit'),
 
+		# Business model
+		url(r'^bizmodel/add/$', views.MyBusinessModelAdd.as_view(), name='biz_model_add'),		
+
 		# Sales Order
 		url(r'^so/$', views.MySalesOrderList.as_view(), name='so_list'),	
 		url(r'^so/add/$', views.MySalesOrderAdd.as_view(), name='so_add'),		
 		url(r'^so/(?P<pk>\d+)/$', views.MySalesOrderDetail.as_view(), name='so_detail'),
 		url(r'^so/add/item/$', views.MySalesOrderAddItem.as_view(), name='so_add_item'),
 		url(r'^so/remove/item/(?P<pk>\d+)/$', views.MySalesOrderLineItemDelete.as_view(), name='so_remove_item'),
+		url(r'^so/edit/(?P<pk>\d+)/$', views.MySalesOrderEdit.as_view(), name='so_edit'),
 
 	)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

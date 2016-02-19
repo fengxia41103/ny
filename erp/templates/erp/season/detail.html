@@ -22,7 +22,7 @@
 		<h4>
 			{{vendor.name}}
 			<a class="pull-right" 
-			title="View product detail" 
+			title="View brand detail" 
 			data-toggle="tooltip" 
 			href="{% url 'item_list_by_vendor' object.id vendor.id %}">
 				<i class="fa fa-external-link"></i>
@@ -61,7 +61,7 @@
 		data-toggle="tooltip"
 		title="Number of line items">			
 		<i class="fa fa-tag"></i>
-		{{ num_of_items }}
+		SKU count: {{ num_of_items }}
 		</span>
 	</div>
 </section>

@@ -13,7 +13,15 @@
 
 
 {% block content %}
-<div class="my-multicol-3">
+<div class="btn-group" role="group" aria-label="...">
+	{% for season in object_list %}
+	<button class="btn" type="button">
+	<a href="{% url 'season_detail' season.id %}">{{ season.name }}/</a>
+	</button>
+	{% endfor %}
+</div>
+
+<div class="my-multicol-4">
 {% for season in object_list %}
 <section class="pin-card" style="" id="{{vendor.id}}">
 	<div class="page-header">
@@ -34,17 +42,20 @@
 		{% with brand.attachments.all.0 as img %}
 			<a href="{% url 'item_list_by_vendor' season.id brand.id %}" >
 				<img src="{{img.file.url}}" class="img-responsive center-block"
-				style="margin-bottom:20px;max-width:50%;">
+				style="margin-bottom:20px;max-width:80%;"
+				data-toggle="tooltip"
+				title="Click to view {{season}} {{brand.name}} details"
+				>
 			</a>
 		{% endwith %}			
 		{% endfor %}
 	</div>	
 
-	<div class="" style="border-top: 1px solid #dddddd;padding:10px 0;">
-		<span class="text-right item-label pull-right">			
-		<i class="fa fa-tag"></i>
-		{{ season.brands|length}}
-		</span>
+	<div class="" style="border-top: 1px solid #ddd;margin-top:10px;margin-bottom:10px;">
+			<span class="text-right item-label pull-right">			
+			<i class="fa fa-tag"></i>
+			{{season}}: {{ season.brands|length}} brands
+			</span>
 	</div>
 </section>
 {% endfor %}

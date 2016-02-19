@@ -154,9 +154,15 @@
 						<li>
 							<a href="{% url 'fiscalyear_add' %}">
 								<i class="fa fa-pencil"></i>
-								Fiscal year
+								New fiscal year
 							</a>						
-						</li>										
+						</li>
+						<li>
+							<a href="{% url 'biz_model_add' %}">
+								<i class="fa fa-pencil"></i>
+								New business model
+							</a>
+						</li>						
 						<li class="divider"></li>					
 					</ul>
 				</li>
@@ -179,7 +185,7 @@
 
 						<li>
 							<a href="{% url 'season_list' %}">
-							Seasons
+							View by seasons
 							</a>
 						</li>			
 					</ul>
@@ -195,8 +201,7 @@
 						<li class="divider"></li>							
 						<li>
 							<a href="{% url "item_inv_add" %}">
-								<i class="fa fa-plus"></i>
-								Quick add inventory
+								New inventory adjustment
 							</a>						
 						</li>														
 					</ul>
@@ -212,15 +217,14 @@
 						<li>
 							<a href="{% url "so_list" %}">
 								<i class="fa fa-plus"></i>
-								Orders			
+								View orders			
 							</a>						
 						</li>														
 
 						<li class="divider"></li>							
 						<li>
 							<a href="{% url "so_add" %}">
-								<i class="fa fa-plus"></i>
-								Quick create an order
+								New order
 							</a>						
 						</li>														
 					</ul>

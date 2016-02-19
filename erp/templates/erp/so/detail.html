@@ -7,6 +7,19 @@
 {% endblock %}
 
 {% block content %}
+<div class="row text-center">
+	<button class="btn btn-small btn-default"
+	data-toggle="modal" data-target="#so-edit">
+		<i class='fa fa-pencil'></i>
+		Edit
+	</button>
+	<button class="btn btn-small btn-danger"
+	data-toggle="modal" data-target="">
+		<i class='fa fa-pencil'></i>
+		Cancel order
+	</button>	
+</div>
+
 {# order header #}
 <h2>Summary</h2>
 <div class="panel panel-default">
@@ -26,19 +39,12 @@
 		<div class="col-md-3 my-sf-display-border">{{ object.created_by }}</div>
 		<div class="col-md-1"></div>		
 	</div><div class="row">
-		<div class="col-md-2"><label>Is Sold At Cost</label></div>
-		<div class="col-md-3 my-sf-display-border">{{ object.is_sold_at_cost }}</div>
-		<div class="col-md-1"></div>		
-		<div class="col-md-2"><label>Fullfiller</label></div>
-		<div class="col-md-3 my-sf-display-border">{{ object.default_storage }}</div>
-		<div class="col-md-1"></div>		
-	</div><div class="row">
 		<div class="col-md-2"><label>Discount</label></div>
 		<div class="col-md-3 my-sf-display-border">{{ object.discount_in_pcnt }}</div>
 		<div class="col-md-1"></div>		
-		<div class="col-md-2"><label>Status</label></div>
+		<div class="col-md-2"><label>Sales Type</label></div>
 		<div class="col-md-3 my-sf-display-border">
-		<label class="label label-info">{{ object.status }}</label></div>
+		<label class="label label-info">{{ object.business_model }}</label></div>
 		<div class="col-md-1"></div>		
 	</div><div class="row">
 		<div class="col-md-2"><label>Total Line Items</label></div>
@@ -53,7 +59,7 @@
 			<ul class="dropdown-menu" aria-labelledby="total-qty-dropdown">
 				{% for brand,data in items.iteritems %}
 					<li>
-						<a href=""><label>{{ brand }}:</label> {{ data.total_qty }}</a>
+						<a><label>{{ brand }}:</label> {{ data.total_qty }}</a>
 					</li>
 				{% endfor %}
 			</ul>		
@@ -76,8 +82,9 @@
 			<ul class="dropdown-menu" aria-labelledby="total-value-dropdown">
 				{% for brand,data in items.iteritems %}
 					<li>
-						<a href=""><label>{{ brand }}:</label> 
-						{{object.customer.currency}}{{ data.total_value|floatformat:2 }}
+						<a><label>{{ brand }}:</label> 
+							{{object.customer.currency}}
+							{{ data.total_value|floatformat:2 }}
 						</a>
 					</li>
 				{% endfor %}
@@ -91,7 +98,11 @@
 <h2>Fullfillment</h2>
 <div class="panel panel-default">
   	<div class="panel-body">
-	<div class="row">
+	<div class="row">	
+		<div class="col-md-2"><label>Fullfiller</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.default_storage }}</div>
+		<div class="col-md-1"></div>		
+	</div> <div class="row">
 		<div class="col-md-2"><label>Last Fullfillment Date</label></div>
 		<div class="col-md-3 my-sf-display-border">{{ object.last_fullfillment_date }}&nbsp;</div>
 		<div class="col-md-1"></div>
@@ -127,9 +138,9 @@
 <h2>Order Details</h2>
 <ul class="nav nav-tabs" role="tablist">
 	{% for brand,data in items.iteritems %}
-	<li class="">
+	<li>
 	  <a href="#brand-{{brand.id}}" role="tab" data-toggle="tab">
-	      <icon class="fa fa-home"></icon> {{ brand }}
+	      <icon class="fa fa-folder"></icon> {{ brand }}
 	  </a>
 	</li>
 	{% endfor %}
@@ -156,7 +167,7 @@
 				<p>
 				<a href="{% url 'item_detail' item.id %}">
 					<i class="fa fa-hand-o-right"></i>
-					{{ item.product_id }}
+					SKU {{ item.product_id }}
 				</a>
 				</p>				
 				
@@ -164,6 +175,8 @@
 				<p>
 					<span class="item-label">COLOR:
 					</span><span class="item-value">{{ item.color }}</span>
+					<span class="item-label">SEASON:
+					</span><span class="item-value">{{ item.season }}</span>					
 				</p>
 				
 				<p class="item-price-original">
@@ -171,6 +184,7 @@
 					{{ item.price|floatformat:0 }}				
 				</p>
 				<p class="on_sale">
+					<label>Sales:</label>
 					{{object.customer.currency}}
 					{{ detail.so_line_items.0.discount_price|floatformat:2 }}
 				</p>
@@ -212,7 +226,9 @@
 							<input type="number" value="{{so_line_item.qty}}" style="width:50px;">
 
 							{# remove line item #}
-							<a href="{% url 'so_remove_item' so_line_item.id %}">
+							<a href="{% url 'so_remove_item' so_line_item.id %}"
+							data-toggle="tooltip"
+							title="Remove this from order">
 								<i class="fa fa-trash"></i>
 							</a>
 						{% endif %}
@@ -236,22 +252,59 @@
 		</div>
 		{% endfor %}
 
-		<div class="row">
-			<div class="col-md-offset-6 col-md-6">
-				<p>
-					<label class="">{{brand}} Total QTY:</label>
-					<span class="item-total">{{ data.total_qty }}</span>
-				</p><p>
-					<label class="">{{brand}} Total Value:</label>
-					<span class="item-total">
-					{{object.customer.currency}}{{ data.total_value|floatformat:2 }}
-					</span>
-				</p>
+		<div class="row" style="margin-top:10px;">
+			<div class="col-md-offset-6 col-md-3 text-right">
+				<label class="">{{brand}} total QTY:</label>
+			</div><div class="col-md-2">
+				<span class="item-total">{{ data.total_qty }}</span>
+			</div>
+		</div><div class="row">
+			<div class="col-md-offset-6 col-md-3 text-right">
+				<label class="">{{brand}} total value:</label>
+			</div><div class="col-md-2">
+				<span class="item-total">
+				{{object.customer.currency}}{{ data.total_value|floatformat:2 }}
+				</span>
 			</div>
 		</div>
 	</div>
 {% endfor %}
 </div>    
+{% endblock %}
+
+{% block modal %}
+<!-- Modal -->
+<div id="so-edit" class="modal fade" role="dialog">
+<form action="{% url 'so_edit' object.id %}" method="POST">
+{% csrf_token %}
+
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+
+    	{# Modal header #}
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Edit {{ object.code }}</h4>
+      </div>
+
+      {# Modal body #}
+      <div class="modal-body">	
+			{{ so_edit_form|crispy }}
+      </div>
+
+      {# Modal footer #}
+      <div class="modal-footer">
+		<button class="btn btn-primary start" id="btn-so-add-item" type="submit">
+			<i class="fa fa-save"></i>
+			<span>Save</span>
+		</button>      
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+<form>
+</div>
 {% endblock %}
 
 {% block custom_js %}

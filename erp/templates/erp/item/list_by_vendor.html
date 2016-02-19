@@ -87,11 +87,17 @@
 			</ul>
 		{% endif %}		
 
-
+		{# show color #}
 		Color <span style="color:#89e;">{{ obj.color }}</span>
-		<span class="text-right item-label pull-right">			
-		<i class="fa fa-tag"></i>
-		{{obj.currency}} {{ obj.price|floatformat:0 }}
+
+		{# show price #}
+		<span class="text-right item-label pull-right">	
+			{% if obj.price > 0 %}		
+				<i class="fa fa-tag"></i>
+				{{obj.currency}} {{ obj.price|floatformat:0 }}
+			{% else %}
+				<span class="badge">price missing</span>
+			{% endif %}
 		</span>
 	</div>
 </section>

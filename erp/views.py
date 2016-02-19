@@ -27,6 +27,7 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db.models import Q
 from django.template import loader, Context
+from django.views.generic.detail import SingleObjectMixin
 
 # django-crispy-forms
 from crispy_forms.helper import FormHelper
@@ -298,7 +299,7 @@ class MyItemDetail(DetailView):
 		context['same_styles'] = MyItem.objects.filter(name=self.object.name,brand=self.object.brand)
 
 		# List all open SO that user can add this item to
-		context['sales_orders'] = MySalesOrder.objects.filter(status='N')
+		context['sales_orders'] = filter(lambda x: x.is_editable,MySalesOrder.objects.all())
 
 		# vendor item form
 		vendor_item, created = MyVendorItem.objects.get_or_create(product = self.object)
@@ -434,37 +435,24 @@ def add_to_inventory(storage,quick_notion,out,reason,created_by):
 
 	# Parse items
 	items = []
-	pat = re.compile("(?P<size>\w+)-?(?P<qty>\d+)")	
+	pat = re.compile("(?P<size>\D+)-?(?P<qty>\d+)")	
 	for line_no, line in enumerate(quick_notion.split('\n')):
 		tmp = line.split(',')
-		style = tmp[0]
-
-		# Optional, can be blank, since some styles have only a single color.
-		color = tmp[1] 
+		sku = tmp[0]
 
 		# Find MyItem object
-		if color: item = MyItem.objects.filter(name__icontains=style,color__icontains=color)
-		else: item = MyItem.objects.filter(name__icontains=style)
-
-		if not item or len(item)==0: 
-			errors[line_no+1] = line
-			print 'not found'
+		tmp_items = MyItem.objects.filter(id=int(sku))
+		if len(tmp_items) == 0: 
+			errors[line_no+1]={'line':line,'reason':'not found'}
 			continue
-		elif len(item) > 1:
-			errors[line_no+1] = line
-			print 'multiple matches'
+		elif len(tmp_items) > 1:
+			errors[line_no+1] = {'line':line,'reason':'multiple matches'}
 			continue
-		item = item[0]
+		item = tmp_items[0]
 		items.append(item)
 
-		# Qty pairs
-		qty_pair = []
-		for i in tmp[2:]:
-			tmp = pat.search(i)
-			if tmp: qty_pair.append((tmp.group('size').upper(),int(tmp.group('qty'))))
-
 		# Adjust inventory
-		for (size,qty) in qty_pair:
+		for (size,qty) in pat.findall(','.join(tmp[1:])):
 			# Get MyItemInventory obj
 			item_inv, created = MyItemInventory.objects.get_or_create(
 				item = item,
@@ -508,6 +496,16 @@ class MyItemInventoryAdd(FormView):
 
 ###################################################
 #
+#	MyBusinessModel views
+#
+###################################################
+class MyBusinessModelAdd(CreateView):
+	model = MyBusinessModel
+	template_name = 'erp/common/add_form.html'
+	fields = ['name','description','abbrev','sales_model']
+
+###################################################
+#
 #	Sales Order views
 #
 ###################################################
@@ -529,7 +527,7 @@ def add_to_sales_order(customer,sales,quick_notion,created_by,applied_discount,i
 
 	# Parse items
 	items = []
-	pat = re.compile("(?P<size>\w+)-?(?P<qty>\d+)")
+	pat = re.compile("(?P<size>\D+)-?(?P<qty>\d+)")
 	for line_no, line in enumerate(quick_notion.split('\n')):
 		tmp = line.split(',')
 		sku = tmp[0]
@@ -545,14 +543,8 @@ def add_to_sales_order(customer,sales,quick_notion,created_by,applied_discount,i
 		item = tmp_items[0]
 		items.append(item)
 
-		# Qty pairs
-		qty_pair = []
-		for i in tmp[1:]:
-			tmp = pat.search(i)
-			if tmp: qty_pair.append((tmp.group('size').upper(),int(tmp.group('qty'))))
-
 		# Create order
-		for (size,qty) in qty_pair:
+		for (size,qty) in pat.findall(','.join(tmp[1:])):
 			# Get MyItemInventory obj
 			item_inv, created = MyItemInventory.objects.get_or_create(
 				item = item,
@@ -565,7 +557,8 @@ def add_to_sales_order(customer,sales,quick_notion,created_by,applied_discount,i
 			else: price = item.price
 
 			existing = MySalesOrderLineItem.objects.filter(order=so,item=item_inv)
-			if len(existing): 
+			if len(existing) and not existing[0].fullfill_qty > 0: 
+				# only modifiable when there has not been any fullfillment yet to this item
 				existing[0].qty += qty
 				existing[0].save()
 			else:
@@ -607,6 +600,12 @@ class MySalesOrderAdd(FormView):
 		self.order = result.so
 
 		return super(FormView, self).form_valid(form)
+
+class MySalesOrderEdit(UpdateView):
+	model = MySalesOrder
+
+	def get_success_url(self):
+		 return reverse_lazy('so_detail', kwargs={'pk': self.object.id})
 
 class MySalesOrderListFilter (FilterSet):
 	customer = ModelChoiceFilter(queryset=MyCRM.objects.filter(crm_type='C').order_by('name'))
@@ -664,6 +663,9 @@ class MySalesOrderDetail(DetailView):
 			items[brand]['items'][item]['value'] += i.discount_value
 		context['items'] = items
 
+		# edit view
+		context['so_edit_form'] = SalesOrderEditForm(instance=self.object)
+
 		return context
 
 class MySalesOrderAddItem(TemplateView):
@@ -699,6 +701,10 @@ class MySalesOrderLineItemDelete(DeleteView):
 	def get_success_url(self):
 		return reverse_lazy('so_detail',kwargs={'pk':self.object.order.id})
 
+	def get_context_data(self,**kwargs):
+		context = super(DeleteView,self).get_context_data(**kwargs)
+		context['cancel_redirect_url'] = self.get_success_url()
+		return context
 
 ###################################################
 #
@@ -709,6 +715,9 @@ class MySalesOrderLineItemDelete(DeleteView):
 class MySeasonList(ListView):
 	model = MySeason
 	template_name = 'erp/season/list.html'
+
+	def get_queryset(self):
+		return MySeason.objects.all().order_by('-name')
 
 class MySeasonDetail(DetailView):
 	model = MySeason

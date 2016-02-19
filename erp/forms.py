@@ -13,8 +13,8 @@ class ItemInventoryAdjustForm(forms.Form):
 	storage = forms.ModelChoiceField(queryset=MyStorage.objects.all())
 	items = forms.CharField(
 		widget=forms.Textarea,
-		help_text = u'''Put one item per line, using syntax <span class="item-label">style #, color, size-qty</span>. 
-		You can also use item's SKU instead of its style # for convenience. Both style # field and color field would be
+		help_text = u'''Put one item per line, using syntax <span class="item-label">SKU #, color, size-qty</span>. 
+		Color field would be
 		used for partial matching so that you don't have to type in the entire string as they are shown on clothes tag. 
 		To enter size and qty, use syntax "S-1, M-2". This field is case insensitive.
 		'''
@@ -28,6 +28,10 @@ class ItemInventoryAddForm(ItemInventoryAdjustForm):
 	reason = forms.ChoiceField(choices = REASON_CHOICES)
 
 class SalesOrderAddForm(forms.Form):
+	business_model = forms.ModelChoiceField(
+		queryset = MyBusinessModel.objects.all(),
+		label = u'Business model'
+	)
 	customer = forms.ModelChoiceField(queryset=MyCRM.objects.filter(Q(crm_type='C')|Q(crm_type='B')))
 	sales = forms.ModelChoiceField(
 		queryset = User.objects.all(),
@@ -51,6 +55,11 @@ class SalesOrderAddForm(forms.Form):
 		To enter size and qty, use syntax "S-1, M-2". This field is case insensitive.
 		'''
 	)
+
+class SalesOrderEditForm(ModelForm):
+	customer = forms.ModelChoiceField(queryset=MyCRM.objects.filter(Q(crm_type='C')|Q(crm_type='B')))
+	class Meta:
+		model = MySalesOrder
 
 class VendorItemForm(ModelForm):
 	class Meta:

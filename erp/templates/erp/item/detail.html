@@ -102,7 +102,7 @@
 
 		{# Related colors, same style #}
 		<div>
-			<h5 class="page-header">Available Colors</h5>
+			<h4 class="page-header">Available In Colors</h4>
 
 			<ul class="list-inline">
 			{% for style in same_styles %}
@@ -132,7 +132,7 @@ Related Sales Orders
 		<th>#</th>
 		<th>Customer</th>
 		<th>Fullfilled By</th>
-		<th>Status</th>
+		<th>Sales Type</th>
 	</thead>
 	<tbody>
 	{% for so in related_sales_orders %}
@@ -147,7 +147,7 @@ Related Sales Orders
 	</td><td>
 		{{ so.default_storage }}
 	</td><td>
-		<span class="btn btn-default">{{ so.status }}</span>
+		{{ so.business_model }}
 	</td></tr>
 	{% endfor %}
 	</tbody>
@@ -174,7 +174,7 @@ Related Sales Orders
 			{{ attachment_form|crispy }}
 
 			<button type="submit" class="btn btn-primary start">
-				<i class="glyphicon glyphicon-upload"></i>
+				<i class="fa fa-upload"></i>
 				<span>Start upload</span>
 			</button>	
 		</form>

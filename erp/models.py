@@ -235,6 +235,11 @@ class MyLocation (models.Model):
 	)	
 	address = models.TextField(default='')
 	users = models.ManyToManyField(User,null=True,blank=True)
+	abbrev = models.CharField(
+		max_length = 5,
+		null = True,
+		blank = True,
+	)
 
 	def _code(self):
 		return u'%s-%s' %(self.crm,self.name)
@@ -248,7 +253,7 @@ class MyStorage (models.Model):
 	is_primary = models.BooleanField(default=True)
 
 	def _code(self):
-		return u'%s-%d' %(self.location,self.id)
+		return u'%s-%d (%s)' %(self.location,self.id, self.location.abbrev)
 	code = property(_code)
 
 	def _physical(self):
@@ -464,7 +469,24 @@ class MyItemInventoryMoveAudit(models.Model):
 	)
 	reason = models.TextField(default='')
 
+class MyBusinessModel(MyBaseModel):
+	'''
+	Define sales model that business supports.
+	'''
+	SALES_MODEL_CHOICES = (
+		('Retail','Retail'),
+		('Wholesale','Wholesale'),
+		('Consignment','Consignment'),
+		('Leasing','Leasing'),
+	)
+	sales_model = models.CharField(
+		max_length = 64,
+		default = 'Retail',
+		choices = SALES_MODEL_CHOICES
+	)
+
 class MySalesOrder(models.Model):
+	business_model = models.ForeignKey('MyBusinessModel')
 	customer = models.ForeignKey('MyCRM')
 	sales = models.ForeignKey(User, related_name='sales')
 	default_storage = models.ForeignKey('MyStorage',null=True,blank=True)
@@ -486,27 +508,16 @@ class MySalesOrder(models.Model):
 	# This will force line item price to use item's converted cost instead of RP.
 	is_sold_at_cost = models.BooleanField(default=False)
 
-	# Order status
-	STATUS_CHOICES = (
-		('N','New'),
-		('C','Closed'),
-		('R','In Review'),
-		('F','Fullfilling'),
-	)
-	status = models.CharField(
-		max_length = 16,
-		null = True,
-		blank = True,
-		default = 'N',
-		choices = STATUS_CHOICES
-	)
-
 	def __unicode__(self):
 		return u'%s for %s'%(self.code,self.customer)
 
 	def _code(self):
-		return '%s %d-%5d'%('SZ',dt.now().year,self.id)
+		return '%s%d-%04d'%(self.default_storage.location.abbrev,dt.now().year,self.id)
 	code = property(_code)
+
+	def _is_editable(self):
+		return self.fullfill_qty == 0
+	is_editable = property(_is_editable)
 
 	def _life_in_days(self):
 		return (dt.now()-self.created_on).days
@@ -593,7 +604,7 @@ class MySalesOrderLineItem(models.Model):
 	discount_value = property(_discount_value)
 
 	def _fullfill_qty(self):
-		qty=MySalesOrderFullfillmentLineItem.objects.filter(so_line_item=self).values('fullfill_qty',flat=True)
+		qty=MySalesOrderFullfillmentLineItem.objects.filter(so_line_item=self).values_list('fullfill_qty',flat=True)
 		return sum(qty)
 	fullfill_qty = property(_fullfill_qty)
 
