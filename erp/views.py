@@ -361,10 +361,8 @@ class MyVendorAdd(CreateView):
 class MyVendorEdit (UpdateView):
 	model = MyCRM
 	template_name = 'erp/common/edit_form.html'
-	
-	def get_success_url(self):
-		return reverse_lazy('vendor_list', kwargs={'pk':self.get_object().id})
-			
+	success_url = reverse_lazy('vendor_list')
+				
 	def get_context_data(self, **kwargs):
 		context = super(UpdateView, self).get_context_data(**kwargs)
 		context['title'] = u'Edit Vendor'
