@@ -314,6 +314,24 @@ class MyVendorItem(models.Model):
 	currency = models.ForeignKey('MyCurrency')
 	product = models.ForeignKey('MyItem')
 
+	# If we know when is the deadline to place SO
+	# against this item. This is observed when showing items
+	# available for SO on e-Commerce site.
+	order_deadline = models.DateField(
+		null = True,
+		blank = True,
+	)
+
+	# Default delivery date. This is a promise that vendor give
+	# regarding this item. However, it can change per order basis.
+	delivery_date = models.DateField(
+		null = True,
+		blank = True
+	)
+
+	# Minimal qty per line item
+	minimal_qty = models.Model(default = 1)	
+
 class MySeason(models.Model):
 	name = models.CharField(
 		max_length = 8
@@ -346,14 +364,6 @@ class MyItem(MyBaseModel):
 	)
 	price = models.FloatField(default = 0) # retail price
 	currency = models.ForeignKey('MyCurrency')
-
-	# If we know when is the deadline to place SO
-	# against this item. This is observed when showing items
-	# available for SO on e-Commerce site.
-	order_deadline = models.DateField(
-		null = True,
-		blank = True,
-	)
 
 	# size chart
 	size_chart = models.ForeignKey(
