@@ -514,20 +514,8 @@ class MyBusinessModelAdd(CreateView):
 #
 ###################################################
 
-def add_to_sales_order(customer,sales,quick_notion,created_by,applied_discount,is_sold_at_cost,storage,so=None):
+def add_item_to_sales_order(quick_notion,so):
 	errors = {}	
-
-	# Create sales order
-	if not so:
-		so = MySalesOrder(
-			customer = customer,
-			sales = sales,
-			created_by = created_by,
-			default_storage = storage,
-			discount = applied_discount,
-			is_sold_at_cost = is_sold_at_cost
-		)
-		so.save()
 
 	# Parse items
 	items = []
@@ -553,28 +541,27 @@ def add_to_sales_order(customer,sales,quick_notion,created_by,applied_discount,i
 			item_inv, created = MyItemInventory.objects.get_or_create(
 				item = item,
 				size = size.upper(),
-				storage = storage
+				storage = so.default_storage
 			)
 
 			# Create SO line item
-			if is_sold_at_cost: price = item.converted_cost
+			if so.is_sold_at_cost: price = item.converted_cost
 			else: price = item.price
 
 			existing = MySalesOrderLineItem.objects.filter(order=so,item=item_inv)
 			if len(existing) and not existing[0].fullfill_qty > 0: 
 				# only modifiable when there has not been any fullfillment yet to this item
-				existing[0].qty += qty
+				existing[0].qty += int(qty)
 				existing[0].save()
 			else:
 				line_item = MySalesOrderLineItem(
 					order = so,
 					item = item_inv,
 					price = price,
-					qty = qty
+					qty = int(qty)
 				).save()
 
-	print errors
-	return {'errors':errors, 'items':items, 'so':so}
+	return {'errors':errors, 'items':items}
 
 class MySalesOrderAdd(FormView):
 	template_name = 'erp/so/add.html'
@@ -582,7 +569,7 @@ class MySalesOrderAdd(FormView):
 	order = None
 
 	def get_success_url(self):
-		if self.order: return reverse_lazy('so_detail',kwargs={'pk',self.order.id})
+		if self.order: return reverse_lazy('so_detail',kwargs={'pk':self.order.id})
 		else: return reverse_lazy('so_list')
 
 	def form_valid(self, form):
@@ -591,17 +578,15 @@ class MySalesOrderAdd(FormView):
             "You have successfully changed your email notifications"
         )		
 
-		# Call utility function to parse
-		result = add_to_sales_order(
-			form.cleaned_data['customer'], # customer
-			form.cleaned_data['sales'],
-			form.cleaned_data['items'].strip(), # input shorhand notion
-			self.request.user, # created by user
-			form.cleaned_data['customer_discount'],
-			form.cleaned_data['is_sold_at_cost'],
-			form.cleaned_data['storage']
-		)
-		self.order = result.so
+		# Create sales order
+		so = form.save(commit=False)
+		so.created_by = self.request.user
+		so.discount = so.customer.std_discount
+		so.save()
+		self.order = so
+
+		# Add item to SO
+		result = add_item_to_sales_order(form.cleaned_data['items'],so)
 
 		return super(FormView, self).form_valid(form)
 

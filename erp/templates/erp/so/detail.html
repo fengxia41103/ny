@@ -160,7 +160,7 @@
 					style="width:90%;">
 				{% endwith %}
 			</div>		
-			<div class="col-md-5">
+			<div class="col-md-4">
 				<h4 style="font-weight:bold;font-size:20px;">
 				{{ item.name|upper }}
 				</h4>
@@ -194,7 +194,7 @@
 			</div>
 
 			{# fullfillment details #}
-			<div class="col-md-3">
+			<div class="col-md-4">
 				<h4 class="my-section-header">
 				<span class="item-label">Order Value:</span> 
 				<span class="">
@@ -223,13 +223,13 @@
 							<label>Fullfilled</label>{{ so_line_item.fullfill_qty }}
 						{% else %}
 							{# qty input box #}
-							<input type="number" value="{{so_line_item.qty}}" style="width:50px;">
+							<input type="number" value="{{so_line_item.qty}}" style="width:50px;" data-toggle="order-qty">
 
 							{# remove line item #}
 							<a href="{% url 'so_remove_item' so_line_item.id %}"
 							data-toggle="tooltip"
 							title="Remove this from order">
-								<i class="fa fa-trash"></i>
+								<i class="fa fa-trash">remove</i>
 							</a>
 						{% endif %}
 					</dd>
@@ -323,7 +323,11 @@ j$(document).ready(function(){
 		var url = j$(this).attr('src');
 		j$(this).closest('section').find('[data-toggle="lightbox"]').attr('href',url);
 		j$(this).closest('section').find('[data-toggle="lightbox"]').find('img:first-child').attr('src',url);
-	});			
+	});	
+
+	j$('input[data-toggle="order-qty"]').change(function(){
+		console.log(j$(this).val());
+	});
 });
 </script>
 {% endblock %}

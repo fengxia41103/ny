@@ -27,26 +27,14 @@ class ItemInventoryAddForm(ItemInventoryAdjustForm):
 	)
 	reason = forms.ChoiceField(choices = REASON_CHOICES)
 
-class SalesOrderAddForm(forms.Form):
-	business_model = forms.ModelChoiceField(
-		queryset = MyBusinessModel.objects.all(),
-		label = u'Business model'
-	)
+class SalesOrderBaseForm(ModelForm):
 	customer = forms.ModelChoiceField(queryset=MyCRM.objects.filter(Q(crm_type='C')|Q(crm_type='B')))
-	sales = forms.ModelChoiceField(
-		queryset = User.objects.all(),
-		label = u'Sales'
-	)
-	storage = forms.ModelChoiceField(
-		queryset = MyStorage.objects.all(),
-		label = u'Default fullfiller'
-	)
-	is_sold_at_cost = forms.BooleanField(
-		initial=False,
-		required=False,
-		label= u'Are items sold at cost?'
-	)
-	customer_discount = forms.FloatField(initial=0.25)
+
+	class Meta:
+		model = MySalesOrder
+		fields = ('customer','sales','business_model','default_storage')
+
+class SalesOrderAddForm(SalesOrderBaseForm):
 	items = forms.CharField(
 		widget=forms.Textarea,
 		help_text = u'''Put one item per line, using syntax <span class="item-label">SKU #, color, size-qty</span>. 
@@ -55,6 +43,9 @@ class SalesOrderAddForm(forms.Form):
 		To enter size and qty, use syntax "S-1, M-2". This field is case insensitive.
 		'''
 	)
+
+	class Meta(SalesOrderBaseForm.Meta):
+		fields = SalesOrderBaseForm.Meta.fields + ('items',)
 
 class SalesOrderEditForm(ModelForm):
 	customer = forms.ModelChoiceField(queryset=MyCRM.objects.filter(Q(crm_type='C')|Q(crm_type='B')))
