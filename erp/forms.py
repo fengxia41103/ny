@@ -55,4 +55,10 @@ class SalesOrderEditForm(ModelForm):
 class VendorItemForm(ModelForm):
 	class Meta:
 		model = MyVendorItem
-		
+
+class SalesOrderPaymentAddForm(ModelForm):
+	class Meta:
+		model = MySalesOrderPayment
+		fields = ['so','payment_method','amount']		
+		widgets = {'so': HiddenInput()}
+			

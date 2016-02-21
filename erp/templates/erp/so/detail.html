@@ -8,16 +8,18 @@
 
 {% block content %}
 <div class="row text-center">
-	<button class="btn btn-small btn-default"
-	data-toggle="modal" data-target="#so-edit">
-		<i class='fa fa-pencil'></i>
-		Edit
-	</button>
-	<button class="btn btn-small btn-danger"
-	data-toggle="modal" data-target="">
-		<i class='fa fa-pencil'></i>
-		Cancel order
-	</button>	
+	{% if object.is_editable %}
+		<button class="btn btn-small btn-default"
+		data-toggle="modal" data-target="#so-edit">
+			<i class='fa fa-pencil'></i>
+			Edit
+		</button>
+		<button class="btn btn-small btn-danger"
+		data-toggle="modal" data-target="">
+			<i class='fa fa-pencil'></i>
+			Cancel order
+		</button>
+	{% endif %}
 </div>
 
 {# order header #}
@@ -67,12 +69,12 @@
 		<div class="col-md-1"></div>		
 	</div><div class="row">
 		<div class="col-md-2"><label>Retail Value</label></div>
-		<div class="col-md-3 my-sf-display-border">
+		<div class="col-md-3 my-sf-display-border item-price-original">
 			{{object.customer.currency}}
 			{{ object.total_std_value|floatformat:0 }}
 		</div>
 		<div class="col-md-1"></div>		
-		<div class="col-md-2"><label>Value After Discount</label></div>
+		<div class="col-md-2"><label>Value On Order</label></div>
 		<div class="col-md-3 my-sf-display-border dropdown">
 			<span class="dropdown-toggle" id="total-value-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 				{{object.customer.currency}}
@@ -95,41 +97,83 @@
   </div>
 </div>
 
-<h2>Fullfillment</h2>
+<h2>Fullfillments</h2>
 <div class="panel panel-default">
   	<div class="panel-body">
 	<div class="row">	
 		<div class="col-md-2"><label>Fullfiller</label></div>
 		<div class="col-md-3 my-sf-display-border">{{ object.default_storage }}</div>
-		<div class="col-md-1"></div>		
-	</div> <div class="row">
+		<div class="col-md-1"></div>	
 		<div class="col-md-2"><label>Last Fullfillment Date</label></div>
-		<div class="col-md-3 my-sf-display-border">{{ object.last_fullfillment_date }}&nbsp;</div>
-		<div class="col-md-1"></div>
-		<div class="col-md-2"><label>Fullfillments</label></div>
-		<div class="col-md-3 my-sf-display-border">
-			&nbsp;
-			{% for f in object.fullfillments %}
-			{{ f }}
-			{% endfor %}
-		</div>
-		<div class="col-md-1"></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.last_fullfill_date }}&nbsp;</div>
+		<div class="col-md-1"></div>			
 	</div><div class="row">
 		<div class="col-md-2"><label>Fullfilled QTY</label></div>
-		<div class="col-md-3 my-sf-display-border">{{ object.fullfill_qty }}&nbsp;</div>
+		<div class="col-md-3 my-sf-display-border">
+			{{ object.fullfill_qty|floatformat:0 }}&nbsp;
+		</div>
 		<div class="col-md-1"></div>	
 		<div class="col-md-2"><label>Fullfill Rate By QTY</label></div>
-		<div class="col-md-3 my-sf-display-border">{{ object.fullfill_rate_by_qty }}&nbsp;</div>
+		<div class="col-md-3 my-sf-display-border">
+			{{ object.fullfill_rate_by_qty|floatformat:0 }}%
+		</div>
 		<div class="col-md-1"></div>				
 	</div><div class="row">
 		<div class="col-md-2"><label>Fullfilled Value</label></div>
 		<div class="col-md-3 my-sf-display-border">
 		{{object.customer.currency}}
-		{{ object.fullfill_discount_value }}&nbsp;</div>
+		{{ object.fullfill_discount_value|floatformat:2 }}&nbsp;</div>
 		<div class="col-md-1"></div>	
 		<div class="col-md-2"><label>Fullfill Rate By Value</label></div>
-		<div class="col-md-3 my-sf-display-border">{{ object.fullfill_rate_by_value }}&nbsp;</div>			
+		<div class="col-md-3 my-sf-display-border">
+			{{ object.fullfill_rate_by_value|floatformat:0 }}%
+		</div>			
 		<div class="col-md-1"></div>	
+	</div><div class="row">
+		<div class="col-md-2"><label>Fullfillment History</label></div>
+		<div class="col-md-9">
+			{% for f in object.fullfillments %}
+				{{ f.fullfill_qty|floatformat:0 }}
+				{% if not forloop.last %}
+					+ 
+				{% endif %}
+			{% endfor %}
+		</div>
+		<div class="col-md-1"></div>
+	</div>
+	</div>
+</div>
+
+<h2>Payments</h2>
+<div class="panel panel-default">
+  	<div class="panel-body">
+	<div class="row">	
+		<div class="col-md-2"><label>Paid</label></div>
+		<div class="col-md-3 my-sf-display-border">{{ object.total_payment|floatformat:2 }}</div>
+		<div class="col-md-1"></div>	
+		<div class="col-md-2"><label>Account Receivable</label></div>
+		<div class="col-md-3 my-sf-display-border">
+			{{ object.account_receivable|floatformat:2 }}
+
+			{% if object.account_receivable > 0 %}
+				<a class="pull-right" data-toggle="modal" data-target="#new-payment">
+					<i class='fa fa-money'></i>
+					make payment
+				</a>
+			{% endif %}
+		</div>			
+		<div class="col-md-1"></div>	
+	</div><div class="row">
+		<div class="col-md-2"><label>Payment History</label></div>
+		<div class="col-md-9">
+			{% for f in object.payments %}
+				{{ f.amount|floatformat:2 }}
+				{% if not forloop.last %} 
+					+ 
+				{% endif %}
+			{% endfor %}
+		</div>
+		<div class="col-md-1"></div>
 	</div>
 	</div>
 </div>
@@ -184,7 +228,7 @@
 					{{ item.price|floatformat:0 }}				
 				</p>
 				<p class="on_sale">
-					<label>Sales:</label>
+					<label>On sale:</label>
 					{{object.customer.currency}}
 					{{ detail.so_line_items.0.discount_price|floatformat:2 }}
 				</p>
@@ -216,12 +260,7 @@
 
 					{# qty #}
 					<dd>
-						{% if so_line_item.fullfill_qty > 0 %}
-							{# qty input box #}
-							<input type="number" value="{{so_line_item.qty}}" style="width:50px;" disabled>
-
-							<label>Fullfilled</label>{{ so_line_item.fullfill_qty }}
-						{% else %}
+						{% if so_line_item.is_editable %}
 							{# qty input box #}
 							<input type="number" value="{{so_line_item.qty}}" style="width:50px;" data-toggle="order-qty">
 
@@ -231,6 +270,9 @@
 							title="Remove this from order">
 								<i class="fa fa-trash">remove</i>
 							</a>
+						{% else %}
+							{# qty input box #}
+							<input type="number" value="{{ so_line_item.fullfill_qty }}" style="width:50px;" disabled> / {{so_line_item.qty}}						
 						{% endif %}
 					</dd>
 					{% endfor %}
@@ -275,10 +317,9 @@
 {% block modal %}
 <!-- Modal -->
 <div id="so-edit" class="modal fade" role="dialog">
+<div class="modal-dialog">
 <form action="{% url 'so_edit' object.id %}" method="POST">
-{% csrf_token %}
-
-  <div class="modal-dialog">
+ 
     <!-- Modal content-->
     <div class="modal-content">
 
@@ -290,20 +331,52 @@
 
       {# Modal body #}
       <div class="modal-body">	
+			{% csrf_token %}
 			{{ so_edit_form|crispy }}
       </div>
 
       {# Modal footer #}
       <div class="modal-footer">
-		<button class="btn btn-primary start" id="btn-so-add-item" type="submit">
+		<button class="btn btn-primary" type="submit">
 			<i class="fa fa-save"></i>
 			<span>Save</span>
 		</button>      
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
       </div>
     </div>
-  </div>
-<form>
+</form>          
+</div>
+</div>
+
+<!-- Modal -->
+<div id="new-payment" class="modal fade" role="dialog">
+<div class="modal-dialog">
+<form action="{% url 'so_payment_add' %}" method="POST">
+    <!-- Modal content-->
+    <div class="modal-content">
+		{# Modal header #}
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal">&times;</button>
+	        <h4 class="modal-title">Register a payment</h4>
+		</div>
+
+	    {# Modal body #}
+	    <div class="modal-body">			
+			{% csrf_token %}
+			{{ so_payment_add_form|crispy }}
+		</div>
+
+	      {# Modal footer #}
+		<div class="modal-footer">
+			<button class="btn btn-primary"  type="submit">
+				<i class="fa fa-save"></i>
+				<span>Register payment</span>
+			</button>      
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+		</div>
+	</div>
+</form>
+</div>
 </div>
 {% endblock %}
 

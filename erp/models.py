@@ -269,7 +269,18 @@ class MyStorage (models.Model):
 	def __unicode__(self):
 		return self.code
 
+class MyCRMCustomManager(models.Manager):
+	def vendors(self):
+		return self.get_queryset().filter(Q(crm_type='V')|Q(crm_type='B'))
+
+	def customers(self):
+		return self.get_queryset().filter(Q(crm_type='C')|Q(crm_type='B'))
+
 class MyCRM(MyBaseModel):
+	# custom managers
+	# Note: the 1st one defined will be taken as the default!
+	objects = MyCRMCustomManager()
+
 	CRM_TYPE_CHOICES = (
 		('B','Both'), # can only be WH internals
 		('V','Vendor'), # can only  link to PO
@@ -330,7 +341,7 @@ class MyVendorItem(models.Model):
 	)
 
 	# Minimal qty per line item
-	minimal_qty = models.Model(default = 1)	
+	minimal_qty = models.IntegerField(default = 1)	
 
 class MySeason(models.Model):
 	name = models.CharField(
@@ -488,12 +499,23 @@ class MyBusinessModel(MyBaseModel):
 		('Wholesale','Wholesale'),
 		('Consignment','Consignment'),
 		('Leasing','Leasing'),
+		('Proxy','Proxy'),
 	)
 	sales_model = models.CharField(
 		max_length = 64,
 		default = 'Retail',
 		choices = SALES_MODEL_CHOICES
 	)
+
+	def __unicode__(self):
+		return self.sales_model
+
+	def _process_model(self):
+		if self.sales_model in ['Retail','Wholesale']: return 1
+		elif self.sales_model in ['Proxy']: return 2
+		elif self.sales_model in ['Consignment']: return 3
+		elif self.sales_model in ['Leasing']: return 4		
+	process_model = property(_process_model)
 
 class MySalesOrder(models.Model):
 	business_model = models.ForeignKey('MyBusinessModel')
@@ -542,13 +564,11 @@ class MySalesOrder(models.Model):
 	total_qty = property(_total_qty)
 
 	def _total_std_value(self):
-		vals = [line.std_value for line in MySalesOrderLineItem.objects.filter(order=self)]
-		return sum(vals)
+		return sum([line.std_value for line in MySalesOrderLineItem.objects.filter(order=self)])
 	total_std_value = property(_total_std_value)
 
 	def _total_discount_value(self):
-		vals = [line.discount_value for line in MySalesOrderLineItem.objects.filter(order=self)]
-		return sum(vals)
+		return sum([line.discount_value for line in MySalesOrderLineItem.objects.filter(order=self)])
 	total_discount_value = property(_total_discount_value)
 
 	def _implied_discount(self):
@@ -556,8 +576,7 @@ class MySalesOrder(models.Model):
 	implied_discount = property(_implied_discount)
 
 	def _fullfill_qty(self):
-		vals = [line.fullfill_qty for line in MySalesOrderLineItem.objects.filter(order=self)]
-		return sum(vals)
+		return sum([line.fullfill_qty for line in MySalesOrderLineItem.objects.filter(order=self)])
 	fullfill_qty = property(_fullfill_qty)
 
 	def _fullfill_std_value(self):
@@ -565,19 +584,21 @@ class MySalesOrder(models.Model):
 	fullfill_std_value = property(_fullfill_std_value)
 
 	def _fullfill_discount_value(self):
-		return sum([line.fullfill_qty*line.discount_value for line in MySalesOrderLineItem.objects.filter(order=self)])
+		return sum([line.fullfill_qty*line.discount_price for line in MySalesOrderLineItem.objects.filter(order=self)])
 	fullfill_discount_value = property(_fullfill_discount_value)
 
 	def _fullfill_rate_by_qty(self):
-		return self.fullfill_qty/self.total_qty
+		return self.fullfill_qty/self.total_qty*100.0
 	fullfill_rate_by_qty = property(_fullfill_rate_by_qty)
 
 	def _fullfill_rate_by_value(self):
-		return self.fullfill_std_value / self.total_std_value
+		return self.fullfill_std_value / self.total_std_value*100.0
 	fullfill_rate_by_value = property(_fullfill_rate_by_value)
 
 	def _last_fullfill_date(self):
-		return MySalesOrderFullfillment.objects.filter(so=self).order_by('-created_on')[0]
+		try:
+			return MySalesOrderFullfillment.objects.filter(so=self).order_by('-created_on')[0].created_on
+		except: return ''
 	last_fullfill_date = property(_last_fullfill_date)
 
 	def _fullfillments(self):
@@ -588,6 +609,21 @@ class MySalesOrder(models.Model):
 		return '%d%%' % (self.discount*100)
 	discount_in_pcnt = property(_discount_in_pcnt)
 
+	def _payments(self):
+		return MySalesOrderPayment.objects.filter(so=self)
+	payments = property(_payments)
+
+	def _total_payment(self):
+		return sum([p.amount for p in MySalesOrderPayment.objects.filter(so=self)])
+	total_payment = property(_total_payment)
+
+	def _account_receivable(self):
+		'''
+		AR is computed by actual fullfilled value instead of what's on order.
+		'''
+		return self.fullfill_discount_value - self.total_payment
+	account_receivable = property(_account_receivable)
+
 class MySalesOrderLineItem(models.Model):
 	order = models.ForeignKey('MySalesOrder')
 	item = models.ForeignKey('MyItemInventory')
@@ -595,6 +631,10 @@ class MySalesOrderLineItem(models.Model):
 
 	# Price is a snapshot in time since xchange rate would fluctuate overtime.
 	price = models.FloatField(default = 0)
+
+	def _is_editable(self):
+		return self.fullfill_qty == 0
+	is_editable = property(_is_editable)
 
 	def _std_value(self):
 		return self.qty*self.price
@@ -622,11 +662,13 @@ class MySalesOrderLineItem(models.Model):
 		return self.fullfill_qty/self.qty
 	fullfill_rate = property(_fullfill_rate)
 
-class MySalesOrderFullfillment(MyBaseModel):
+class MySalesOrderFullfillment(models.Model):
 	'''
-	Fullfillment would require an associated PO.
+	Fullfillment would require an associated SO.
 	'''
 	so = models.ForeignKey('MySalesOrder')
+
+	# PO is optional. Retail sales, for example, does not require a PO.
 	po = models.ForeignKey(
 		'MyPurchaseOrder',
 		blank = True,
@@ -642,6 +684,9 @@ class MySalesOrderFullfillment(MyBaseModel):
 		help_text = ''
 	)
 
+	def __unicode__(self):
+		return '%s/F%02d'%(self.so.code,self.id)
+
 class MySalesOrderFullfillmentLineItem(models.Model):
 	so_fullfillment = models.ForeignKey('MySalesOrderFullfillment')
 	po_line_item = models.ForeignKey(
@@ -651,6 +696,53 @@ class MySalesOrderFullfillmentLineItem(models.Model):
 	)
 	so_line_item = models.ForeignKey('MySalesOrderLineItem')
 	fullfill_qty = models.IntegerField(default = 0)
+
+class MySalesOrderPayment(models.Model):
+	PAYMENT_METHOD_CHOICES = (
+		('Cash','Cash'),
+		('Paypal','Paypal'),
+		(u'支付宝',u'支付宝'),
+		(u'微信支付',u'微信支付'),
+	)
+	created_on = models.DateField(auto_now_add = True)
+
+	# instance fields
+	created_by = models.ForeignKey (
+		User,
+		null = True,
+		blank = True,
+		verbose_name = u'创建用户',
+		help_text = '',
+		related_name = 'Logger'
+	)
+	reviewed_by = models.ForeignKey(
+		User,
+		null = True,
+		blank = True,
+		default = None,
+		related_name = "Reviewer"
+	)	
+	reviewed_on = models.DateField(
+		null = True,
+		blank = True,
+		default = None
+	)
+	last_modified_on = models.DateField(auto_now = True)
+
+	so = models.ForeignKey('MySalesOrder')
+	amount = models.FloatField(default=0)
+	payment_method = models.CharField(
+		max_length = 16,
+		default = 'Cash',
+		choices = PAYMENT_METHOD_CHOICES
+	)
+
+	def __unicode__(self):
+		return '%s/P%02d'%(self.so.code,self.id)
+
+	def _is_editable(self):
+		return self.review_by is None
+	is_editable = property(_is_editable)
 
 class MyPurchaseOrder(MyBaseModel):
 	'''
@@ -702,4 +794,3 @@ class MyPurchaseOrderLineItem(models.Model):
 		blank = True,
 		choices = ESTIMATED_MONTH_CHOICES
 	)
-

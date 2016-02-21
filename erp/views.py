@@ -338,7 +338,7 @@ class MyVendorList(ListView):
 	template_name = 'erp/crm/vendor_list.html'
 
 	def get_queryset(self):
-		return MyCRM.objects.filter(Q(crm_type='V')|Q(crm_type='B'))
+		return MyCRM.objects.vendors()
 
 class MyVendorAdd(CreateView):
 	model = MyCRM
@@ -391,7 +391,7 @@ class MyCustomerList(ListView):
 	template_name = 'erp/crm/customer_list.html'
 
 	def get_queryset(self):
-		return MyCRM.objects.filter(Q(crm_type='C')|Q(crm_type='B'))
+		return MyCRM.objects.customers()
 
 class MyCustomerAdd(CreateView):
 	model = MyCRM
@@ -652,8 +652,14 @@ class MySalesOrderDetail(DetailView):
 			items[brand]['items'][item]['value'] += i.discount_value
 		context['items'] = items
 
-		# edit view
+		# SO edit view
 		context['so_edit_form'] = SalesOrderEditForm(instance=self.object)
+
+		# SO payment add view
+		context['so_payment_add_form'] = SalesOrderPaymentAddForm(initial={
+			'so':self.object,
+			'amount':self.object.account_receivable
+		})
 
 		return context
 
@@ -694,6 +700,25 @@ class MySalesOrderLineItemDelete(DeleteView):
 		context = super(DeleteView,self).get_context_data(**kwargs)
 		context['cancel_redirect_url'] = self.get_success_url()
 		return context
+
+class MySalesOrderPaymentList(ListView):
+	model = MySalesOrderPayment
+	template_name = 'erp/payment/payment/so_list.html'
+
+class MySalesOrderPaymentAdd(FormView):
+	form_class = SalesOrderPaymentAddForm
+	payment = None
+
+	def get_success_url(self):
+		if self.payment: return reverse_lazy('so_detail',kwargs={'pk':self.payment.so.id})
+		else: return reverse_lazy('so_payment_list')
+
+	def form_valid(self,form):
+		payment = form.save(commit=False)
+		payment.created_by = self.request.user
+		payment.save()
+		self.payment = payment
+		return super(FormView, self).form_valid(form)		
 
 ###################################################
 #

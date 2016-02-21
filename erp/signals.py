@@ -56,3 +56,29 @@ def myitem_pre_save_handler(sender, instance, **kwargs):
 @receiver(pre_save, sender=MyBusinessModel)
 def mybusinessmodel_pre_save_handler(sender, instance, **kwargs):
 	instance.name = instance.name.upper()	
+
+@receiver(post_save, sender=MySalesOrder)
+def mysalesorder_post_save_handler(sender,instance,**kwargs):
+	# Type 1: SO -> fullfillment -> payment -> done
+	# Scenario: retail, wholesale
+	# All payments would be cleared immediately at sales.
+	# In this type, we auto created a SO Fullfillment and line items that mirrors SO and its line items,
+	# and auto-populate fullfilled qty!
+	if instance.business_model.process_model == 1:
+		so_fullfillment,created = MySalesOrderFullfillment.objects.get_or_create(
+			so = instance,
+			created_by = instance.created_by
+		)
+
+@receiver(post_save, sender=MySalesOrderLineItem)
+def mysalesorderlineitem_post_save_handler(sender,instance,**kwargs):
+	if instance.order.business_model.process_model == 1:
+		so_fullfillment, created = MySalesOrderFullfillment.objects.get_or_create(
+			so = instance.order,
+			created_by = instance.order.created_by
+		)
+		so_line_item,created = MySalesOrderFullfillmentLineItem.objects.get_or_create(
+			so_fullfillment = so_fullfillment,
+			so_line_item = instance,
+			fullfill_qty = instance.qty
+		)

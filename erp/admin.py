@@ -23,12 +23,12 @@ admin.site.register(MyExchangeRate,MyExchangeRateAdmin)
 
 class MyItemAdmin(admin.ModelAdmin):
 	list_filter=['season','brand']
-	list_display = ['season','brand','name','color','price','order_deadline','size_chart']
+	list_display = ['season','brand','name','color','price','size_chart']
 admin.site.register(MyItem,MyItemAdmin)
 
 class MyVendorItemAdmin(admin.ModelAdmin):
-	list_filter=['vendor','currency']
-	list_display=('vendor','product','price')
+	list_filter=['vendor','currency','order_deadline','delivery_date']
+	list_display=('vendor','product','price','order_deadline','delivery_date','minimal_qty')
 admin.site.register(MyVendorItem,MyVendorItemAdmin)
 
 admin.site.register(MyUOM)
