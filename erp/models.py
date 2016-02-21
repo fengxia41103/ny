@@ -687,6 +687,10 @@ class MySalesOrderFullfillment(models.Model):
 	def __unicode__(self):
 		return '%s/F%02d'%(self.so.code,self.id)
 
+	def _qty(self):
+		return sum([f.fullfill_qty for f in MySalesOrderFullfillmentLineItem.objects.filter(so_fullfillment=self)])
+	qty = property(_qty)
+
 class MySalesOrderFullfillmentLineItem(models.Model):
 	so_fullfillment = models.ForeignKey('MySalesOrderFullfillment')
 	po_line_item = models.ForeignKey(

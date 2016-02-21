@@ -133,7 +133,7 @@
 		<div class="col-md-2"><label>Fullfillment History</label></div>
 		<div class="col-md-9">
 			{% for f in object.fullfillments %}
-				{{ f.fullfill_qty|floatformat:0 }}
+				{{ f.qty|floatformat:0 }}
 				{% if not forloop.last %}
 					+ 
 				{% endif %}
@@ -153,6 +153,7 @@
 		<div class="col-md-1"></div>	
 		<div class="col-md-2"><label>Account Receivable</label></div>
 		<div class="col-md-3 my-sf-display-border">
+			{{object.customer.currency}}
 			{{ object.account_receivable|floatformat:2 }}
 
 			{% if object.account_receivable > 0 %}
