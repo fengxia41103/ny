@@ -42,6 +42,11 @@
 		{% for obj in object_list %}
 		<tr><td>
 			<a href="{% url 'so_detail' obj.id %}">Detail</a> | 
+
+			{% if obj.is_editable %}
+				<a data-toggle="modal" data-target="#so-delete-{{obj.id}}">Delete</a>
+			{% endif %}
+
 		</td><td>
 			{% if obj.is_sold_at_cost %}
 				<i class='fa fa-flag-o'></i>
@@ -73,11 +78,48 @@
     	{% endfor %}
 	</tbody>
 	</table>
+{% endblock %}
 
+{% block modal %}
 
-<script type="text/javascript">
-	j$(document).ready(function(){
-	});
-</script>
+{% for object in object_list %}
+	{# Delete SO modal #}
+	<div id="so-delete-{{object.id}}" class="modal fade" role="dialog">
+	<div class="modal-dialog">
+	<form action="{% url 'so_delete' object.id %}" method="POST">
+	 
+	    <!-- Modal content-->
+	    <div class="modal-content">
+
+	    	{# Modal header #}
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal">&times;</button>
+	        <h4 class="modal-title">To Cancel {{ object.code }}</h4>
+	      </div>
+
+	      {# Modal body #}
+	      <div class="modal-body alert alert-warning">	
+				{% csrf_token %}
+				<p>Order cancellation is not recoverable.</p>
+
+				<p>
+				Are you sure to cancel this order?
+				</p>
+	      </div>
+
+	      {# Modal footer #}
+	      <div class="modal-footer">
+			<button class="btn btn-primary" type="submit">
+				<i class="fa fa-check">Yes</i>
+			</button>      
+	        <button type="button" class="btn btn-default" data-dismiss="modal">
+	        	<i class="fa fa-close">No</i>
+	        </button>
+	      </div>
+	    </div>
+	</form>          
+	</div>
+	</div>
+{% endfor %}
 {% endblock %}
 

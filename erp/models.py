@@ -548,7 +548,10 @@ class MySalesOrder(models.Model):
 	code = property(_code)
 
 	def _is_editable(self):
-		return self.fullfill_qty == 0
+		'''
+		Sales order becomes locked when there has been fullfillment or a payment
+		'''
+		return self.fullfill_qty == 0 and self.total_payment == 0
 	is_editable = property(_is_editable)
 
 	def _life_in_days(self):
@@ -572,7 +575,8 @@ class MySalesOrder(models.Model):
 	total_discount_value = property(_total_discount_value)
 
 	def _implied_discount(self):
-		return 1-self.total_discount_value/self.total_std_value
+		if self.total_std_value: return 1-self.total_discount_value/self.total_std_value
+		else: return ''
 	implied_discount = property(_implied_discount)
 
 	def _fullfill_qty(self):
@@ -588,11 +592,13 @@ class MySalesOrder(models.Model):
 	fullfill_discount_value = property(_fullfill_discount_value)
 
 	def _fullfill_rate_by_qty(self):
-		return self.fullfill_qty/self.total_qty*100.0
+		if self.total_qty: return self.fullfill_qty/self.total_qty*100.0
+		else: return ''
 	fullfill_rate_by_qty = property(_fullfill_rate_by_qty)
 
 	def _fullfill_rate_by_value(self):
-		return self.fullfill_std_value / self.total_std_value*100.0
+		if self.total_std_value: return self.fullfill_std_value / self.total_std_value*100.0
+		else: return ''
 	fullfill_rate_by_value = property(_fullfill_rate_by_value)
 
 	def _last_fullfill_date(self):
@@ -741,12 +747,30 @@ class MySalesOrderPayment(models.Model):
 		choices = PAYMENT_METHOD_CHOICES
 	)
 
+	'''
+	Deposit is different from regular payment because
+	this money may be part of an agreement on what we can do with it.
+	'''
+	PAYMENT_USAGE_CHOICES = (
+		('pay','Pay for a sales order'),
+		('deposit','Deposit for a sales order'),
+	)
+	usage = models.CharField(
+		max_length = 32,
+		default = 'pay',
+		choices = PAYMENT_USAGE_CHOICES
+	)
+
 	def __unicode__(self):
 		return '%s/P%02d'%(self.so.code,self.id)
 
 	def _is_editable(self):
-		return self.review_by is None
+		return not self.review_by
 	is_editable = property(_is_editable)
+
+	def _is_deposit(self):
+		return self.usage == 'deposit'
+	is_deposit = property(_is_deposit)
 
 class MyPurchaseOrder(MyBaseModel):
 	'''

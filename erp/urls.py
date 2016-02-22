@@ -60,6 +60,7 @@ urlpatterns = patterns(
 		url(r'^so/add/item/$', views.MySalesOrderAddItem.as_view(), name='so_add_item'),
 		url(r'^so/remove/item/(?P<pk>\d+)/$', views.MySalesOrderLineItemDelete.as_view(), name='so_remove_item'),
 		url(r'^so/edit/(?P<pk>\d+)/$', views.MySalesOrderEdit.as_view(), name='so_edit'),
+		url(r'^so/delete/(?P<pk>\d+)/$', views.MySalesOrderDelete.as_view(), name='so_delete'),
 
 		# Sales order payment
 		url(r'^so/payments/$', views.MySalesOrderPaymentList.as_view(), name='so_payment_list'),						

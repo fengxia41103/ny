@@ -720,6 +720,10 @@ class MySalesOrderPaymentAdd(FormView):
 		self.payment = payment
 		return super(FormView, self).form_valid(form)		
 
+class MySalesOrderDelete(DeleteView):
+	model = MySalesOrder
+	success_url = reverse_lazy('so_list')
+	
 ###################################################
 #
 #	MySeason views

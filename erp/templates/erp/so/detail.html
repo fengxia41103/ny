@@ -15,7 +15,7 @@
 			Edit
 		</button>
 		<button class="btn btn-small btn-danger"
-		data-toggle="modal" data-target="">
+		data-toggle="modal" data-target="#so-delete">
 			<i class='fa fa-pencil'></i>
 			Cancel order
 		</button>
@@ -163,12 +163,23 @@
 				</a>
 			{% endif %}
 		</div>			
-		<div class="col-md-1"></div>	
+		<div class="col-md-1"></div>
 	</div><div class="row">
 		<div class="col-md-2"><label>Payment History</label></div>
 		<div class="col-md-9">
 			{% for f in object.payments %}
-				{{ f.amount|floatformat:2 }}
+				{% if f.is_deposit %}
+					<span data-toggle="tooltip" title="This is a deposit">
+					{{ f.amount|floatformat:2 }}
+					<sup>D</sup>
+					</span>
+				{% else %}
+					{{ f.amount|floatformat:2 }}
+					{% if f.is_editable %}
+						<sup>E</sup>
+					{% endif %}
+				{% endif %}
+
 				{% if not forloop.last %} 
 					+ 
 				{% endif %}
@@ -316,7 +327,7 @@
 {% endblock %}
 
 {% block modal %}
-<!-- Modal -->
+{# SO edit modal #}
 <div id="so-edit" class="modal fade" role="dialog">
 <div class="modal-dialog">
 <form action="{% url 'so_edit' object.id %}" method="POST">
@@ -349,7 +360,7 @@
 </div>
 </div>
 
-<!-- Modal -->
+{# Add payment modal #}
 <div id="new-payment" class="modal fade" role="dialog">
 <div class="modal-dialog">
 <form action="{% url 'so_payment_add' %}" method="POST">
@@ -379,6 +390,45 @@
 </form>
 </div>
 </div>
+
+{# Delete SO modal #}
+<div id="so-delete" class="modal fade" role="dialog">
+<div class="modal-dialog">
+<form action="{% url 'so_delete' object.id %}" method="POST">
+ 
+    <!-- Modal content-->
+    <div class="modal-content">
+
+    	{# Modal header #}
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">To Cancel {{ object.code }}</h4>
+      </div>
+
+      {# Modal body #}
+      <div class="modal-body alert alert-warning">	
+			{% csrf_token %}
+			<p>Order cancellation is not recoverable.</p>
+
+			<p>
+			Are you sure to cancel this order?
+			</p>
+      </div>
+
+      {# Modal footer #}
+      <div class="modal-footer">
+		<button class="btn btn-primary" type="submit">
+			<i class="fa fa-check">Yes</i>
+		</button>      
+        <button type="button" class="btn btn-default" data-dismiss="modal">
+        	<i class="fa fa-close">No</i>
+        </button>
+      </div>
+    </div>
+</form>          
+</div>
+</div>
+
 {% endblock %}
 
 {% block custom_js %}
