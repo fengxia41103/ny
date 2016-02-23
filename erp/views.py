@@ -581,7 +581,9 @@ class MySalesOrderAdd(FormView):
 		# Create sales order
 		so = form.save(commit=False)
 		so.created_by = self.request.user
-		so.discount = so.customer.std_discount
+		if form.cleaned_data['discount']: so.discount = form.cleaned_data['discount']
+		else: so.discount = so.customer.std_discount
+
 		so.save()
 		self.order = so
 
@@ -723,7 +725,54 @@ class MySalesOrderPaymentAdd(FormView):
 class MySalesOrderDelete(DeleteView):
 	model = MySalesOrder
 	success_url = reverse_lazy('so_list')
-	
+
+class MySalesOrderFullfillmentAdd(DetailView):
+	model = MySalesOrder
+	template_name = 'erp/so/fullfill_add.html'
+
+	def get_context_data(self,**kwargs):
+		context = super(DetailView,self).get_context_data(**kwargs)
+
+		items = []
+		for line_item in MySalesOrderLineItem.objects.filter(order=self.object):
+			if line_item.qty_balance > 0: items.append(line_item)
+		context['items'] = items
+		return context
+
+	def post(self,request,pk):
+		items = []
+		for line_id,qty in self.request.POST.iteritems():
+			if 'line-item' in line_id and int(qty):
+				line_item = MySalesOrderLineItem.objects.get(id=int(line_id.split('-')[-1]))
+				items.append((line_item,qty))
+
+		if len(items):
+			# Create MySalesOrderFullfillment
+			fullfill = MySalesOrderFullfillment(
+				so=items[0][0].order,
+				created_by = self.request.user
+			)
+			fullfill.save()
+
+			# Add fullfill items to MySalesOrderFullfillment
+			for so_line_item,qty in items:
+				MySalesOrderFullfillmentLineItem(
+					so_fullfillment = fullfill,
+					so_line_item = so_line_item,
+					fullfill_qty = int(qty)
+				).save()
+		return HttpResponseRedirect(reverse_lazy('so_detail',kwargs={'pk':pk}))
+
+class MySalesOrderFullfillmentEdit(TemplateView):
+	def post(self,request,pk):
+		print request.POST
+		so_line_item_id = int(request.POST['id'])
+		value = int(request.POST['value'])
+		so_line_item = MySalesOrderLineItem.objects.get(id=so_line_item_id)
+
+		return HttpResponse(json.dumps(value), 
+			content_type='application/javascript')	
+
 ###################################################
 #
 #	MySeason views

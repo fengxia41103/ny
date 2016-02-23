@@ -56,7 +56,7 @@
 	<link rel="stylesheet" type="text/css" href="{% static 'loading/ladda-themeless.min.css' %}">
 	
 	{# DataTable #}
-	<link rel="stylesheet" type="text/css" href="{% static 'datatable/jquery.dataTables.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'datatable/css/jquery.dataTables.min.css' %}">
 
 	{# jqcloud #}
 	<link rel="stylesheet" type="text/css" href="{% static 'jqcloud/jqcloud.css' %}">
@@ -335,11 +335,17 @@
 
 	{# DataTable #}
     <script type="text/javascript"
-    	src="{% static 'datatable/jquery.dataTables.min.js' %}">
+    	src="{% static 'datatable/js/jquery.dataTables.min.js' %}">
     </script>
     <script type="text/javascript"
-    	src="{% static 'datatable/dataTables.bootstrap.js' %}">
+    	src="{% static 'datatable/js/dataTables.bootstrap.min.js' %}">
     </script>
+    <script type="text/javascript"
+    	src="{% static 'datatable/js/jquery.dataTables.editable.js' %}">
+    </script>
+    <script type="text/javascript"
+    	src="{% static 'datatable/js/jquery.jeditable.js' %}">
+    </script>    
 
 	{# lightbos: http://ashleydw.github.io/lightbox/ #} 
     <script type="text/javascript"

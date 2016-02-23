@@ -29,10 +29,9 @@ class ItemInventoryAddForm(ItemInventoryAdjustForm):
 
 class SalesOrderBaseForm(ModelForm):
 	customer = forms.ModelChoiceField(queryset=MyCRM.objects.filter(Q(crm_type='C')|Q(crm_type='B')))
-
 	class Meta:
 		model = MySalesOrder
-		fields = ('customer','sales','business_model','default_storage')
+		fields = ('customer','sales','business_model','discount','default_storage')
 
 class SalesOrderAddForm(SalesOrderBaseForm):
 	items = forms.CharField(
@@ -49,6 +48,7 @@ class SalesOrderAddForm(SalesOrderBaseForm):
 
 class SalesOrderEditForm(ModelForm):
 	customer = forms.ModelChoiceField(queryset=MyCRM.objects.filter(Q(crm_type='C')|Q(crm_type='B')))
+	discount = forms.FloatField(max_value=1.0,min_value=0.0)
 	class Meta:
 		model = MySalesOrder
 

@@ -15,6 +15,7 @@ from datetime import datetime as dt
 from django.db.models.signals import pre_save,post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
+from django.core.validators import MaxValueValidator, MinValueValidator
 from localflavor.us.forms import USPhoneNumberField
 
 
@@ -310,13 +311,22 @@ class MyCRM(MyBaseModel):
 	)
 	balance = models.FloatField(default = 0)
 	currency = models.ForeignKey('MyCurrency')
-	std_discount = models.FloatField(default=0.25)
+	std_discount = models.FloatField(
+		default=0.25,
+		validators=[MaxValueValidator(1.0),MinValueValidator(0.0)]
+	)
 
 	def __unicode__(self):
 		return self.name
+
+	def _code(self):
+		return '%04d' % self.id
+	code = property(_code)
 	
 class MyVendorItem(models.Model):
 	vendor = models.ForeignKey('MyCRM')
+
+	# This is vendor SKU
 	sku = models.CharField(
 		max_length = 32,
 		default = '',
@@ -373,7 +383,10 @@ class MyItem(MyBaseModel):
 		max_length = 128,
 		default = '',
 	)
-	price = models.FloatField(default = 0) # retail price
+	price = models.FloatField(
+		default = 0,
+		validators=[MinValueValidator(0.0),]
+	) # retail price
 	currency = models.ForeignKey('MyCurrency')
 
 	# size chart
@@ -452,7 +465,10 @@ class MyItemInventory(models.Model):
 	storage = models.ForeignKey('MyStorage')
 	withdrawable = models.BooleanField(default = True)
 
-	physical = models.IntegerField(default = 0)
+	physical = models.IntegerField(
+		default = 0,
+		validators=[MinValueValidator(0),]
+	)
 
 	def _theoretical(self):
 		inv = 0
@@ -461,6 +477,10 @@ class MyItemInventory(models.Model):
 			else: inv += audit.qty
 		return inv
 	theoretical = property(_theoretical)
+
+	def _code(self):
+		return 'INV-%06d'%self.id
+	code = property(_code)
 
 class MyItemInventoryMoveAudit(models.Model):
 	created_on = models.DateField(auto_now_add = True)
@@ -495,11 +515,11 @@ class MyBusinessModel(MyBaseModel):
 	Define sales model that business supports.
 	'''
 	SALES_MODEL_CHOICES = (
-		('Retail','Retail'),
-		('Wholesale','Wholesale'),
-		('Consignment','Consignment'),
-		('Leasing','Leasing'),
-		('Proxy','Proxy'),
+		('Retail',u'零售'),
+		('Wholesale',u'批发'),
+		('Consignment',u'代销'),
+		('Leasing',u'租赁'),
+		('Proxy',u'订货'),
 	)
 	sales_model = models.CharField(
 		max_length = 64,
@@ -534,7 +554,9 @@ class MySalesOrder(models.Model):
 		help_text = '',
 		related_name='logger'
 	)
-	discount = models.FloatField(default = 0)
+	discount = models.FloatField(
+		validators=[MaxValueValidator(1.0),MinValueValidator(0.0),]
+	)
 
 	# Set this flag to True for internal customers.
 	# This will force line item price to use item's converted cost instead of RP.
@@ -592,12 +614,12 @@ class MySalesOrder(models.Model):
 	fullfill_discount_value = property(_fullfill_discount_value)
 
 	def _fullfill_rate_by_qty(self):
-		if self.total_qty: return self.fullfill_qty/self.total_qty*100.0
+		if self.total_qty: return self.fullfill_qty*100.0/self.total_qty
 		else: return ''
 	fullfill_rate_by_qty = property(_fullfill_rate_by_qty)
 
 	def _fullfill_rate_by_value(self):
-		if self.total_std_value: return self.fullfill_std_value / self.total_std_value*100.0
+		if self.total_std_value: return self.fullfill_std_value*100.0/ self.total_std_value
 		else: return ''
 	fullfill_rate_by_value = property(_fullfill_rate_by_value)
 
@@ -633,7 +655,10 @@ class MySalesOrder(models.Model):
 class MySalesOrderLineItem(models.Model):
 	order = models.ForeignKey('MySalesOrder')
 	item = models.ForeignKey('MyItemInventory')
-	qty = models.IntegerField(default = 0)
+	qty = models.IntegerField(
+		default = 0,
+		validators=[MinValueValidator(0),]
+	)
 
 	# Price is a snapshot in time since xchange rate would fluctuate overtime.
 	price = models.FloatField(default = 0)
@@ -667,6 +692,10 @@ class MySalesOrderLineItem(models.Model):
 	def _fullfill_rate(self):
 		return self.fullfill_qty/self.qty
 	fullfill_rate = property(_fullfill_rate)
+
+	def _qty_balance(self):
+		return self.qty - self.fullfill_qty
+	qty_balance = property(_qty_balance)
 
 class MySalesOrderFullfillment(models.Model):
 	'''
@@ -705,7 +734,10 @@ class MySalesOrderFullfillmentLineItem(models.Model):
 		blank = True
 	)
 	so_line_item = models.ForeignKey('MySalesOrderLineItem')
-	fullfill_qty = models.IntegerField(default = 0)
+	fullfill_qty = models.IntegerField(
+		default = 0,
+		validators=[MinValueValidator(0),]
+	)
 
 class MySalesOrderPayment(models.Model):
 	PAYMENT_METHOD_CHOICES = (

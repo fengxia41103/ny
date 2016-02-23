@@ -20,7 +20,8 @@
 		<th rowspan="2">Customer</th>
 		<th rowspan="2">Sales</th>
 		<th colspan="5">Order Summary</th>
-		<th colspan="4">Fullfillment Summary</th>
+		<th colspan="4">Fullfillments</th>
+		<th colspan="2">Payments</th>
 		</tr>
 
 		<tr>
@@ -28,7 +29,7 @@
 			<th>Line Item</th>
 			<th>QTY</th>
 			<th>STD Value</th>
-			<th>Discount Value</th>
+			<th>Order Value</th>
 			<th>Implied Discount</th>
 
 			{# fullfillment #}
@@ -36,6 +37,10 @@
 			<th>Sales Value</th>
 			<th>Rate by QTY</th>
 			<th>Rate by Value</th>
+
+			{# payment #}
+			<th>Paid</th>
+			<th>Balance</th>
 		<tr>
 	</thead>
 	<tbody>
@@ -71,9 +76,13 @@
 		</td><td>
 			{{ obj.fullfill_std_value }}
 		</td><td>
-			{{ obj.fullfull_rate_by_qty }}
+			{{ obj.fullfill_rate_by_qty|floatformat:0 }}%
 		</td><td>
-			{{ obj.fullfill_rate_by_value }}
+			{{ obj.fullfill_rate_by_value|floatformat:0 }}%
+		</td><td>
+			{{ obj.total_payment }}
+		</td><td>
+			{{ obj.account_receivable }}
 		</td></tr>
     	{% endfor %}
 	</tbody>
