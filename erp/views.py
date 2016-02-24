@@ -734,7 +734,7 @@ class MySalesOrderFullfillmentAdd(DetailView):
 		context = super(DetailView,self).get_context_data(**kwargs)
 
 		items = {}
-		for line_item in MySalesOrderLineItem.objects.filter(order=self.object).order_by('id'):
+		for line_item in MySalesOrderLineItem.objects.filter(order=self.object).order_by('item__id'):
 			if line_item.qty_balance > 0: 
 				brand = line_item.item.item.brand
 				if brand not in items: items[brand] = []
@@ -747,7 +747,7 @@ class MySalesOrderFullfillmentAdd(DetailView):
 		Post to this API will create a sales order fullfillment.
 		'''
 		print self.request.POST
-		
+
 		items = []
 		for line_id,qty in self.request.POST.iteritems():
 			if 'line-item' in line_id and int(qty):
