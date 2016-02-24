@@ -720,7 +720,11 @@ class MySalesOrderFullfillment(models.Model):
 	)
 
 	def __unicode__(self):
-		return '%s/F%02d'%(self.so.code,self.id)
+		return '%s/%s'%(self.so.code,self.code)
+
+	def _code(self):
+		return 'SOFF%3d' % self.id
+	code = property(_code)
 
 	def _qty(self):
 		return sum([f.fullfill_qty for f in MySalesOrderFullfillmentLineItem.objects.filter(so_fullfillment=self)])
@@ -794,7 +798,11 @@ class MySalesOrderPayment(models.Model):
 	)
 
 	def __unicode__(self):
-		return '%s/P%02d'%(self.so.code,self.id)
+		return '%s/%s'%(self.so.code,self.code)
+
+	def _code(self):
+		return 'SOPAY%03d' % self.id
+	code = property(_code)
 
 	def _is_editable(self):
 		return not self.review_by

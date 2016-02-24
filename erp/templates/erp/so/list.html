@@ -46,10 +46,16 @@
 	<tbody>
 		{% for obj in object_list %}
 		<tr><td>
-			<a href="{% url 'so_detail' obj.id %}">Detail</a> | 
+			<a href="{% url 'so_detail' obj.id %}">Detail</a>
 
+			{# fullfill shortcut #}
+			{% if obj.fullfill_rate_by_qty < 100 %}
+			| <a href="{% url 'so_fullfill_add' obj.id %}">Fullfill</a>
+			{% endif %}
+
+			{# cancel order shortcut #}
 			{% if obj.is_editable %}
-				<a data-toggle="modal" data-target="#so-delete-{{obj.id}}">Cancel order</a>
+			| <a data-toggle="modal" data-target="#so-delete-{{obj.id}}">Cancel</a>
 			{% endif %}
 
 		</td><td>
