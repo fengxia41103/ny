@@ -573,7 +573,7 @@ class MySalesOrder(models.Model):
 		'''
 		Sales order becomes locked when there has been fullfillment or a payment
 		'''
-		return self.fullfill_qty == 0 and self.total_payment == 0
+		return self.total_payment == 0
 	is_editable = property(_is_editable)
 
 	def _life_in_days(self):

@@ -299,7 +299,7 @@ class MyItemDetail(DetailView):
 		context['same_styles'] = MyItem.objects.filter(name=self.object.name,brand=self.object.brand)
 
 		# List all open SO that user can add this item to
-		context['sales_orders'] = filter(lambda x: x.is_editable,MySalesOrder.objects.all())
+		context['sales_orders'] = filter(lambda x: x.is_editable,MySalesOrder.objects.all().order_by('id'))
 
 		# vendor item form
 		vendor_item, created = MyVendorItem.objects.get_or_create(product = self.object)
