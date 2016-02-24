@@ -630,7 +630,7 @@ class MySalesOrder(models.Model):
 	last_fullfill_date = property(_last_fullfill_date)
 
 	def _fullfillments(self):
-		return MySalesOrderFullfillment.objects.filter(so=self).order_by('-created_on')
+		return MySalesOrderFullfillment.objects.filter(so=self).order_by('created_on')
 	fullfillments = property(_fullfillments)
 
 	def _discount_in_pcnt(self):

@@ -13,12 +13,6 @@
 		data-toggle="modal" data-target="#so-edit">
 			<i class='fa fa-pencil'></i>
 			Edit
-		</button>
-		<button class="btn btn-small">
-			<a href="{% url 'so_fullfill_add' object.id %}">
-				<i class='fa fa-pencil'></i>
-				Create a fullfillment
-			</a>
 		</button>		
 		<button class="btn btn-small btn-danger"
 		data-toggle="modal" data-target="#so-delete">
@@ -26,6 +20,12 @@
 			Cancel order
 		</button>
 	{% endif %}
+		<button class="btn btn-small">
+			<a href="{% url 'so_fullfill_add' object.id %}">
+				<i class='fa fa-pencil'></i>
+				Create a fullfillment
+			</a>
+		</button>	
 </div>
 
 {# order header #}

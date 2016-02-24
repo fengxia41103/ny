@@ -733,13 +733,21 @@ class MySalesOrderFullfillmentAdd(DetailView):
 	def get_context_data(self,**kwargs):
 		context = super(DetailView,self).get_context_data(**kwargs)
 
-		items = []
-		for line_item in MySalesOrderLineItem.objects.filter(order=self.object):
-			if line_item.qty_balance > 0: items.append(line_item)
+		items = {}
+		for line_item in MySalesOrderLineItem.objects.filter(order=self.object).order_by('id'):
+			if line_item.qty_balance > 0: 
+				brand = line_item.item.item.brand
+				if brand not in items: items[brand] = []
+				items[brand].append(line_item)
 		context['items'] = items
 		return context
 
 	def post(self,request,pk):
+		'''
+		Post to this API will create a sales order fullfillment.
+		'''
+		print self.request.POST
+		
 		items = []
 		for line_id,qty in self.request.POST.iteritems():
 			if 'line-item' in line_id and int(qty):
@@ -763,7 +771,9 @@ class MySalesOrderFullfillmentAdd(DetailView):
 				).save()
 		return HttpResponseRedirect(reverse_lazy('so_detail',kwargs={'pk':pk}))
 
-class MySalesOrderFullfillmentEdit(TemplateView):
+class MySalesOrderFullfillmentEdit(DetailView):
+	model = MySalesOrderFullfillment
+
 	def post(self,request,pk):
 		print request.POST
 		so_line_item_id = int(request.POST['id'])

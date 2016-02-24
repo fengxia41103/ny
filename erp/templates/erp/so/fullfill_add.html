@@ -38,7 +38,8 @@
 
 <form action="{% url 'so_fullfill_add' object.id %}" method="POST">
 {% csrf_token %}
-<table class="table table-striped table-hover my-datatable" id="fullfill">
+
+<table class="table table-striped table-hover" id="fullfill">
 	<thead>
 		<th>INVENTORY SKU</th>
 		<th>PRODUCT ID</th>
@@ -52,32 +53,45 @@
 	</thead>
 
 	<tbody>
-	{% for line_item in items %}
-		{% with line_item.item.item as item %}
-		<tr><td>
-			{{ line_item.item.code }}
-		</td><td>
-			{{ line_item.item.item.product_id }}
-		</td><td>
-			{{ item.brand }}
-		</td><td>
-			{{ item.name }}
-		</td><td>
-			{{ item.color }}
-		</td><td>
-			{{ line_item.price }}			
-		</td><td>
-			{{ line_item.item.size }}
-		</td><td>
-			{{ line_item.qty_balance }}
-		</td><td class="editt">
-			<input type="number" value="{{ line_item.qty_balance }}" name="line-item-{{line_item.id}}" id="{{line_item.id}}" min="0" max="{{ line_item.qty_balance }}"/>			
-		</td></tr>
-		{% endwith %}
-	{% endfor %}
+		{% for brand,line_items in items.iteritems %}	
+		<tr><td colspan="9" class="info"><h2>{{ brand }}</h2></td></tr>
+
+		{% for line_item in line_items %}
+			{% with line_item.item.item as item %}
+			<tr><td>
+				{{ line_item.item.code }}
+			</td><td>
+				{{ line_item.item.item.product_id }}
+			</td><td>
+				{{ item.brand }}
+			</td><td>
+				{{ item.name }}
+			</td><td>
+				{{ item.color }}
+			</td><td>
+				{{ line_item.price }}			
+			</td><td>
+				{{ line_item.item.size }}
+			</td><td>
+				{{ line_item.qty_balance }}
+			</td><td class="editt">
+				<input type="number" value="0" name="line-item-{{line_item.id}}" id="{{line_item.id}}" min="0" max="{{ line_item.qty_balance }}" data-toggle="qty"/>			
+				<div class="btn-group" role="group" aria-label="">
+					<button type="button" class="btn btn-tiny btn-secondary" data-toggle="minus">
+						<i class="fa fa-minus"></i>
+					</button>
+					<button type="button" class="btn btn-tiny btn-primary" data-toggle="plus">
+						<i class="fa fa-plus"></i>
+					</button>
+				</div>		
+			</td></tr>
+			{% endwith %}
+		{% endfor %}
+
+		{% endfor %}
 	</tbody>
 </table>
-<button class="btn btn-primary"  type="submit">
+<button class="btn btn-primary"  type="submit" id="create">
 	<i class="fa fa-save"></i>
 	<span>Create a fullfillment</span>
 </button>    
@@ -88,6 +102,15 @@
 <script type="text/javascript">
 var j$ = jQuery.noConflict();
 j$(document).ready(function(){
+	// // common global widget initializations
+	// var table = j$('table').dataTable({
+	// 	stateSave: true, // must be true
+	// 	paging: false,
+	// 	info: false,
+	// 	"pagingType": "simple",
+	// 	"bFilter": false,
+	// });
+
 	j$('.edit').editable("{%url 'so_fullfill_edit' object.id %}",{
 		submit    : 'Save',
 		cancel    : 'Cancel',
@@ -100,6 +123,36 @@ j$(document).ready(function(){
 		    // var json = $.parseJSON(value);
 		    // $("#qty").text(json.status);
 		}		
+	});
+
+	// j$('#create').click( function() {
+ //        var data = table.$('input').serialize();
+ //        return true; // pass on the event
+ //    });	   
+
+	j$('[data-toggle="plus"]').click(function(){
+		var current_val = parseInt(j$(this).parent().siblings('input').val());
+		var max_val = parseInt(j$(this).parent().siblings('input').attr('max'));
+		if ((current_val+1)<=max_val){
+			j$(this).parent().siblings('input').val(current_val+1);
+			j$(this).parents('tr').addClass('warning');
+		}
+		if ((current_val+1)==max_val){
+			j$(this).prop('disabled', true);;
+			j$(this).siblings('[data-toggle="minus"]').prop('disabled', false);
+		}
+	});
+	j$('[data-toggle="minus"]').click(function(){
+		var current_val = parseInt(j$(this).parent().siblings('input').val());
+		var min_val = parseInt(j$(this).parent().siblings('input').attr('min'));
+		if ((current_val-1)>=min_val){
+			j$(this).parent().siblings('input').val(current_val-1);
+		}
+		if ((current_val-1)==min_val){
+			j$(this).prop('disabled', true);
+			j$(this).siblings('[data-toggle="plus"]').prop('disabled', false);
+			j$(this).parents('tr').removeClass('warning');
+		}
 	});
 });
 </script>
