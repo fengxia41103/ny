@@ -216,7 +216,7 @@ def server_attachment_add_view(request, pk):
 class ServerListFilter (FilterSet):
 
     class Meta:
-        model = Server
+        model = CatalogServer
         fields = {
             'size': ['contains'],
             'name': ['contains']

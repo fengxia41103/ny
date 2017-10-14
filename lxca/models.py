@@ -23,13 +23,6 @@ from django.utils import timezone
 logger = logging.getLogger("lenovo-lxca")
 logger.setLevel(logging.DEBUG)
 
-OS_CHOICES = (
-    ("win210svr", "Windows Server 2010"),
-    ("esxi", "ESXI server"),
-    ("Ubuntu xeniel", "Ubuntu 16.04 Xeniel"),
-    ("Ubuntu trusty", "Ubuntu 14.04 Trusty")
-)
-
 
 class BaseModel (models.Model):
     # basic value fields
@@ -48,18 +41,6 @@ class BaseModel (models.Model):
     )
     # is object active
     is_active = models.BooleanField(default=True)
-
-    serial = models.CharField(
-        max_length=64,
-        null=True,
-        blank=True,
-        verbose_name=u"Serial number"
-    )
-    # is debug active
-    is_debug = models.BooleanField(default=False)
-
-    uuid = models.CharField(max_length=32, default="uuid")
-    mtm = models.CharField(max_length=64, default="mtm")
 
     # attachments
     attachments = GenericRelation("Attachment")
@@ -152,32 +133,32 @@ class Note(models.Model):
 
 ######################################################
 #
-#	Hardware BOM models
+#	Hardware catalog models
 #
 #####################################################
-class Rack(BaseModel):
-    SIZE_CHOICES = (
-        (u"16U", u"16U"),
-        (u"32U", u"32U"),
-        (u"48U", u"48U")
+class CatalogRack(BaseModel):
+    EIA_CAPACITY_CHOICES = (
+        (25, u"25U"),
+        (42, u"42U"),
     )
 
     is_primary = models.BooleanField(
         default=True,
         verbose_name=u"Is primary rack"
     )
-    size = models.CharField(
-        max_length=8,
-        default=u"16U",
-        choices=SIZE_CHOICES
+    eia_capacity = models.IntegerField(
+        default=25,
+        choices=EIA_CAPACITY_CHOICES
     )
-    width = models.FloatField(
-        default=19,
-        verbose_name="Rack width (inch)"
-    )
+    sizewall_compartment = models.IntegerField(default=0)
+    expansion_racks = models.ForeignKey("self",
+                                        blank=True,
+                                        null=True,
+                                        default=None,
+                                        help_text="Expansion rack for the primary")
 
 
-class EndpointModel(BaseModel):
+class CatalogEndpoint(BaseModel):
     SIZE_CHOICES = (
         (u"1U", u"1U"),
         (u"2U", u"2U"),
@@ -187,70 +168,53 @@ class EndpointModel(BaseModel):
         default=u"1U",
         choices=SIZE_CHOICES
     )
-
-    class Meta:
-        abstract = True
-
-
-class PDU(EndpointModel):
-    VOLTAGE_CHOICES = (
-        (u"120-1", u"120V single phase"),
-        (u"208-1", u"208V single phase"),
-        (u"120-3", u"208V three phase"),
-        (u"400-3", u"400V three phase")
-    )
-
     ORIENTATION_CHOICES = (
         (u"h", u"Horizontal"),
         (u"v", u"Vertical")
-    )
-    voltage = models.CharField(
-        max_length=16,
-        default=u"120-1",
-        choices=VOLTAGE_CHOICES
     )
     orientation = models.CharField(
         max_length=16,
         default=u"h",
         choices=ORIENTATION_CHOICES
     )
-    form_factor = models.IntegerField(
-        default=1,
-        verbose_name=u"Form factor",
-        help_text=u"0=vertical mount, 1=1U, 2=2U, and so on"
+
+    class Meta:
+        abstract = True
+
+
+class CatalogPdu(CatalogEndpoint):
+    VOLTAGE_CHOICES = (
+        (u"120-1", u"120V single phase"),
+        (u"208-1", u"208V single phase"),
+        (u"120-3", u"208V three phase"),
+        (u"400-3", u"400V three phase")
+    )
+    voltage = models.CharField(
+        max_length=16,
+        default=u"120-1",
+        choices=VOLTAGE_CHOICES
     )
 
 
-class Switch(EndpointModel):
+class CatalogSwitch(CatalogEndpoint):
     SPEED_CHOICES = (
-        (u"1G", u"1G"),
-        (u"10G", u"10G"),
+        (1, u"1G"),
+        (10, u"10G"),
     )
-    COOLING_ORIENTATIONS = (
-        (u"h", u"Horizontal"),
-        (u"v", u"Vertical")
-    )
-    speed = models.CharField(
-        max_length=8,
-        default=u"1G",
+    speed = models.IntegerField(
+        default=10,
         choices=SPEED_CHOICES
-    )
-    cooling_orientation = models.CharField(
-        max_length=8,
-        default=u"h",
-        choices=COOLING_ORIENTATIONS,
-        verbose_name=u"Cooling orientation"
     )
     rear_to_front = models.BooleanField(default=True)
 
 
-class Server(EndpointModel):
+class CatalogServer(CatalogEndpoint):
     cpu_sockets = models.IntegerField(default=2)
     max_25_disk = models.IntegerField(default=12)
     max_35_disk = models.IntegerField(default=10)
 
 
-class StorageDisk(models.Model):
+class CatalogStorageDisk(models.Model):
     CAPACITY_UNIT_CHOICES = (
         (u"GB", u"GB"),
         (u"TB", u"TB")
@@ -265,23 +229,25 @@ class StorageDisk(models.Model):
         max_length=8,
         default="2.5"
     )
-    capacity_in_gb = models.IntegerField(
+    capacity = models.IntegerField(
         default=100,
         help_text=u"Storage capacity in GB."
     )
 
+    def __unicode__(self):
+        return "%s, %dGB" % (self.physical_format, self.capacity)
 
-class RaidAdapter(EndpointModel):
+
+class CatalogRaidAdapter(CatalogEndpoint):
     SPEED_CHOICES = (
-        ("PCIx1", "PCIx1"),
-        ("PCIx4", "PCIx4"),
-        ("PCIx6", "PCIx6"),
+        (1, "PCIx1"),
+        (4, "PCIx4"),
+        (6, "PCIx6"),
 
     )
-    speed = models.CharField(
-        max_length=32,
+    speed = models.IntegerField(
         choices=SPEED_CHOICES,
-        default=u"PCIx1",
+        default=1,
         verbose_name=u"PCI speed"
     )
 
@@ -293,34 +259,75 @@ class RaidAdapter(EndpointModel):
 #####################################################
 
 
-class Solution(BaseModel):
+class ArchitectSolution(BaseModel):
+    # allow solution chain
     parent = models.ForeignKey(
         "self",
         null=True,
         blank=True,
         default=None,
-        verbose_name=u"Solution"
     )
-    manifestversion_major = models.CharField(max_length=8, default="0")
-    manifestversion_minor = models.CharField(max_length=8, default="1")
 
-    def _manifestversion(self):
-        return ".".join([self.manifestversion_major, self.manifestversion_minor])
-    manifestversion = property(_manifestversion)
+    version = models.CharField(max_length=8)
+
+    # firmware
+    firmware_repo = models.ForeignKey("ArchitectFirmwareRepo")
+    firmware_policy = models.ForeignKey("ArchitectFirmwareRepoPolicy")
+
+    # software meets hardware! Picking application will determine
+    # which servers are available to pick.
+    applications = models.ManyToManyField("ArchitectApplication")
+
+    def _hosts(self):
+        return [s.host for s in self.applications.all()]
+    hosts = property(_hosts)
+
+    def _compatible_servers(self):
+        tmp = [s.compatible_servers for s in self.workloads.all()]
+        return set(reduce(lambda x, y: x + y, tmp))
+    compatible_servers = property(_compatible_servers)
+
+    # hardware
+    racks = models.ManyToManyField("ArchitectRack")
+    switches = models.ManyToManyField("ArchitectSwitch")
+    servers = models.ManyToManyField("ArchitectServer")
 
 
-class Application(models.Model):
+class ArchitectApplication(models.Model):
+    """Applications certified by SA
+
+    These applications are somehow stamped by SA that can run on this
+    architecture. Therefore, we can take an assumption that there are
+    orchestration means to facilitate its installation and even
+    life-cycle management.
+    """
+    PLATFORM_CHOICES = (
+        ("bm", "BareMetal"),
+        ("win210svr", "Windows Server 2010"),
+        ("esxi", "ESXI server"),
+        ("Ubuntu xeniel", "Ubuntu 16.04 Xeniel"),
+        ("Ubuntu trusty", "Ubuntu 14.04 Trusty")
+    )
+
     name = models.CharField(max_length=32)
     host = models.CharField(
         max_length=32,
-        choices=OS_CHOICES
+        choices=PLATFORM_CHOICES
     )
-    compatible_servers = models.ManyToManyField("Server")
+    compatible_servers = models.ManyToManyField("CatalogServer")
+
+    def __unicode__(self):
+        return "%s on %s" % (self.name,
+                             self.host)
 
 
-class FirmwareRepo(models.Model):
+class ArchitectFirmwareRepo(models.Model):
     UPDATE_ACCESS_METHOD_CHOICES = (
         ("m", "manual"),
+    )
+    firmware_fix_id = models.CharField(
+        max_length=8,
+        default="fixid"
     )
     update_access_method = models.CharField(
         choices=UPDATE_ACCESS_METHOD_CHOICES,
@@ -330,35 +337,201 @@ class FirmwareRepo(models.Model):
     update_access_location = models.FilePathField(
         path="/home/lenovo",
         match="foo.*",
-        recursive=True
+        recursive=True,
+        null=True,
+        blank=True
     )
-    pack = models.FilePathField(
+    firmware_pack = models.FilePathField(
         path="/home/lenovo",
         match="pack[.]zip",
-        recursive=True
-    )
-    fix = models.CharField(
-        max_length=8,
-        default="fixid"
+        recursive=True,
+        null=True,
+        blank=True
     )
 
+    def __unicode__(self):
+        return self.firmware_fix_id
 
-class FirmwareRepoPolicy(models.Model):
+
+class ArchitectFirmwareRepoPolicy(models.Model):
     name = models.CharField(max_length=32, default="repo policy")
     device = models.CharField(max_length=32, default="policity device")
 
+    def __unicode__(self):
+        return self.name
+
+
+class ArchitectRuleForCount(models.Model):
+    max_count = models.IntegerField(default=0)
+    min_count = models.IntegerField(default=0)
+
+    def __unicode__(self):
+        return "%d-%d" % (self.min_count, self.max_count)
+
+
+class ArchitectRack(models.Model):
+    catalog = models.ForeignKey("CatalogRack")
+    rule_for_count = models.ForeignKey("ArchitectRuleForCount")
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.catalog,
+                            self.rule_for_count)
+
+
+class ArchitectSwitch(models.Model):
+    catalog = models.ForeignKey("CatalogSwitch")
+    rule_for_count = models.ForeignKey("ArchitectRuleForCount")
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.catalog,
+                            self.rule_for_count)
+
+
+class ArchitectServer(models.Model):
+    catalog = models.ForeignKey("CatalogServer")
+    rule_for_count = models.ForeignKey("ArchitectRuleForCount")
+
+    def _hosts(self):
+        return [a.host for a in self.applications.all()]
+    hosts = property(_hosts)
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.catalog,
+                            self.rule_for_count)
 
 ######################################################
 #
-#    Order config  models
+#    Order models
 #
 #####################################################
-class OrderServerModel(models.Model):
+
+
+class MyOrder(models.Model):
+    order = models.CharField(max_length=32,
+                             default="21873",
+                             help_text=u"Order number")
+    solution = models.ForeignKey("ArchitectSolution")
+
+    ORDER_STATUS_CHOICES = (
+        (1, u"draft"),  # in shopping cart
+        (2, u"in MFG"),
+        (3, u"in provisioning"),
+        (4, u"in deployment"),
+        (5, u"obsolete")
+    )
+    status = models.IntegerField(
+        default=1,
+        choices=ORDER_STATUS_CHOICES
+    )
+
+    def __unicode__(self):
+        return "%s [#%s]" % (self.solution, self.order)
+
+    def _racks(self):
+        return OrderRack.objects.filter(solution=self.solution)
+    racks = property(_racks)
+
+    def _switches(self):
+        return OrderSwitch.objects.filter(solution=self.solution)
+    switchs = property(_switches)
+
+    def _servers(self):
+        return OrderServer.objects.filter(solution=self.solution)
+    servers = property(_servers)
+
+
+class OrderBaseModel(models.Model):
+    """Common configurations that will be determined at ordering.
+    """
+    order = models.ForeignKey("MyOrder")
+    count = models.IntegerField(default=1)
+
+
+class OrderRack(OrderBaseModel):
+    template = models.ForeignKey("ArchitectRack")
+
+    def __unicode__(self):
+        return "%s/%s" % (self.order, self.template.catalog)
+
+
+class OrderSwitch(OrderBaseModel):
+    template = models.ForeignKey("ArchitectSwitch")
+
+    def __unicode__(self):
+        return "%s/%s" % (self.order, self.template.catalog)
+
+
+class OrderServer(OrderBaseModel):
+    """Server model in Ordering phase.
+
+    Based on SA specifics, client can configure his server with
+    more specifics such as the num of cores, memory size, disk size and so on.
+    """
+    template = models.ForeignKey("ArchitectServer")
+
     firmware = models.CharField(max_length=32, default="firmware version")
     cores = models.IntegerField(default=2)
     mem = models.IntegerField(
         default=16,
         help_text=u"Memory size in GB")
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    storages = models.ManyToManyField("CatalogStorageDisk")
+
+    def __unicode__(self):
+        return "%s/%s" % (self.order, self.template.catalog)
+
+
+######################################################
+#
+#    BOM models
+#
+#####################################################
+
+
+class MfgSolution(models.Model):
+    racks = models.ManyToManyField("MfgRack")
+    switches = models.ManyToManyField("MfgSwitch")
+    servers = models.ManyToManyField("MfgServer")
+
+
+class MfgBaseModel(models.Model):
+    # BM manager, eg. LXCA
+    bm_user = models.CharField(max_length=64, default="")
+    bm_password = models.CharField(max_length=32, default="")
+    bm_manager_url = models.URLField(default="")
+
+    # imm seetings
+    imm_ip = models.GenericIPAddressField(blank=True, null=True)
+    imm_user = models.CharField(max_length=64, default="")
+    imm_password = models.CharField(max_length=32, default="")
+
+    serial = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        verbose_name=u"Serial number"
+    )
+    uuid = models.CharField(max_length=32, default="uuid")
+    mtm = models.CharField(max_length=64,
+                           default="",
+                           help_text="Machine type model")
+    firmware_update = models.CharField(max_length=32, default="")
+    config_pattern = models.CharField(max_length=32, default="")
+
+    class Meta:
+        abstract = True
+
+
+class MfgRack(MfgBaseModel):
+    on_order = models.ForeignKey("OrderRack")
+
+
+class MfgSwitch(MfgBaseModel):
+    on_order = models.ForeignKey("OrderSwitch")
+
+
+class MfgServer(MfgBaseModel):
+    on_order = models.ForeignKey("OrderServer")
 
 ######################################################
 #
@@ -367,82 +540,8 @@ class OrderServerModel(models.Model):
 #####################################################
 
 
-class ConfigBaseModel(models.Model):
-    bm_user = models.CharField(max_length=64, default="")
-    bm_password = models.CharField(max_length=32, default="")
-    bm_manager_url = models.URLField(default="")
-    playbooks = models.ManyToManyField("Playbook")
-
-    imm_ip = models.GenericIPAddressField(blank=True, null=True)
-    imm_user = models.CharField(max_length=64, default="")
-    imm_password = models.CharField(max_length=32, default="")
-
-    firmware_update = models.CharField(max_length=32, default="")
-    config_pattern = models.CharField(max_length=32, default="")
-
-    class Meta:
-        abstract = True
-
-
 class Playbook(models.Model):
     name = models.CharField(max_length=32)
     path = models.FilePathField()
     tags = models.CharField(max_length=32, default="")
     extra_vars = JSONField(default="")
-
-
-class SolutionConfig(ConfigBaseModel):
-    solution = models.ForeignKey("Solution")
-
-    # solution is really an abstract concept
-    # that groups racks
-    racks = models.ManyToManyField("RackConfig")
-
-
-class RackConfig(ConfigBaseModel):
-    rack = models.ForeignKey("Rack")
-    pdu_configs = models.ManyToManyField("PduConfig")
-    switch_configs = models.ManyToManyField("SwitchConfig")
-    server_configs = models.ManyToManyField("ServerConfig")
-    storage_configs = models.ManyToManyField("StorageConfig")
-
-    def _pdus(self):
-        return [a.pdu for a in self.pdu_configs.all()]
-    pdus = property(_pdus)
-
-    def _switches(self):
-        return [a.switch for a in self.switch_configs.all()]
-    switches = property(_switches)
-
-    def _servers(self):
-        return [a.server for a in self.server_configs.all()]
-    servers = property(_servers)
-
-    def _storages(self):
-        return [a.storage for a in self.storage_configs.all()]
-    storages = property(_storages)
-
-
-class PduConfig(ConfigBaseModel):
-    pdu = models.ForeignKey("PDU")
-
-
-class ServerConfig(ConfigBaseModel):
-    server = models.ForeignKey("Server")
-    operating_system = models.CharField(
-        max_length=256,
-        default="Ubuntu xeniel",
-        choices=OS_CHOICES
-    )
-
-
-class SwitchConfig(ConfigBaseModel):
-    switch = models.ForeignKey("Switch")
-
-
-class RaidAdapterConfig(ConfigBaseModel):
-    raid = models.ForeignKey("RaidAdapter")
-
-
-class StorageConfig(ConfigBaseModel):
-    storage = models.ForeignKey("StorageDisk")

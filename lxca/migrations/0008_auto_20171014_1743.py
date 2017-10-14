@@ -7,14 +7,14 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lxca', '0005_auto_20170930_1809'),
+        ('lxca', '0007_auto_20171014_1726'),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='playbook',
-            name='path',
-            field=models.FilePathField(),
+            model_name='orderserver',
+            name='ip',
+            field=models.GenericIPAddressField(null=True, blank=True),
             preserve_default=True,
         ),
     ]

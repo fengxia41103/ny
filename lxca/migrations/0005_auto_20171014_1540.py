@@ -7,16 +7,14 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lxca', '0003_auto_20170920_1545'),
+        ('lxca', '0004_auto_20171014_1538'),
     ]
 
     operations = [
-        migrations.RemoveField(
+        migrations.AlterField(
             model_name='rack',
-            name='firmware',
-        ),
-        migrations.RemoveField(
-            model_name='solution',
-            name='firmware',
+            name='expansion_racks',
+            field=models.ForeignKey(blank=True, to='lxca.Rack', null=True),
+            preserve_default=True,
         ),
     ]

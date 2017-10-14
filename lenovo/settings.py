@@ -88,10 +88,6 @@ WSGI_APPLICATION = 'lenovo.wsgi.application'
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 if DEPLOY_TYPE == 'dev':
     DATABASES = {
-        #'default': {
-        #    'ENGINE': 'django.db.backends.sqlite3',
-        #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        #}
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'lenovo',
@@ -99,14 +95,13 @@ if DEPLOY_TYPE == 'dev':
             'PASSWORD': DEV_DB_PWD,
             'HOST': DEV_DB_HOST,   # Or an IP Address that your DB is hosted on
             'PORT': DEV_DB_PORT,
+            'OPTIONS': {
+                "init_command": "SET foreign_key_checks = 0;",
+            },
         }
     }
 elif DEPLOY_TYPE == 'production':
     DATABASES = {
-        #'default': {
-        #    'ENGINE': 'django.db.backends.sqlite3',
-        #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        #}
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': PRODUCTION_DB,
