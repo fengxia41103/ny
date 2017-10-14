@@ -32,13 +32,6 @@ class BaseModel (models.Model):
     )
     description = models.TextField(default="")
 
-    # help text
-    help_text = models.CharField(
-        null=True,
-        blank=True,
-        max_length=64,
-        verbose_name=u"Help"
-    )
     # is object active
     is_active = models.BooleanField(default=True)
 
@@ -210,7 +203,8 @@ class CatalogSwitch(CatalogEndpoint):
 
 class CatalogServer(CatalogEndpoint):
     cpu_sockets = models.IntegerField(default=2)
-    max_25_disk = models.IntegerField(default=12)
+    max_25_disk = models.IntegerField(default=12,
+                                      help_text=u"Maximum number of 2.5inch disks")
     max_35_disk = models.IntegerField(default=10)
 
 

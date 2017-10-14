@@ -35,7 +35,9 @@ urlpatterns = patterns(
         name='server_attachment_add'),
 
     # servers
-    url('^servers/$',
-        views.ServerList.as_view(),
-        name='server_list')
+    url('^catalog/servers/$',
+        views.CatalogServerList.as_view(),
+        name='catalog_server_list'),
+    url(r'^catalog/server/add/$', views.CatalogServerAdd.as_view(),
+        name='catalog_server_add'),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

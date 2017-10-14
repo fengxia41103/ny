@@ -93,7 +93,7 @@ def class_view_decorator(function_decorator):
     """Convert a function based decorator into a class based decorator usable
     on class based Views.
 
-    Can't subclass the `View` as it breaks inheritance (super in particular),
+    Can"t subclass the `View` as it breaks inheritance (super in particular),
     so we monkey-patch instead.
     """
 
@@ -111,7 +111,7 @@ def class_view_decorator(function_decorator):
 
 
 class HomeView (TemplateView):
-    template_name = 'home/home_with_login_modal.html'
+    template_name = "home/home_with_login_modal.html"
 
     def get_context_data(self, **kwargs):
         context = super(TemplateView, self).get_context_data(**kwargs)
@@ -119,8 +119,8 @@ class HomeView (TemplateView):
         user_auth_form = AuthenticationForm()
         user_registration_form = UserCreationForm()
 
-        context['registration_form'] = user_registration_form
-        context['auth_form'] = user_auth_form
+        context["registration_form"] = user_registration_form
+        context["auth_form"] = user_auth_form
         return context
 
 ###################################################
@@ -131,13 +131,13 @@ class HomeView (TemplateView):
 
 
 class LoginView(FormView):
-    template_name = 'registration/login.html'
-    success_url = reverse_lazy('server_list')
+    template_name = "registration/login.html"
+    success_url = reverse_lazy("catalog_server_list")
     form_class = AuthenticationForm
 
     def form_valid(self, form):
-        username = form.cleaned_data['username']
-        password = form.cleaned_data['password']
+        username = form.cleaned_data["username"]
+        password = form.cleaned_data["password"]
         user = authenticate(username=username, password=password)
 
         if user is not None and user.is_active:
@@ -148,28 +148,28 @@ class LoginView(FormView):
 
 
 class LogoutView(TemplateView):
-    template_name = 'registration/logged_out.html'
+    template_name = "registration/logged_out.html"
 
     def get(self, request):
         logout(request)
     # Redirect to a success page.
-        # messages.add_message(request, messages.INFO, 'Thank you for using our
-        # service. Hope to see you soon!')
-        return HttpResponseRedirect(reverse_lazy('home'))
+        # messages.add_message(request, messages.INFO, "Thank you for using our
+        # service. Hope to see you soon!")
+        return HttpResponseRedirect(reverse_lazy("home"))
 
 
 class UserRegisterView(FormView):
-    template_name = 'registration/register_form.html'
+    template_name = "registration/register_form.html"
     form_class = UserCreationForm
-    success_url = reverse_lazy('login')
+    success_url = reverse_lazy("login")
 
     def form_valid(self, form):
-        user_name = form.cleaned_data['username']
-        password = form.cleaned_data['password2']
+        user_name = form.cleaned_data["username"]
+        password = form.cleaned_data["password2"]
         if len(User.objects.filter(username=user_name)) > 0:
             return self.form_invalid(form)
         else:
-            user = User.objects.create_user(user_name, '', password)
+            user = User.objects.create_user(user_name, "", password)
             user.save()
 
             return super(UserRegisterView, self).form_valid(form)
@@ -192,7 +192,7 @@ def attachment_delete_view(request, pk):
 
     # delete model
     a.delete()
-    return HttpResponseRedirect(reverse_lazy('item_detail', kwargs={'pk': object_id}))
+    return HttpResponseRedirect(reverse_lazy("item_detail", kwargs={"pk": object_id}))
 
 
 def server_attachment_add_view(request, pk):
@@ -200,11 +200,11 @@ def server_attachment_add_view(request, pk):
 
     if tmp_form.is_valid():
         t = tmp_form.save(commit=False)
-        t.name = request.FILES['file'].name
+        t.name = request.FILES["file"].name
         t.content_object = MyServer.objects.get(id=pk)
         t.created_by = request.user
         t.save()
-    return HttpResponseRedirect(reverse_lazy('server_detail', kwargs={'pk': pk}))
+    return HttpResponseRedirect(reverse_lazy("server_detail", kwargs={"pk": pk}))
 
 ###################################################
 #
@@ -213,19 +213,33 @@ def server_attachment_add_view(request, pk):
 ###################################################
 
 
-class ServerListFilter (FilterSet):
+class CatalogServerListFilter (FilterSet):
 
     class Meta:
         model = CatalogServer
         fields = {
-            'size': ['contains'],
-            'name': ['contains']
+            "name": ["contains"],
+            "size": ["exact"],
+            "cpu_sockets": ["gt"]
         }
 
 
-class ServerList(FilterView):
-    template_name = 'lxca/server/list.html'
+class CatalogServerList(FilterView):
+    template_name = "lxca/server/catalog_list.html"
     paginate_by = 10
 
     def get_filterset_class(self):
-        return ServerListFilter
+        return CatalogServerListFilter
+
+
+class CatalogServerAdd(CreateView):
+    model = CatalogServer
+    template_name = 'common/add_form.html'
+    success_url = reverse_lazy('catalog_server_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateView, self).get_context_data(**kwargs)
+        context['title'] = u'New Server'
+        context['list_url'] = self.success_url
+        context['objects'] = CatalogServer.objects.all()
+        return context
