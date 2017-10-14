@@ -1,0 +1,29 @@
+{% extends "common/base.html" %}
+
+{% block page-header %}
+Servers (<a href="{% url 'catalog_server_add' %}">add</a>)
+{% endblock %}
+
+
+{% block content %}
+{% include  "common/filter.html" %}
+<table class="table table-striped table-hover" id="server-list">
+  <thead>
+    <th>Name</th>
+    <th>Size</th>
+    <th>Orientation</th>
+    <th>CPU Sockets</th>
+  </thead>
+  <tbody>
+    {% for obj in object_list %}
+    <tr><td> {{ obj.name }}
+    </td><td> {{ obj.size }}
+    </td><td> {{ obj.orientation }}
+    </td><td> {{ obj.cpu_sockets }}
+    </td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+
