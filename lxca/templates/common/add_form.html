@@ -5,7 +5,7 @@
 {{ title }}
 <a href="{{ list_url }}"
    class="btn btn-xs addlink">
-  <span class="glyphicon glyphicon-list"></span>
+  <span class="fa fa-list"></span>
   List
 </a>
 {% endblock %}
@@ -14,7 +14,6 @@
 {% block content %}
 
 {% block existing-list %}{% endblock %}
-
 {% load crispy_forms_tags %}
 <form action="" method="post">
   {% csrf_token %}
@@ -23,7 +22,7 @@
            type="submit"
            value="Create" />
   </div>
-  {% crispy form %}
+  {{ form|crispy }}
 </form>
 
 {% endblock %}

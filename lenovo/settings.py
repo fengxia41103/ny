@@ -54,13 +54,10 @@ INSTALLED_APPS = (
     # custom packages
     #'devserver', # django-devserver
     'debug_toolbar',
-    'storages',  # django-storage
-    's3_folder_storage',  # django-s3-folder-storage
     'compressor',  # django_compressor
     'django_filters',  # django-filters
     'pagination_bootstrap',  # django-pagination-bootstrap
     'crispy_forms',  # django-crispy-forms
-    'social.apps.django_app.default',  # python-social-auth
     'localflavor',  # django-localflavor
     'lxca',  # LXCA
 )
@@ -141,11 +138,6 @@ STATICFILES_FINDERS = (
 # crispy forms
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
-# TEMPLATE_CONTEXT_PROCESSORS = global_settings.TEMPLATE_CONTEXT_PROCESSORS + (
-#     'django.core.context_processors.request',
-#     'social.apps.django_app.context_processors.backends',
-#     'social.apps.django_app.context_processors.login_redirect',
-# )
 
 # for django-allauth
 SITE_ID = 1
