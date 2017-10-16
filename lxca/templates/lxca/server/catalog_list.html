@@ -1,7 +1,10 @@
 {% extends "common/base.html" %}
 
 {% block page-header %}
-Servers (<a href="{% url 'catalog_server_add' %}">add</a>)
+Servers
+<a href="{% url 'catalog_server_add' %}">
+  <i class="fa fa-plus"></i>
+</a>
 {% endblock %}
 
 

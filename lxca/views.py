@@ -1,13 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 import codecs
 import csv
 import hashlib
 import os
 import os.path
 import random
-# so what
 import re
 import shutil
 import subprocess
@@ -378,4 +376,24 @@ class ArchitectSolutionDetail(DetailView):
         context["attachment_form"] = AttachmentForm()
         context["images"] = [
             img.file.url for img in self.object.attachments.all()]
+
+        # solution template YAML
+        solution = {"solution": {
+            "name": self.object.name,
+            "manifestversion": self.object.version,
+            "hosts": self.object.hosts,
+            "workloads": [a.name for a in self.object.applications.all()],
+            "hardware": {
+                "servers": {
+                    "machine_type": [s.catalog.name for s in self.object.servers.all()],
+                },
+                "tor-switches": {
+                    "machine_type": [s.catalog.name for s in self.object.switches.all()],
+                },
+                "racks": {
+                    "machine_type": [s.catalog.name for s in self.object.racks.all()],
+                }
+            }
+        }}
+        context["manifest"] = json.dumps(solution, indent=4)
         return context

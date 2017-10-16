@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime as dt
+import itertools
 
 from annoying.fields import JSONField  # django-annoying
 from django.contrib import admin
@@ -143,12 +144,12 @@ class CatalogRack(BaseModel):
         default=25,
         choices=EIA_CAPACITY_CHOICES
     )
-    sizewall_compartment = models.IntegerField(default=0)
-    expansion_racks = models.ForeignKey("self",
-                                        blank=True,
-                                        null=True,
-                                        default=None,
-                                        help_text="Expansion rack for the primary")
+    sidewall_compartment = models.IntegerField(default=0)
+    expansion_rack = models.ForeignKey("self",
+                                       blank=True,
+                                       null=True,
+                                       default=None,
+                                       help_text="Expansion rack for the primary")
 
 
 class CatalogEndpoint(BaseModel):
@@ -277,8 +278,8 @@ class ArchitectSolution(BaseModel):
     hosts = property(_hosts)
 
     def _compatible_servers(self):
-        tmp = [s.compatible_servers for s in self.workloads.all()]
-        return set(reduce(lambda x, y: x + y, tmp))
+        tmp = [s.compatible_servers.all() for s in self.applications.all()]
+        return set(itertools.chain.from_iterable(tmp))
     compatible_servers = property(_compatible_servers)
 
     # hardware

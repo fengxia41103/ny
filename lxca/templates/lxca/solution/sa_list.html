@@ -14,9 +14,9 @@ Architect Solutions
   <thead>
     <th></th>
     <th>Name</th>
-    <th>Description</th>
     <th>Version</th>
     <th>Applications</th>
+    <th>Compatible Servers</th>
     <th></th>
   </thead>
   <tbody>
@@ -29,9 +29,19 @@ Architect Solutions
         detail
       </a>
     </td><td>{{ obj.name }}
-    </td><td> {{ obj.descriptioin }}
     </td><td> {{ obj.version }}
-    </td><td> {{ obj.applications.all }}
+    </td><td>
+      <ul>
+        {% for app in  obj.applications.all %}
+        <li> {{ app.name }}</li>
+        {% endfor %}
+      </ul>
+    </td><td>
+      <ul class="list-unstyled">
+        {% for svr in obj.compatible_servers %}
+        <li>{{ svr }}</li>
+        {% endfor %}
+      </ul>
     </td><td>
       <a href="{% url 'sa_solution_delete' obj.id %}">
         <i class="fa fa-close"></i>

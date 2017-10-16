@@ -1,4 +1,7 @@
 {% load staticfiles %}
+<script type="text/javascript"
+        src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
+
 <script
     src="{% static 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}">
 </script>
@@ -82,6 +85,18 @@
 <script type="text/javascript"
         src="{% static 'form/jquery.form.js' %}">
 </script>
+
+{# Syntaxhighlighter #}
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/SyntaxHighlighter/3.0.83/scripts/shCore.min.js">
+</script>
+<script type="text/javascript"
+        src="{% static 'bower_components/SyntaxHighlighter/scripts/shAutoloader.js' %}">
+</script>
+<script type="text/javascript"
+        src="{% static 'bower_components/SyntaxHighlighter/scripts/shBrushJScript.js' %}">
+</script>
+
 
 <script type="text/javascript">
  var j$ = jQuery.noConflict();

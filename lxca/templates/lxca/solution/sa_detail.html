@@ -5,9 +5,9 @@
 {% block page-header %}
 <ol class="breadcrumb">
   <li>
-    <a href="{% url 'catalog_server_list' %}"
+    <a href="{% url 'sa_solution_list' %}"
       <i class="fa fa-list-ul"></i>
-      Reference Architecture
+      Architect Solutions
     </a>
   </li>
   <li class="active">
@@ -69,6 +69,8 @@
     </a>
     {% endif %}
 
+    {# barcode #}
+    <img class="text-right" id="barcode">
     <h1 style="font-weight:bold;font-size:40px;">
       {{ object.name|upper }}
     </h1>
@@ -81,13 +83,14 @@
       </span>
     </p>
   </div>
+</div>
 
-{% if applications.all %}
+{% if object.applications.all %}
 <div class="row">
-  <h2 class="page-header">
+  <h4 class="page-header">
     <i class="fa fa-book"></i>
-    Applications
-  </h2>
+    Supported Applications
+  </h4>
   <table class="table table-striped table-hover table-responsive">
     <thead>
       <th>Name</th>
@@ -101,9 +104,13 @@
       </td><td>
         {{ app.host }}
       </td><td>
-        <ul>
+        <ul class="list-unstyled">
           {% for svr in app.compatible_servers.all %}
-          <li> {{ svr }}</li>
+          <li>
+            <a href="{% url 'catalog_server_detail' svr.id %}">
+              {{ svr }}
+            </a>
+          </li>
           {% endfor %}
         </ul>
       </td></tr>
@@ -113,6 +120,129 @@
 </div>
 {% endif %}
 
+{% if object.racks.all %}
+<div class="row">
+  <h4 class="page-header">
+    <i class="fa fa-book"></i>
+    Supported Racks
+  </h4>
+  <table class="table table-striped table-hover table-responsive">
+    <thead>
+      <th>Name</th>
+      <th>EIA Capacity</th>
+      <th>Sidewall Compartment</th>
+      <th>Is Primary?</th>
+      <th>Expansion Rack</th>
+    </thead>
+    <tbody>
+      {% for rack in object.racks.all %}
+      <tr><td>
+        {{ rack.catalog.name }}
+      </td><td>
+        {{ rack.catalog.eia_capacity }}
+      </td><td>
+        {{ rack.catalog.sidewall_compartment }}
+      </td><td>
+        {{ rack.catalog.is_primary }}
+      </td><td>
+        {{ rack.catalog.expansion_rack }}
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if object.switches.all %}
+<div class="row">
+  <h4 class="page-header">
+    <i class="fa fa-book"></i>
+    Supported Switches
+  </h4>
+  <table class="table table-striped table-hover table-responsive">
+    <thead>
+      <th>Name</th>
+      <th>Size</th>
+      <th>Orientation</th>
+      <th>Speed</th>
+      <th>Rear to Front</th>
+      <th>Rules</th>
+    </thead>
+    <tbody>
+      {% for switch in object.switches.all %}
+      <tr><td>
+        {{ switch.catalog.name }}
+      </td><td>
+        {{ switch.catalog.size }}
+      </td><td>
+        {{ switch.catalog.get_orientation_display }}
+      </td><td>
+        {{ switch.catalog.speed }} GB
+      </td><td>
+        {{ switch.catalog.rear_to_front }}
+      </td><td>
+        <ul class="list-unstyled">
+          <li>Max: {{ switch.rule_for_count.max_count }}</li>
+          <li>Min: {{ switch.rule_for_count.min_count }}</li>
+        </ul>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if object.servers.all %}
+<div class="row">
+  <h4 class="page-header">
+    <i class="fa fa-book"></i>
+    Supported Servers
+  </h4>
+  <table class="table table-striped table-hover table-responsive">
+    <thead>
+      <th>Name</th>
+      <th>Size</th>
+      <th>Orientation</th>
+      <th>CPU Sockets</th>
+      <th>Max 3.5" Disk Bay</th>
+      <th>Max 2.5" Disk Bay</th>
+      <th>Rules</th>
+    </thead>
+    <tbody>
+      {% for svr in object.servers.all %}
+      <tr><td>
+        {{ svr.catalog.name }}
+      </td><td>
+        {{ svr.catalog.size }}
+      </td><td>
+        {{ svr.catalog.get_orientation_display }}
+      </td><td>
+        {{ svr.catalog.cpu_sockets }}
+      </td><td>
+        {{ svr.max_35_disk }}
+      </td><td>
+        {{ svr.max_25_disk }}
+      </td><td>
+        <ul class="list-unstyled">
+          <li>Max: {{ svr.rule_for_count.max_count }}</li>
+          <li>Min: {{ svr.rule_for_count.min_count }}</li>
+        </ul>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="row">
+  <h4 class="page-header">
+    <i class="fa fa-book"></i>
+    Manifest (JSON)
+  </h4>
+  <pre class="brush:js;">
+  {{ manifest }}
+  </pre>
+</div>
 {% endblock %}
 
 
@@ -164,7 +294,6 @@
 
   </div>
 </div>
-
 {% endblock %}
 
 {% block custom_js %}
@@ -174,8 +303,14 @@
    // barcode, https://github.com/lindell/JsBarcode
    j$("#barcode").JsBarcode(
      "{{ object.id }}",
-     {format:"CODE39", displayValue:false, fontSize:16}
+     {
+       format:"CODE39",
+       displayValue:false,
+       fontSize:16
+     }
    );
+
+   SyntaxHighlighter.highlight();
  });
 </script>
 {% endblock %}
