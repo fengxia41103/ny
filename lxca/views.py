@@ -175,9 +175,211 @@ class UserRegisterView(FormView):
 
 ###################################################
 #
+#	Catalog rack views
+#
+###################################################
+
+def CatalogRack_attachment_add(request, pk):
+    tmp_form = AttachmentForm(request.POST, request.FILES)
+
+    if tmp_form.is_valid():
+        t = tmp_form.save(commit=False)
+        t.name = request.FILES["file"].name
+        t.content_object = CatalogRack.objects.get(id=pk)
+        t.created_by = request.user
+        t.save()
+    return HttpResponseRedirect(
+        reverse_lazy("catalog_rack_detail",
+                     kwargs={"pk": pk}))
+
+
+@login_required
+def CatalogRack_attachment_delete(request, pk):
+    a = Attachment.objects.get(id=pk)
+    object_id = a.object_id
+
+    # once we set MEDIA_ROOT, we will delete local file from file system also
+    if os.path.exists(a.file.path):
+        os.remove(os.path.join(settings.MEDIA_ROOT, a.file.path))
+
+    # delete model
+    a.delete()
+    return HttpResponseRedirect(
+        reverse_lazy("catalog_rack_detail",
+                     kwargs={"pk": object_id}))
+
+
+class CatalogRackListFilter (FilterSet):
+
+    class Meta:
+        model = CatalogRack
+        fields = ["name", "eia_capacity"]
+
+
+class CatalogRackList(FilterView):
+    template_name = "lxca/rack/catalog_list.html"
+    paginate_by = 10
+
+    def get_filterset_class(self):
+        return CatalogRackListFilter
+
+
+class CatalogRackAdd(CreateView):
+    model = CatalogRack
+    template_name = 'common/add_form.html'
+    success_url = reverse_lazy('catalog_rack_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateView, self).get_context_data(**kwargs)
+        context['title'] = u'New Rack'
+        context['list_url'] = self.success_url
+        context['objects'] = CatalogRack.objects.all()
+        return context
+
+
+class CatalogRackDelete (DeleteView):
+    model = CatalogRack
+    template_name = 'common/delete_form.html'
+    success_url = reverse_lazy('catalog_rack_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(DeleteView, self).get_context_data(**kwargs)
+        context['title'] = u'Delete item'
+        context['list_url'] = reverse_lazy('catalog_rack_list')
+        return context
+
+
+class CatalogRackEdit(UpdateView):
+    model = CatalogRack
+    template_name = "common/edit_form.html"
+    success_url = reverse_lazy("catalog_rack_list")
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateView, self).get_context_data(**kwargs)
+        context['title'] = u'Edit Rack'
+        context['list_url'] = reverse_lazy('catalog_rack_list')
+        context['attachment_form'] = AttachmentForm()
+        return context
+
+
+class CatalogRackDetail(DetailView):
+    model = CatalogRack
+    template_name = "lxca/rack/catalog_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context["attachment_form"] = AttachmentForm()
+        context["images"] = [
+            img.file.url for img in self.object.attachments.all()]
+        return context
+
+###################################################
+#
+#	Catalog switch views
+#
+###################################################
+
+
+def CatalogSwitch_attachment_add(request, pk):
+    tmp_form = AttachmentForm(request.POST, request.FILES)
+
+    if tmp_form.is_valid():
+        t = tmp_form.save(commit=False)
+        t.name = request.FILES["file"].name
+        t.content_object = CatalogSwitch.objects.get(id=pk)
+        t.created_by = request.user
+        t.save()
+    return HttpResponseRedirect(
+        reverse_lazy("catalog_switch_detail",
+                     kwargs={"pk": pk}))
+
+
+@login_required
+def CatalogSwitch_attachment_delete(request, pk):
+    a = Attachment.objects.get(id=pk)
+    object_id = a.object_id
+
+    # once we set MEDIA_ROOT, we will delete local file from file system also
+    if os.path.exists(a.file.path):
+        os.remove(os.path.join(settings.MEDIA_ROOT, a.file.path))
+
+    # delete model
+    a.delete()
+    return HttpResponseRedirect(
+        reverse_lazy("catalog_switch_detail",
+                     kwargs={"pk": object_id}))
+
+
+class CatalogSwitchListFilter (FilterSet):
+
+    class Meta:
+        model = CatalogSwitch
+        fields = ["name", "speed", "rear_to_front"]
+
+
+class CatalogSwitchList(FilterView):
+    template_name = "lxca/switch/catalog_list.html"
+    paginate_by = 10
+
+    def get_filterset_class(self):
+        return CatalogSwitchListFilter
+
+
+class CatalogSwitchAdd(CreateView):
+    model = CatalogSwitch
+    template_name = 'common/add_form.html'
+    success_url = reverse_lazy('catalog_switch_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateView, self).get_context_data(**kwargs)
+        context['title'] = u'New Switch'
+        context['list_url'] = self.success_url
+        context['objects'] = CatalogSwitch.objects.all()
+        return context
+
+
+class CatalogSwitchDelete (DeleteView):
+    model = CatalogSwitch
+    template_name = 'common/delete_form.html'
+    success_url = reverse_lazy('catalog_switch_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(DeleteView, self).get_context_data(**kwargs)
+        context['title'] = u'Delete item'
+        context['list_url'] = reverse_lazy('catalog_switch_list')
+        return context
+
+
+class CatalogSwitchEdit(UpdateView):
+    model = CatalogSwitch
+    template_name = "common/edit_form.html"
+    success_url = reverse_lazy("catalog_switch_list")
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateView, self).get_context_data(**kwargs)
+        context['title'] = u'Edit Switch'
+        context['list_url'] = reverse_lazy('catalog_switch_list')
+        context['attachment_form'] = AttachmentForm()
+        return context
+
+
+class CatalogSwitchDetail(DetailView):
+    model = CatalogSwitch
+    template_name = "lxca/switch/catalog_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context["attachment_form"] = AttachmentForm()
+        context["images"] = [
+            img.file.url for img in self.object.attachments.all()]
+        return context
+
+###################################################
+#
 #	Catalog server views
 #
 ###################################################
+
 
 def CatalogServer_attachment_add(request, pk):
     tmp_form = AttachmentForm(request.POST, request.FILES)

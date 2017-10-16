@@ -137,9 +137,11 @@
     <tbody>
       {% for rack in object.racks.all %}
       <tr><td>
-        {{ rack.catalog.name }}
+        <a href="{% url 'catalog_rack_detail' rack.id %}">
+          {{ rack.catalog.name }}
+        </a>
       </td><td>
-        {{ rack.catalog.eia_capacity }}
+        {{ rack.catalog.get_eia_capacity_display }}
       </td><td>
         {{ rack.catalog.sidewall_compartment }}
       </td><td>
@@ -211,7 +213,9 @@
     <tbody>
       {% for svr in object.servers.all %}
       <tr><td>
-        {{ svr.catalog.name }}
+        <a href="{% url 'catalog_server_detail' svr.catalog.id %}">
+          {{ svr.catalog.name }}
+        </a>
       </td><td>
         {{ svr.catalog.size }}
       </td><td>
