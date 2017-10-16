@@ -12,37 +12,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />    
     <meta name="description" content="">
     <meta name="author" content="">
-
-    {% block core-library %}
-
-    {# app specific tweaks #} 
-    <link rel="stylesheet"
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
-          integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
-          crossorigin="anonymous">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
-            integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
-            crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
-            integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
-            crossorigin="anonymous"></script>
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/simplex/bootstrap.min.css">
-    <link rel="stylesheet"
-          type="text/css"
-          href="{% static 'sass/my.css' %}">	
-
-    {% endblock %}
-
-    {# extra css code #}
-    {% block custom_css %}
-    {% endblock %}
-
     <title>Lenovo Unified</title>
+    {% include "common/head.html" %}
   </head>
 
   <body>
@@ -82,99 +53,12 @@
     </div>
     {% endblock %}<!-- end of block main -->
 
-    {# sandbox for testing client libs/css/js #}
-    {% block test %}	
-    {% endblock %}
-
-    {# modal sections #}
     {% block modal %}
     {% endblock %}
 
-    {% block footer %}
-    <footer class="" id="footer">
-      <i class="fa fa-copyright"></i>
-      2017 Lenovo US
-    </footer>
-    {% endblock %}<!- end of block footer -->
+    {% include "common/footer.html" %}
+    {% include "common/js.html" %}
 
-    <!-- Placed at the end of the document so the pages load faster -->
-    {% block Javascripts %}	
-
-    <script type="text/javascript">
-     var j$ = jQuery.noConflict();
-
-     // set up csrf token for jQuery ajax call to Django views
-     var csrftoken = j$.cookie('csrftoken');
-     function csrfSafeMethod(method) {
-       // these HTTP methods do not require CSRF protection
-       return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-     }
-     function sameOrigin(url) {
-       // test that a given url is a same-origin URL
-       // url could be relative or scheme relative or absolute
-       var host = document.location.host; // host + port
-       var protocol = document.location.protocol;
-       var sr_origin = '//' + host;
-       var origin = protocol + sr_origin;
-       // Allow absolute or scheme relative URLs to same origin
-       return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
-	      (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
-	      // or any other URL that isn't scheme relative or absolute i.e relative.
-	      !(/^(\/\/|http:|https:).*/.test(url));
-     }
-     j$.ajaxSetup({
-       beforeSend: function(xhr, settings) {
-	 if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
-	   // Send the token to same-origin, relative URLs only.
-	   // Send the token only if the method warrants CSRF protection
-	   // Using the CSRFToken value acquired earlier
-	   xhr.setRequestHeader("X-CSRFToken", csrftoken);
-	 }
-       }
-     });
-
-
-     j$(document).ready(function(){
-       // common global widget initializations
-       var table = j$('table.my-datatable').dataTable({
-	 paging: false,
-	 info:false,
-	 "pagingType": "simple"
-       });
-
-       // register tab events
-       j$('a[data-toggle="tab"]').click(function ( e ) {
-	 e.preventDefault ();
-	 j$(this).tab('show');
-       });  
-
-       // show first tab after page loading
-       j$('a[data-toggle="tab"]:first').tab('show');	
-
-       // initialize all tooltips
-       j$("[data-toggle='tooltip']").tooltip({
-	 'placement': 'bottom'
-       });
-
-       // navbar dropdown form
-       j$('.dropdown-menu').find('form').click(function (e) {
-	 e.stopPropagation();
-       });
-
-       // datepicker
-       j$('.dateinput').datepicker({ 
-	 format: "yyyy-mm-dd" ,
-	 todayHighlight: true,
-	 todayBtn: true
-       });
-
-       {% if user.is_authenticated %}
-       {% endif %}
-     });
-    </script>
-    {% endblock %} <!-- end of block JS -->
-
-    {# extra javascript code #}
     {% block custom_js %}
     {% endblock %}
 

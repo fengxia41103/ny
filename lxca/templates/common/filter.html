@@ -4,14 +4,16 @@
 {% load pagination_tags %}
 
 {% block filter %}
-<div class="dropdown">
+<ul class="nav">
+  <li class="dropdown">
     <a class="dropdown-toggle"
        data-toggle="dropdown"
        href="">
       <i class="fa fa-filter"></i>
-      Filters
+      Filters <span class="caret"></span>
     </a>
-    <ul class="dropdown-menu inline-list" id="filters">
+    <ul class="dropdown-menu"
+        id="filters">
       <li>
 	{# filter form #}
 	<div class="my-filter-form">
@@ -20,10 +22,9 @@
                 class="form-inline"
                 role="form">
 	    {% csrf_token %}
-
 	    {{ filter.form|crispy }}
 
-	    <button class="btn"
+	    <button class="my-btn"
                     type="submit"
                     id="id_btn_search_submit">
               Search
@@ -32,21 +33,21 @@
 	</div>
       </li>
     </ul>
-</div>
+  </li>
+</ul>
 
-
-{% for filter,val in filters.iteritems %}
+{% for filter,val in filter.data.iteritems %}
+{% if val and filter != "csrfmiddlewaretoken" and filter != "page" %}
 <span class="flabel">
-  <span class="badge">
-    {{filter}}
+  <span class="badge badge-default">
+    {{ filter }}
   </span>
   {{ val }}
-  <span class="glyphicon
-               glyphicon-remove
-               my-filter-value-close"
+  <span class="glyphicon glyphicon-remove my-filter-value-close"
         for="{{ filter }}">
   </span>
 </span>
+{% endif %}
 {% endfor %}
 
 {# paginator #}

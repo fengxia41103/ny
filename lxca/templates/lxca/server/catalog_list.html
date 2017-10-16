@@ -9,6 +9,7 @@ Servers (<a href="{% url 'catalog_server_add' %}">add</a>)
 {% include  "common/filter.html" %}
 <table class="table table-striped table-hover" id="server-list">
   <thead>
+    <th></th>
     <th>Name</th>
     <th>Size</th>
     <th>Orientation</th>
@@ -16,7 +17,14 @@ Servers (<a href="{% url 'catalog_server_add' %}">add</a>)
   </thead>
   <tbody>
     {% for obj in object_list %}
-    <tr><td> {{ obj.name }}
+    <tr><td>
+      <a href="{% url 'catalog_server_edit' obj.id %}">
+        edit
+      </a> |
+      <a href="{% url 'catalog_server_detail' obj.id %}">
+        detail
+      </a>
+    </td><td>{{ obj.name }}
     </td><td> {{ obj.size }}
     </td><td> {{ obj.orientation }}
     </td><td> {{ obj.cpu_sockets }}

@@ -201,7 +201,7 @@ def server_attachment_add_view(request, pk):
     if tmp_form.is_valid():
         t = tmp_form.save(commit=False)
         t.name = request.FILES["file"].name
-        t.content_object = MyServer.objects.get(id=pk)
+        t.content_object = CatalogServer.objects.get(id=pk)
         t.created_by = request.user
         t.save()
     return HttpResponseRedirect(reverse_lazy("server_detail", kwargs={"pk": pk}))
@@ -242,4 +242,29 @@ class CatalogServerAdd(CreateView):
         context['title'] = u'New Server'
         context['list_url'] = self.success_url
         context['objects'] = CatalogServer.objects.all()
+        return context
+
+
+class CatalogServerEdit(UpdateView):
+    model = CatalogServer
+    template_name = "common/edit_form.html"
+    success_url = reverse_lazy("catalog_server_list")
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateView, self).get_context_data(**kwargs)
+        context['title'] = u'Edit Server'
+        context['list_url'] = reverse_lazy('catalog_server_list')
+        context['attachment_form'] = AttachmentForm()
+        return context
+
+
+class CatalogServerDetail(DetailView):
+    model = CatalogServer
+    template_name = "lxca/server/catalog_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context["attachment_form"] = AttachmentForm()
+        context["images"] = [
+            img.file.url for img in self.object.attachments.all()]
         return context

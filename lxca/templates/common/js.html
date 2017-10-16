@@ -1,0 +1,139 @@
+{% load staticfiles %}
+<script
+    src="{% static 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}">
+</script>
+
+{# jquery.cookie #}
+<scritp type="text/javascript"
+        src="{% static 'bower_components/jquery.cookie/jquery.cookie.js' %}">
+</scritp>
+
+{# loading spinner #}
+<script type="text/javascript"
+        src="{% static 'loading/spin.min.js' %}">
+</script>
+<script type="text/javascript"
+        src="{% static 'loading/ladda.min.js' %}">
+</script>
+
+{# DataTable #}
+<script type="text/javascript"
+        src="{% static 'datatable/js/jquery.dataTables.min.js' %}">
+</script>
+<script type="text/javascript"
+        src="{% static 'datatable/js/dataTables.bootstrap.min.js' %}">
+</script>
+<script type="text/javascript"
+        src="{% static 'datatable/js/jquery.dataTables.editable.js' %}">
+</script>
+<script type="text/javascript"
+        src="{% static 'datatable/js/jquery.jeditable.js' %}">
+</script>
+
+{# lightbos: http://ashleydw.github.io/lightbox/ #}
+<script type="text/javascript"
+        src="{% static 'bower_components/lightbox2/dist/js/lightbox.min.js' %}">
+</script>
+
+{# newticker: http://risq.github.io/jquery-advanced-news-ticker/ #}
+<script type="text/javascript"
+        src="{% static 'newsticker/jquery.newsTicker.min.js' %}">
+</script>
+
+{# https://github.com/lucaong/jQCloud #}
+<script type="text/javascript"
+        src="{% static 'jqcloud/jqcloud-1.0.4.min.js' %}">
+</script>
+
+{# toast https://github.com/CodeSeven/toastr #}
+<script type="text/javascript"
+        src="{% static 'toastr/toastr.min.js' %}">
+</script>
+
+{# TOC https://github.com/dcneiner/TableOfContents/tree/master #}
+<script type="text/javascript"
+        src="{% static 'js/jquery.toc.min.js' %}">
+</script>
+
+{# bootstrap datepicker #}
+<script type="text/javascript"
+        src="{% static 'bootstrap-datepicker/js/bootstrap-datepicker.min.js' %}">
+</script>
+
+{# jquery validate #}
+<script type="text/javascript"
+        src="{% static 'validator/jquery.validate.min.js' %}">
+</script>
+
+{# JsBarcode, https://github.com/lindell/JsBarcode #}
+<script type="text/javascript"
+        src="{% static 'barcode/JsBarcode.all.min.js' %}">
+</script>
+
+{# highcharts #}
+<script type="text/javascript"
+        src="{% static 'highcharts/highcharts-custom.js' %}">
+</script>
+<script type="text/javascript"
+        src="{% static 'highcharts/js/modules/exporting.js' %}">
+</script>
+
+{# jQuery ajax form plugin #}
+<script type="text/javascript"
+        src="{% static 'form/jquery.form.js' %}">
+</script>
+
+<script type="text/javascript">
+ var j$ = jQuery.noConflict();
+
+ // set up csrf token for jQuery ajax call to Django views
+ var csrftoken = j$.cookie('csrftoken');
+ function csrfSafeMethod(method) {
+   // these HTTP methods do not require CSRF protection
+   return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+ }
+ function sameOrigin(url) {
+   // test that a given url is a same-origin URL
+   // url could be relative or scheme relative or absolute
+   var host = document.location.host; // host + port
+   var protocol = document.location.protocol;
+   var sr_origin = '//' + host;
+   var origin = protocol + sr_origin;
+   // Allow absolute or scheme relative URLs to same origin
+   return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+	  (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+	  // or any other URL that isn't scheme relative or absolute i.e relative.
+	  !(/^(\/\/|http:|https:).*/.test(url));
+ }
+ j$.ajaxSetup({
+   beforeSend: function(xhr, settings) {
+     if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+       // Send the token to same-origin, relative URLs only.
+       // Send the token only if the method warrants CSRF protection
+       // Using the CSRFToken value acquired earlier
+       xhr.setRequestHeader("X-CSRFToken", csrftoken);
+     }
+   }
+ });
+
+
+ j$(document).ready(function(){
+   // common global widget initializations
+   var table = j$('table.my-datatable').dataTable({
+     paging: false,
+     info:false,
+     "pagingType": "simple"
+   });
+
+   // navbar dropdown form
+   j$('.dropdown-menu').find('form').click(function (e) {
+     e.stopPropagation();
+   });
+
+   // form validate
+   j$('form').validate();
+
+   {% if user.is_authenticated %}
+   {% endif %}
+ });
+</script>

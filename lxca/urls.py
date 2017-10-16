@@ -40,4 +40,9 @@ urlpatterns = patterns(
         name='catalog_server_list'),
     url(r'^catalog/server/add/$', views.CatalogServerAdd.as_view(),
         name='catalog_server_add'),
+    url(r'^catalog/server/(?P<pk>\d+)/edit/$',
+        views.CatalogServerEdit.as_view(), name='catalog_server_edit'),
+    url(r'^catalog/server/(?P<pk>\d+)/$',
+        views.CatalogServerDetail.as_view(), name='catalog_server_detail'),
+
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
