@@ -174,15 +174,29 @@ class UserRegisterView(FormView):
 
             return super(UserRegisterView, self).form_valid(form)
 
+
 ###################################################
 #
-#	Attachment views
+#	Catalog server views
 #
 ###################################################
+
+def CatalogServer_attachment_add(request, pk):
+    tmp_form = AttachmentForm(request.POST, request.FILES)
+
+    if tmp_form.is_valid():
+        t = tmp_form.save(commit=False)
+        t.name = request.FILES["file"].name
+        t.content_object = CatalogServer.objects.get(id=pk)
+        t.created_by = request.user
+        t.save()
+    return HttpResponseRedirect(
+        reverse_lazy("catalog_server_detail",
+                     kwargs={"pk": pk}))
 
 
 @login_required
-def attachment_delete_view(request, pk):
+def CatalogServer_attachment_delete(request, pk):
     a = Attachment.objects.get(id=pk)
     object_id = a.object_id
 
@@ -192,25 +206,9 @@ def attachment_delete_view(request, pk):
 
     # delete model
     a.delete()
-    return HttpResponseRedirect(reverse_lazy("item_detail", kwargs={"pk": object_id}))
-
-
-def server_attachment_add_view(request, pk):
-    tmp_form = AttachmentForm(request.POST, request.FILES)
-
-    if tmp_form.is_valid():
-        t = tmp_form.save(commit=False)
-        t.name = request.FILES["file"].name
-        t.content_object = CatalogServer.objects.get(id=pk)
-        t.created_by = request.user
-        t.save()
-    return HttpResponseRedirect(reverse_lazy("server_detail", kwargs={"pk": pk}))
-
-###################################################
-#
-#	Server views
-#
-###################################################
+    return HttpResponseRedirect(
+        reverse_lazy("catalog_server_detail",
+                     kwargs={"pk": object_id}))
 
 
 class CatalogServerListFilter (FilterSet):
@@ -245,6 +243,18 @@ class CatalogServerAdd(CreateView):
         return context
 
 
+class CatalogServerDelete (DeleteView):
+    model = CatalogServer
+    template_name = 'common/delete_form.html'
+    success_url = reverse_lazy('catalog_server_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(DeleteView, self).get_context_data(**kwargs)
+        context['title'] = u'Delete item'
+        context['list_url'] = reverse_lazy('catalog_server_list')
+        return context
+
+
 class CatalogServerEdit(UpdateView):
     model = CatalogServer
     template_name = "common/edit_form.html"
@@ -261,6 +271,107 @@ class CatalogServerEdit(UpdateView):
 class CatalogServerDetail(DetailView):
     model = CatalogServer
     template_name = "lxca/server/catalog_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context["attachment_form"] = AttachmentForm()
+        context["images"] = [
+            img.file.url for img in self.object.attachments.all()]
+        return context
+
+###################################################
+#
+#	 Architect solution views
+#
+###################################################
+
+
+def ArchitectSolution_attachment_add(request, pk):
+    tmp_form = AttachmentForm(request.POST, request.FILES)
+
+    if tmp_form.is_valid():
+        t = tmp_form.save(commit=False)
+        t.name = request.FILES["file"].name
+        t.content_object = ArchitectSolution.objects.get(id=pk)
+        t.created_by = request.user
+        t.save()
+    return HttpResponseRedirect(
+        reverse_lazy("sa_solution_detail",
+                     kwargs={"pk": pk}))
+
+
+@login_required
+def ArchitectSolution_attachment_delete(request, pk):
+    a = Attachment.objects.get(id=pk)
+    object_id = a.object_id
+
+    # once we set MEDIA_ROOT, we will delete local file from file system also
+    if os.path.exists(a.file.path):
+        os.remove(os.path.join(settings.MEDIA_ROOT, a.file.path))
+
+    # delete model
+    a.delete()
+    return HttpResponseRedirect(
+        reverse_lazy("sa_solution_detail",
+                     kwargs={"pk": object_id}))
+
+
+class ArchitectSolutionListFilter (FilterSet):
+
+    class Meta:
+        model = ArchitectSolution
+        fields = ["name", "version"]
+
+
+class ArchitectSolutionList(FilterView):
+    template_name = "lxca/solution/sa_list.html"
+    paginate_by = 10
+
+    def get_filterset_class(self):
+        return ArchitectSolutionListFilter
+
+
+class ArchitectSolutionAdd(CreateView):
+    model = ArchitectSolution
+    template_name = 'common/add_form.html'
+    success_url = reverse_lazy('sa_solution_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateView, self).get_context_data(**kwargs)
+        context['title'] = u'New Solution'
+        context['list_url'] = self.success_url
+        context['objects'] = ArchitectSolution.objects.all()
+        return context
+
+
+class ArchitectSolutionDelete (DeleteView):
+    model = ArchitectSolution
+    template_name = 'common/delete_form.html'
+    success_url = reverse_lazy('sa_solution_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(DeleteView, self).get_context_data(**kwargs)
+        context['title'] = u'Delete item'
+        context['list_url'] = reverse_lazy('sa_solution_list')
+        return context
+
+
+class ArchitectSolutionEdit(UpdateView):
+    model = ArchitectSolution
+    template_name = "common/edit_form.html"
+    success_url = reverse_lazy("sa_solution_list")
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateView, self).get_context_data(**kwargs)
+        context['title'] = u'Edit Solution'
+        context['list_url'] = reverse_lazy('sa_solution_list')
+        context['attachment_form'] = AttachmentForm()
+        return context
+
+
+class ArchitectSolutionDetail(DetailView):
+    model = ArchitectSolution
+    template_name = "lxca/solution/sa_detail.html"
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)

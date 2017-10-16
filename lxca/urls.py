@@ -26,23 +26,44 @@ urlpatterns = patterns(
         views.UserRegisterView.as_view(),
         name='user_register'),
 
-    # attachments
-    url(r'^attachment/(?P<pk>\d+)/delete/$',
-        views.attachment_delete_view,
-        name='attachment_delete'),
-    url(r'^attachment/server/(?P<pk>\d+)/add/$',
-        views.server_attachment_add_view,
-        name='server_attachment_add'),
+    # catalog servers
+    url(r'^attachment/catalog/server/(?P<pk>\d+)/add/$',
+        views.CatalogServer_attachment_add,
+        name='catalog_server_attachment_add'),
+    url(r'^attachment/catalog/server/(?P<pk>\d+)/delete/$',
+        views.CatalogServer_attachment_delete,
+        name='catalog_server_attachment_delete'),
 
-    # servers
     url('^catalog/servers/$',
         views.CatalogServerList.as_view(),
         name='catalog_server_list'),
     url(r'^catalog/server/add/$', views.CatalogServerAdd.as_view(),
         name='catalog_server_add'),
+    url(r'^catalog/server/(?P<pk>\d+)/delete/$',
+        views.CatalogServerDelete.as_view(), name='catalog_server_delete'),
     url(r'^catalog/server/(?P<pk>\d+)/edit/$',
         views.CatalogServerEdit.as_view(), name='catalog_server_edit'),
     url(r'^catalog/server/(?P<pk>\d+)/$',
         views.CatalogServerDetail.as_view(), name='catalog_server_detail'),
+
+    # architect solution
+    url(r'^attachment/ref/solution/(?P<pk>\d+)/add/$',
+        views.ArchitectSolution_attachment_add,
+        name='sa_solution_attachment_add'),
+    url(r'^attachment/ref/solution/(?P<pk>\d+)/delete/$',
+        views.ArchitectSolution_attachment_delete,
+        name='sa_solution_attachment_delete'),
+
+    url('^ref/solutions/$',
+        views.ArchitectSolutionList.as_view(),
+        name='sa_solution_list'),
+    url(r'^ref/solution/add/$', views.ArchitectSolutionAdd.as_view(),
+        name='sa_solution_add'),
+    url(r'^ref/solution/(?P<pk>\d+)/delete/$',
+        views.ArchitectSolutionDelete.as_view(), name='sa_solution_delete'),
+    url(r'^ref/solution/(?P<pk>\d+)/edit/$',
+        views.ArchitectSolutionEdit.as_view(), name='sa_solution_edit'),
+    url(r'^ref/solution/(?P<pk>\d+)/$',
+        views.ArchitectSolutionDetail.as_view(), name='sa_solution_detail'),
 
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

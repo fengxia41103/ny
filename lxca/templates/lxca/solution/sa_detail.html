@@ -7,7 +7,7 @@
   <li>
     <a href="{% url 'catalog_server_list' %}"
       <i class="fa fa-list-ul"></i>
-      Servers
+      Reference Architecture
     </a>
   </li>
   <li class="active">
@@ -28,7 +28,7 @@
              style="width:100px;height:100px;">
 
         {% if user.is_superuser %}
-	<a href="{% url 'catalog_server_attachment_delete' img.id %}">
+	<a href="{% url 'sa_solution_attachment_delete' img.id %}">
 	  <i class="fa fa-trash"></i></a>
 	{% endif %}
       </li>
@@ -63,7 +63,7 @@
 
   <div class="col-md-5">
     {% if user.is_superuser %}
-    <a href="{% url 'catalog_server_edit' object.id %}">
+    <a href="{% url 'sa_solution_edit' object.id %}">
       <i class="fa fa-pencil"></i>
       Edit
     </a>
@@ -74,13 +74,45 @@
     </h1>
     <p>
       <span class="item-label">
-        Size:
+        Version:
       </span>
       <span class="item-value">
-        {{ object.size }}
+        {{ object.version }}
       </span>
     </p>
   </div>
+
+{% if applications.all %}
+<div class="row">
+  <h2 class="page-header">
+    <i class="fa fa-book"></i>
+    Applications
+  </h2>
+  <table class="table table-striped table-hover table-responsive">
+    <thead>
+      <th>Name</th>
+      <th>Host</th>
+      <th>Compatible servers</th>
+    </thead>
+    <tbody>
+      {% for app in object.applications.all %}
+      <tr><td>
+        {{ app.name }}
+      </td><td>
+        {{ app.host }}
+      </td><td>
+        <ul>
+          {% for svr in app.compatible_servers.all %}
+          <li> {{ svr }}</li>
+          {% endfor %}
+        </ul>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
 {% endblock %}
 
 
@@ -108,7 +140,7 @@
       {# Modal body #}
       <div class="modal-body">
 	<form id="fileupload"
-              action="{% url 'catalog_server_attachment_add' object.id %}"
+              action="{% url 'sa_solution_attachment_add' object.id %}"
               method="POST"
               enctype="multipart/form-data">
 	  {% csrf_token %}

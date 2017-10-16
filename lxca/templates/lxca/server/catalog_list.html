@@ -14,6 +14,7 @@ Servers (<a href="{% url 'catalog_server_add' %}">add</a>)
     <th>Size</th>
     <th>Orientation</th>
     <th>CPU Sockets</th>
+    <th></th>
   </thead>
   <tbody>
     {% for obj in object_list %}
@@ -28,6 +29,10 @@ Servers (<a href="{% url 'catalog_server_add' %}">add</a>)
     </td><td> {{ obj.size }}
     </td><td> {{ obj.orientation }}
     </td><td> {{ obj.cpu_sockets }}
+    </td><td>
+      <a href="{% url 'catalog_server_delete' obj.id %}">
+        <i class="fa fa-close"></i>
+      </a>
     </td></tr>
     {% endfor %}
   </tbody>
