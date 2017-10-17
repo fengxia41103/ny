@@ -1,0 +1,166 @@
+{% extends "common/base.html" %}
+
+{% load crispy_forms_tags %}
+{% load static %}
+{% block page-header %}
+<ol class="breadcrumb">
+  <li>
+    <a href="{% url 'sa_application_list' %}"
+      <i class="fa fa-list-ul"></i>
+      SA Applications
+    </a>
+  </li>
+  <li class="active">
+    {{ object.id }}
+  </li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-2">
+    <ul class="list-inline">
+      {% for img in object.attachments.all %}
+      <li>
+	<img src="{{ img.file.url }}"
+             data-type="attachment-thumbnail"
+             class="img-responsive img-thumbnail"
+             style="width:100px;height:100px;">
+
+        {% if user.is_superuser %}
+	<a href="{% url 'sa_application_attachment_delete' img.id %}">
+	  <i class="fa fa-trash"></i></a>
+	{% endif %}
+      </li>
+      {% endfor %}
+
+      {% if user.is_superuser %}
+      <li>
+	<img src="{% static "images/upload.png" %}"
+             title="Add more images"
+             data-type="attachment-thumbnail"
+             class="img-responsive img-thumbnail"
+             style="width:100px;height:100px;opacity: 0.2;"
+             data-toggle="modal"
+             data-target="#upload-form">
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+  <div class="col-md-5">
+    {% with object.attachments.all|first as img %}
+    <a href="{{ img.file.url }}"
+       data-lightbox="{{ object}}"
+       data-title="{{ object }}"
+       data-toggle="lightbox">
+      <img src="{{img.file.url}}"
+           class="img-responsive center-block"
+           style="margin-bottom:20px;">
+    </a>
+    <p>{{ img.description }}</p>
+    {% endwith %}
+  </div><!-- end of image -->
+
+  <div class="col-md-5">
+    {% if user.is_superuser %}
+    <a href="{% url 'sa_application_edit' object.id %}">
+      <i class="fa fa-pencil"></i>
+      Edit
+    </a>
+    {% endif %}
+
+    {# barcode #}
+    <img class="text-right" id="barcode">
+
+    <h1 style="font-weight:bold;font-size:40px;">
+      {{ object.name|upper }}
+    </h1>
+    <p>
+      <span class="item-label">
+        Host:
+      </span>
+      <span class="item-value">
+        {{ object.get_host_display }}
+      </span>
+    </p>
+    <p>
+      <span class="item-label">
+        Compatible servers:
+      </span>
+      <span class="item-value">
+        <ul class="list-unstyled">
+          {% for s in object.compatible_servers.all %}
+          <a href="{% url 'catalog_server_detail' s.id %}">
+            <li>{{ s }}</li>
+          </a>
+          {% endfor %}
+        </ul>
+      </span>
+    </p>
+  </div>
+{% endblock %}
+
+
+{% block modal %}
+{# Upload item image #}
+<div id="upload-form"
+     class="modal fade"
+     role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      {# Modal header #}
+      <div class="modal-header">
+        <button type="button"
+                class="close"
+                data-dismiss="modal">
+          &times;
+        </button>
+        <h4 class="modal-title">
+          Upload images
+        </h4>
+      </div>
+
+      {# Modal body #}
+      <div class="modal-body">
+	<form id="fileupload"
+              action="{% url 'sa_application_attachment_add' object.id %}"
+              method="POST"
+              enctype="multipart/form-data">
+	  {% csrf_token %}
+	  {{ attachment_form|crispy }}
+
+	  <button type="submit"
+                  class="btn btn-primary start">
+	    <i class="fa fa-upload"></i>
+	    <span>Start upload</span>
+	  </button>
+	</form>
+      </div>
+
+      {# Modal footer #}
+      <div class="modal-footer">
+        <button type="button"
+                class="btn btn-default"
+                data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block custom_js %}
+<script type="text/javascript">
+ var j$ = jQuery.noConflict();
+ j$(document).ready(function(){
+   // barcode, https://github.com/lindell/JsBarcode
+   j$("#barcode").JsBarcode(
+     "{{ object.id }}",
+     {format:"CODE39", displayValue:false, fontSize:16}
+   );
+ });
+</script>
+{% endblock %}

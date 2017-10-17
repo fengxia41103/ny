@@ -104,7 +104,9 @@
     <tbody>
       {% for app in object.applications.all %}
       <tr><td>
-        {{ app.name }}
+        <a href="{% url 'sa_application_detail' app.id %}">
+          {{ app.name }}
+        </a>
       </td><td>
         {{ app.host }}
       </td><td>

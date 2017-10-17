@@ -118,6 +118,29 @@ urlpatterns = patterns(
         views.CatalogServerDetail.as_view(),
         name='catalog_server_detail'),
 
+    # architect application
+    url(r'^attachment/ref/application/(?P<pk>\d+)/add/$',
+        views.ArchitectApplication_attachment_add,
+        name='sa_application_attachment_add'),
+    url(r'^attachment/ref/application/(?P<pk>\d+)/delete/$',
+        views.ArchitectApplication_attachment_delete,
+        name='sa_application_attachment_delete'),
+    url('^ref/applications/$',
+        views.ArchitectApplicationList.as_view(),
+        name='sa_application_list'),
+    url(r'^ref/application/add/$',
+        views.ArchitectApplicationAdd.as_view(),
+        name='sa_application_add'),
+    url(r'^ref/application/(?P<pk>\d+)/delete/$',
+        views.ArchitectApplicationDelete.as_view(),
+        name='sa_application_delete'),
+    url(r'^ref/application/(?P<pk>\d+)/edit/$',
+        views.ArchitectApplicationEdit.as_view(),
+        name='sa_application_edit'),
+    url(r'^ref/application/(?P<pk>\d+)/$',
+        views.ArchitectApplicationDetail.as_view(),
+        name='sa_application_detail'),
+
     # architect solution
     url(r'^attachment/ref/solution/(?P<pk>\d+)/add/$',
         views.ArchitectSolution_attachment_add,
@@ -125,7 +148,6 @@ urlpatterns = patterns(
     url(r'^attachment/ref/solution/(?P<pk>\d+)/delete/$',
         views.ArchitectSolution_attachment_delete,
         name='sa_solution_attachment_delete'),
-
     url('^ref/solutions/$',
         views.ArchitectSolutionList.as_view(),
         name='sa_solution_list'),

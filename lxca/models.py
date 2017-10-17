@@ -368,7 +368,7 @@ class ArchitectSolution(BaseModel):
     servers = models.ManyToManyField("ArchitectServer")
 
 
-class ArchitectApplication(models.Model):
+class ArchitectApplication(BaseModel):
     """Applications certified by SA
 
     These applications are somehow stamped by SA that can run on this
@@ -384,7 +384,6 @@ class ArchitectApplication(models.Model):
         ("Ubuntu trusty", "Ubuntu 14.04 Trusty")
     )
 
-    name = models.CharField(max_length=32)
     host = models.CharField(
         max_length=32,
         choices=PLATFORM_CHOICES
