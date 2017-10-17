@@ -59,6 +59,7 @@ INSTALLED_APPS = (
     'pagination_bootstrap',  # django-pagination-bootstrap
     'crispy_forms',  # django-crispy-forms
     'localflavor',  # django-localflavor
+    'tastypie',  # django-tastypie
     'lxca',  # LXCA
 )
 

@@ -275,6 +275,107 @@ class CatalogRackDetail(DetailView):
 
 ###################################################
 #
+#	Catalog pdu views
+#
+###################################################
+
+
+def CatalogPdu_attachment_add(request, pk):
+    tmp_form = AttachmentForm(request.POST, request.FILES)
+
+    if tmp_form.is_valid():
+        t = tmp_form.save(commit=False)
+        t.name = request.FILES["file"].name
+        t.content_object = CatalogPdu.objects.get(id=pk)
+        t.created_by = request.user
+        t.save()
+    return HttpResponseRedirect(
+        reverse_lazy("catalog_pdu_detail",
+                     kwargs={"pk": pk}))
+
+
+@login_required
+def CatalogPdu_attachment_delete(request, pk):
+    a = Attachment.objects.get(id=pk)
+    object_id = a.object_id
+
+    # once we set MEDIA_ROOT, we will delete local file from file system also
+    if os.path.exists(a.file.path):
+        os.remove(os.path.join(settings.MEDIA_ROOT, a.file.path))
+
+    # delete model
+    a.delete()
+    return HttpResponseRedirect(
+        reverse_lazy("catalog_pdu_detail",
+                     kwargs={"pk": object_id}))
+
+
+class CatalogPduListFilter (FilterSet):
+
+    class Meta:
+        model = CatalogPdu
+        fields = ["name", "c13", "c19", "is_monitored"]
+
+
+class CatalogPduList(FilterView):
+    template_name = "lxca/pdu/catalog_list.html"
+    paginate_by = 10
+
+    def get_filterset_class(self):
+        return CatalogPduListFilter
+
+
+class CatalogPduAdd(CreateView):
+    model = CatalogPdu
+    template_name = 'common/add_form.html'
+    success_url = reverse_lazy('catalog_pdu_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateView, self).get_context_data(**kwargs)
+        context['title'] = u'New PDU'
+        context['list_url'] = self.success_url
+        context['objects'] = CatalogPdu.objects.all()
+        return context
+
+
+class CatalogPduDelete (DeleteView):
+    model = CatalogPdu
+    template_name = 'common/delete_form.html'
+    success_url = reverse_lazy('catalog_pdu_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(DeleteView, self).get_context_data(**kwargs)
+        context['title'] = u'Delete item'
+        context['list_url'] = reverse_lazy('catalog_pdu_list')
+        return context
+
+
+class CatalogPduEdit(UpdateView):
+    model = CatalogPdu
+    template_name = "common/edit_form.html"
+    success_url = reverse_lazy("catalog_pdu_list")
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateView, self).get_context_data(**kwargs)
+        context['title'] = u'Edit PDU'
+        context['list_url'] = reverse_lazy('catalog_pdu_list')
+        context['attachment_form'] = AttachmentForm()
+        return context
+
+
+class CatalogPduDetail(DetailView):
+    model = CatalogPdu
+    template_name = "lxca/pdu/catalog_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context["attachment_form"] = AttachmentForm()
+        context["images"] = [
+            img.file.url for img in self.object.attachments.all()]
+        return context
+
+###################################################
+#
 #	Catalog switch views
 #
 ###################################################
@@ -594,6 +695,9 @@ class ArchitectSolutionDetail(DetailView):
                 },
                 "racks": {
                     "machine_type": [s.catalog.name for s in self.object.racks.all()],
+                },
+                "pdus": {
+                    "machine_type": [s.catalog.name for s in self.object.powers.all()],
                 }
             }
         }}

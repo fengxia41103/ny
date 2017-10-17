@@ -9,24 +9,29 @@ import settings
 from lxca.api import *
 
 v1_api = Api(api_name='v1')
-# v1_api.register(SchoolResource())
+v1_api.register(CatalogServerResource())
+v1_api.register(ArchitectSolutionResource())
 
-urlpatterns = patterns('',
-                       url(r'^api/', include(v1_api.urls)),
-                       url(r'^admin/', include(admin.site.urls)),
-                       url('', include('social.apps.django_app.urls', namespace='social')),
-                       url('', include('django.contrib.auth.urls', namespace='auth')),
-
-                       url(r'^lxca/', include('lxca.urls')),
-
-                       )
+urlpatterns = patterns(
+    '',
+    url(r'^api/',
+        include(v1_api.urls)),
+    url(r'^admin/',
+        include(admin.site.urls)),
+    url('', include('django.contrib.auth.urls',
+                    namespace='auth')),
+    url(r'^lxca/',
+        include('lxca.urls')),
+)
 
 if settings.DEBUG:
     import debug_toolbar
-    urlpatterns += patterns('',
-                            url(r'^__debug__/', include(debug_toolbar.urls)),
-                            )
+    urlpatterns += patterns(
+        '',
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    )
 
-    urlpatterns += patterns('django.contrib.staticfiles.views',
-                            url(r'^static/(?P<path>.*)$', 'serve'),
-                            )
+    urlpatterns += patterns(
+        'django.contrib.staticfiles.views',
+        url(r'^static/(?P<path>.*)$', 'serve'),
+    )

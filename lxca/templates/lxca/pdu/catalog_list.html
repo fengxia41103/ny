@@ -1,8 +1,8 @@
 {% extends "common/base.html" %}
 
 {% block page-header %}
-Switches
-<a href="{% url 'catalog_switch_add' %}">
+PDUs
+<a href="{% url 'catalog_pdu_add' %}">
   <i class="fa fa-plus"></i>
 </a>
 {% endblock %}
@@ -10,30 +10,26 @@ Switches
 
 {% block content %}
 {% include  "common/filter.html" %}
-<table class="table table-striped table-hover" id="switch-list">
+<table class="table table-striped table-hover" id="pdu-list">
   <thead>
     <th></th>
     <th>Name</th>
-    <th>Size</th>
-    <th>Speed</th>
-    <th>Rear to Front</th>
+    <th>Voltage</th>
     <th></th>
   </thead>
   <tbody>
     {% for obj in object_list %}
     <tr><td>
-      <a href="{% url 'catalog_switch_edit' obj.id %}">
+      <a href="{% url 'catalog_pdu_edit' obj.id %}">
         edit
       </a> |
-      <a href="{% url 'catalog_switch_detail' obj.id %}">
+      <a href="{% url 'catalog_pdu_detail' obj.id %}">
         detail
       </a>
     </td><td>{{ obj.name }}
-    </td><td>{{ obj.get_size_display }}
-    </td><td> {{ obj.get_speed_display }}
-    </td><td> {{ obj.rear_to_front }}
+    </td><td>{{ obj.get_voltage_display }}
     </td><td>
-      <a href="{% url 'catalog_switch_delete' obj.id %}">
+      <a href="{% url 'catalog_pdu_delete' obj.id %}">
         <i class="fa fa-close"></i>
       </a>
     </td></tr>

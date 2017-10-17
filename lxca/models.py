@@ -154,12 +154,12 @@ class CatalogRack(BaseModel):
 
 class CatalogEndpoint(BaseModel):
     SIZE_CHOICES = (
-        (u"1U", u"1U"),
-        (u"2U", u"2U"),
+        (0, u"0U"),
+        (1, u"1U"),
+        (2, u"2U"),
     )
-    size = models.CharField(
-        max_length=8,
-        default=u"1U",
+    size = models.IntegerField(
+        default=1,
         choices=SIZE_CHOICES
     )
     ORIENTATION_CHOICES = (
@@ -176,18 +176,97 @@ class CatalogEndpoint(BaseModel):
         abstract = True
 
 
+class PduInput(models.Model):
+    """PDU input voltage, phase, current.
+    https://lenovopress.com/redp5267.pdf
+    """
+    voltage = models.IntegerField(default=120)
+
+    PHASE_CHOICES = (
+        (1, u"1 Phase"),
+        (3, u"3 Phase")
+    )
+    phase = models.IntegerField(
+        default=1,
+        choices=PHASE_CHOICES
+    )
+
+    FREQUENCY_CHOICES = (
+        (1, u"50-60Hz"),
+    )
+    frequency = models.IntegerField(
+        default=1,
+        choices=FREQUENCY_CHOICES
+    )
+    current = models.IntegerField(default=13)
+
+    class Meta:
+        unique_together = ("voltage", "phase", "current")
+
+    def __unicode__(self):
+        return " ".join([
+            "%dVAC" % self.voltage,
+            "%d Phase" % self.phase,
+            "%dA" % self.current
+        ])
+
+
+class PduOutput(models.Model):
+    """PDU out voltage, phase, current.
+    https://lenovopress.com/redp5267.pdf
+    """
+    voltage = models.IntegerField(default=120)
+    capacity = models.IntegerField(
+        help_text=u"Capacity per PDU (w)"
+    )
+    power_limit_per_pdu = models.IntegerField()
+    power_limit_per_outlet = models.IntegerField()
+    power_limit_per_group = models.IntegerField(
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        unique_together = ("voltage", "capacity",
+                           "power_limit_per_pdu",
+                           "power_limit_per_outlet",
+                           "power_limit_per_group")
+
+    def __unicode__(self):
+        if self.power_limit_per_group:
+            tmp = "%dA" % self.power_limit_per_group
+        else:
+            tmp = "-"
+        return "/".join([
+            "%dVAC" % self.voltage,
+            "%dW" % self.capacity,
+            "%dA" % self.power_limit_per_pdu,
+            "%dA" % self.power_limit_per_outlet,
+            "%s" % tmp
+        ])
+
+
 class CatalogPdu(CatalogEndpoint):
-    VOLTAGE_CHOICES = (
-        (u"120-1", u"120V single phase"),
-        (u"208-1", u"208V single phase"),
-        (u"120-3", u"208V three phase"),
-        (u"400-3", u"400V three phase")
-    )
-    voltage = models.CharField(
-        max_length=16,
-        default=u"120-1",
-        choices=VOLTAGE_CHOICES
-    )
+    c13 = models.IntegerField(default=0)
+    c19 = models.IntegerField(default=0)
+    inputs = models.ManyToManyField(PduInput)
+    outputs = models.ManyToManyField(PduOutput)
+    is_monitored = models.BooleanField(default=False)
+
+    def _input_voltages(self):
+        voltages = [i.voltage for i in self.inputs.all()]
+        min_vol = min(voltages)
+        max_vol = max(voltages)
+        return "%d-%dVAC" % (min_val, max_val)
+    input_voltages = property(_input_voltages)
+
+    def _input_phases(self):
+        return set(["%d Phase" % i.phase for i in self.inputs.all()])
+    input_phases = property(_input_phases)
+
+    def _input_currents(self):
+        return set(["%dA" % i.current for i in self.inputs.all()])
+    input_currents = property(_input_currents)
 
 
 class CatalogSwitch(CatalogEndpoint):
@@ -283,6 +362,7 @@ class ArchitectSolution(BaseModel):
     compatible_servers = property(_compatible_servers)
 
     # hardware
+    powers = models.ManyToManyField("ArchitectPdu")
     racks = models.ManyToManyField("ArchitectRack")
     switches = models.ManyToManyField("ArchitectSwitch")
     servers = models.ManyToManyField("ArchitectServer")
@@ -362,6 +442,15 @@ class ArchitectRuleForCount(models.Model):
 
     def __unicode__(self):
         return "%d-%d" % (self.min_count, self.max_count)
+
+
+class ArchitectPdu(models.Model):
+    catalog = models.ForeignKey("CatalogPdu")
+    rule_for_count = models.ForeignKey("ArchitectRuleForCount")
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.catalog,
+                            self.rule_for_count)
 
 
 class ArchitectRack(models.Model):

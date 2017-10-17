@@ -82,6 +82,10 @@
         {{ object.version }}
       </span>
     </p>
+
+    <p>
+      {{ object.description }}
+    </p>
   </div>
 </div>
 
@@ -155,6 +159,49 @@
 </div>
 {% endif %}
 
+{% if object.powers.all %}
+<div class="row">
+  <h4 class="page-header">
+    <i class="fa fa-book"></i>
+    Supported PDUs
+  </h4>
+  <table class="table table-striped table-hover table-responsive">
+    <thead>
+      <th>Name</th>
+      <th>Inputs</th>
+      <th>Outputs</th>
+      <th>C13</th>
+      <th>C19</th>
+    </thead>
+    <tbody>
+      {% for pdu in object.powers.all %}
+      <tr><td>
+        <a href="{% url 'catalog_pdu_detail' pdu.id %}">
+          {{ pdu.catalog.name }}
+        </a>
+      </td><td>
+        <ul class="list-unstyled">
+          {% for i in pdu.catalog.inputs.all %}
+          <li>{{ i }}</li>
+          {% endfor %}
+        </ul>
+      </td><td>
+        <ul class="list-unstyled">
+          {% for o in pdu.catalog.outputs.all %}
+          <li>{{ o }}</li>
+          {% endfor %}
+        </ul>
+      </td><td>
+        {{ pdu.catalog.c13 }}
+      </td><td>
+        {{ pdu.catalog.c19 }}
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
 {% if object.switches.all %}
 <div class="row">
   <h4 class="page-header">
@@ -173,9 +220,11 @@
     <tbody>
       {% for switch in object.switches.all %}
       <tr><td>
-        {{ switch.catalog.name }}
+        <a href="{% url 'catalog_switch_detail' switch.id %}">
+          {{ switch.catalog.name }}
+        </a>
       </td><td>
-        {{ switch.catalog.size }}
+        {{ switch.catalog.get_size_display }}
       </td><td>
         {{ switch.catalog.get_orientation_display }}
       </td><td>
@@ -217,7 +266,7 @@
           {{ svr.catalog.name }}
         </a>
       </td><td>
-        {{ svr.catalog.size }}
+        {{ svr.catalog.get_size_display }}
       </td><td>
         {{ svr.catalog.get_orientation_display }}
       </td><td>
