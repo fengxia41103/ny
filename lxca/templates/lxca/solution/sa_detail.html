@@ -104,6 +104,17 @@
     <tbody>
       {% for app in object.applications.all %}
       <tr><td>
+        {% with app.attachments.all|first as img %}
+        <a href="{{ img.file.url }}"
+           data-lightbox="{{ app}}"
+           data-title="{{ app }}"
+           data-toggle="lightbox">
+          <img src="{{img.file.url}}"
+               data-type="attachment-thumbnail"
+               class="img-responsive img-thumbnail"
+               style="width:50px;height:50px;">
+        </a>
+        {% endwith %}
         <a href="{% url 'sa_application_detail' app.id %}">
           {{ app.name }}
         </a>
@@ -143,6 +154,17 @@
     <tbody>
       {% for rack in object.racks.all %}
       <tr><td>
+        {% with rack.catalog.attachments.all|first as img %}
+        <a href="{{ img.file.url }}"
+           data-lightbox="{{ rack }}"
+           data-title="{{ rack }}"
+           data-toggle="lightbox">
+          <img src="{{img.file.url}}"
+               data-type="attachment-thumbnail"
+               class="img-responsive img-thumbnail"
+               style="width:50px;height:50px;">
+        </a>
+        {% endwith %}
         <a href="{% url 'catalog_rack_detail' rack.id %}">
           {{ rack.catalog.name }}
         </a>
@@ -178,6 +200,17 @@
     <tbody>
       {% for pdu in object.powers.all %}
       <tr><td>
+        {% with pdu.catalog.attachments.all|first as img %}
+        <a href="{{ img.file.url }}"
+           data-lightbox="{{ pdu }}"
+           data-title="{{ pdu }}"
+           data-toggle="lightbox">
+          <img src="{{img.file.url}}"
+               data-type="attachment-thumbnail"
+               class="img-responsive img-thumbnail"
+               style="width:50px;height:50px;">
+        </a>
+        {% endwith %}
         <a href="{% url 'catalog_pdu_detail' pdu.id %}">
           {{ pdu.catalog.name }}
         </a>
@@ -222,6 +255,17 @@
     <tbody>
       {% for switch in object.switches.all %}
       <tr><td>
+        {% with switch.catalog.attachments.all|first as img %}
+        <a href="{{ img.file.url }}"
+           data-lightbox="{{ switch }}"
+           data-title="{{ switch }}"
+           data-toggle="lightbox">
+          <img src="{{img.file.url}}"
+               data-type="attachment-thumbnail"
+               class="img-responsive img-thumbnail"
+               style="width:50px;height:50px;">
+        </a>
+        {% endwith %}
         <a href="{% url 'catalog_switch_detail' switch.id %}">
           {{ switch.catalog.name }}
         </a>
@@ -264,6 +308,17 @@
     <tbody>
       {% for svr in object.servers.all %}
       <tr><td>
+        {% with svr.catalog.attachments.all|first as img %}
+        <a href="{{ img.file.url }}"
+           data-lightbox="{{ svr }}"
+           data-title="{{ svr }}"
+           data-toggle="lightbox">
+          <img src="{{img.file.url}}"
+               data-type="attachment-thumbnail"
+               class="img-responsive img-thumbnail"
+               style="width:50px;height:50px;">
+        </a>
+        {% endwith %}
         <a href="{% url 'catalog_server_detail' svr.catalog.id %}">
           {{ svr.catalog.name }}
         </a>
@@ -274,9 +329,9 @@
       </td><td>
         {{ svr.catalog.cpu_sockets }}
       </td><td>
-        {{ svr.max_35_disk }}
+        {{ svr.catalog.max_35_disk }}
       </td><td>
-        {{ svr.max_25_disk }}
+        {{ svr.catalog.max_25_disk }}
       </td><td>
         <ul class="list-unstyled">
           <li>Max: {{ svr.rule_for_count.max_count }}</li>
