@@ -38,7 +38,7 @@ Architect Solutions
       </ul>
     </td><td>
       <ul class="list-unstyled">
-        {% for svr in obj.compatible_servers %}
+        {% for svr in obj.servers.all %}
         <li>{{ svr }}</li>
         {% endfor %}
       </ul>

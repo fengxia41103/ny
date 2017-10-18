@@ -7,13 +7,12 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lxca', '0010_auto_20171014_2353'),
+        ('lxca', '0004_auto_20171018_1919'),
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='catalograck',
-            old_name='sizewall_compartment',
-            new_name='sidewall_compartment',
+        migrations.RemoveField(
+            model_name='architectsolution',
+            name='firmware_repo',
         ),
     ]

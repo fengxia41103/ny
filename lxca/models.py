@@ -283,8 +283,9 @@ class CatalogSwitch(CatalogEndpoint):
 
 class CatalogServer(CatalogEndpoint):
     cpu_sockets = models.IntegerField(default=2)
-    max_25_disk = models.IntegerField(default=12,
-                                      help_text=u"Maximum number of 2.5inch disks")
+    max_25_disk = models.IntegerField(
+        default=12,
+        help_text=u"Maximum number of 2.5inch disks")
     max_35_disk = models.IntegerField(default=10)
 
 
@@ -343,10 +344,8 @@ class ArchitectSolution(BaseModel):
     )
 
     version = models.CharField(max_length=8)
-
-    # firmware
-    firmware_repo = models.ForeignKey("ArchitectFirmwareRepo")
-    firmware_policy = models.ForeignKey("ArchitectFirmwareRepoPolicy")
+    lxca = models.ForeignKey("ArchitectLxca")
+    compliance = models.ForeignKey("ArchitectCompliance")
 
     # software meets hardware! Picking application will determine
     # which servers are available to pick.
@@ -366,6 +365,25 @@ class ArchitectSolution(BaseModel):
     racks = models.ManyToManyField("ArchitectRack")
     switches = models.ManyToManyField("ArchitectSwitch")
     servers = models.ManyToManyField("ArchitectServer")
+
+
+class ArchitectCompliance(models.Model):
+    name = models.CharField(
+        max_length=32,
+        default="compliance")
+
+    def __unicode__(self):
+        return self.name
+
+
+class ArchitectLxca(models.Model):
+    version = models.CharField(max_length=8)
+    patch_update_filename = models.CharField(
+        max_length=32,
+        default="update.tgz")
+
+    def __unicode__(self):
+        return self.patch_update_filename
 
 
 class ArchitectApplication(BaseModel):
@@ -399,40 +417,22 @@ class ArchitectFirmwareRepo(models.Model):
     UPDATE_ACCESS_METHOD_CHOICES = (
         ("m", "manual"),
     )
-    firmware_fix_id = models.CharField(
-        max_length=8,
-        default="fixid"
-    )
     update_access_method = models.CharField(
         choices=UPDATE_ACCESS_METHOD_CHOICES,
-        max_length=8,
+        max_length=1,
         default="m"
     )
-    update_access_location = models.FilePathField(
-        path="/home/lenovo",
-        match="foo.*",
-        recursive=True,
-        null=True,
-        blank=True
+
+    fix_id = models.CharField(
+        max_length=8,
+        default="fixpack"
     )
-    firmware_pack = models.FilePathField(
-        path="/home/lenovo",
-        match="pack[.]zip",
-        recursive=True,
-        null=True,
-        blank=True
-    )
+    pack_filename = models.CharField(
+        max_length=32,
+        default="fixpack.tgz")
 
     def __unicode__(self):
-        return self.firmware_fix_id
-
-
-class ArchitectFirmwareRepoPolicy(models.Model):
-    name = models.CharField(max_length=32, default="repo policy")
-    device = models.CharField(max_length=32, default="policity device")
-
-    def __unicode__(self):
-        return self.name
+        return self.fix_id
 
 
 class ArchitectRuleForCount(models.Model):
@@ -443,36 +443,46 @@ class ArchitectRuleForCount(models.Model):
         return "%d-%d" % (self.min_count, self.max_count)
 
 
-class ArchitectPdu(models.Model):
-    catalog = models.ForeignKey("CatalogPdu")
+class ArchitectBaseModel(models.Model):
+    # design rules
     rule_for_count = models.ForeignKey("ArchitectRuleForCount")
 
-    def __unicode__(self):
-        return "%s (%s)" % (self.catalog,
-                            self.rule_for_count)
+    # firmware
+    firmware_repo = models.ForeignKey("ArchitectFirmwareRepo")
+    firmware_policy = models.CharField(max_length=32, default="")
+
+    def _firmware(self):
+        return "/".join([self.firmware_repo.fix_id,
+                         self.firmware_policy])
+    firmware = property(_firmware)
 
 
-class ArchitectRack(models.Model):
+class ArchitectRack(ArchitectBaseModel):
     catalog = models.ForeignKey("CatalogRack")
-    rule_for_count = models.ForeignKey("ArchitectRuleForCount")
 
     def __unicode__(self):
         return "%s (%s)" % (self.catalog,
                             self.rule_for_count)
 
 
-class ArchitectSwitch(models.Model):
+class ArchitectPdu(ArchitectBaseModel):
+    catalog = models.ForeignKey("CatalogPdu")
+
+    def __unicode__(self):
+        return "%s (%s)" % (self.catalog,
+                            self.rule_for_count)
+
+
+class ArchitectSwitch(ArchitectBaseModel):
     catalog = models.ForeignKey("CatalogSwitch")
-    rule_for_count = models.ForeignKey("ArchitectRuleForCount")
 
     def __unicode__(self):
         return "%s (%s)" % (self.catalog,
                             self.rule_for_count)
 
 
-class ArchitectServer(models.Model):
+class ArchitectServer(ArchitectBaseModel):
     catalog = models.ForeignKey("CatalogServer")
-    rule_for_count = models.ForeignKey("ArchitectRuleForCount")
 
     def _hosts(self):
         return [a.host for a in self.applications.all()]
@@ -489,9 +499,10 @@ class ArchitectServer(models.Model):
 #####################################################
 
 
-class MyOrder(models.Model):
+class OrderSolution(models.Model):
     order = models.CharField(max_length=32,
                              default="21873",
+                             unique=True,
                              help_text=u"Order number")
     solution = models.ForeignKey("ArchitectSolution")
 
@@ -510,38 +521,71 @@ class MyOrder(models.Model):
     def __unicode__(self):
         return "%s [#%s]" % (self.solution, self.order)
 
+    def _applications(self):
+        return OrderApplication.objects.filter(order=self)
+    applications = property(_applications)
+
     def _racks(self):
-        return OrderRack.objects.filter(solution=self.solution)
+        return OrderRack.objects.filter(order=self)
     racks = property(_racks)
 
+    def _num_racks(self):
+        return sum([s.qty for s in self.racks])
+    num_racks = property(_num_racks)
+
+    def _pdus(self):
+        return OrderPdu.objects.filter(order=self)
+    pdus = property(_pdus)
+
+    def _num_pdus(self):
+        return sum([s.qty for s in self.pdus])
+    num_pdus = property(_num_pdus)
+
     def _switches(self):
-        return OrderSwitch.objects.filter(solution=self.solution)
-    switchs = property(_switches)
+        return OrderSwitch.objects.filter(order=self)
+    switches = property(_switches)
+
+    def _num_switches(self):
+        return sum([s.qty for s in self.switches])
+    num_switches = property(_num_switches)
 
     def _servers(self):
-        return OrderServer.objects.filter(solution=self.solution)
+        return OrderServer.objects.filter(order=self)
     servers = property(_servers)
+
+    def _num_servers(self):
+        return sum([s.qty for s in self.servers])
+    num_servers = property(_num_servers)
 
 
 class OrderBaseModel(models.Model):
     """Common configurations that will be determined at ordering.
     """
-    order = models.ForeignKey("MyOrder")
-    count = models.IntegerField(default=1)
+    order = models.ForeignKey("OrderSolution")
+    qty = models.IntegerField(default=1)
+
+    def __unicode__(self):
+        return "%s/%s" % (self.order, self.template.catalog)
+
+
+class OrderApplication(OrderBaseModel):
+    template = models.ForeignKey("ArchitectApplication",
+                                 on_delete=models.CASCADE)
 
 
 class OrderRack(OrderBaseModel):
-    template = models.ForeignKey("ArchitectRack")
+    template = models.ForeignKey("ArchitectRack",
+                                 on_delete=models.CASCADE)
 
-    def __unicode__(self):
-        return "%s/%s" % (self.order, self.template.catalog)
+
+class OrderPdu(OrderBaseModel):
+    template = models.ForeignKey("ArchitectPdu",
+                                 on_delete=models.CASCADE)
 
 
 class OrderSwitch(OrderBaseModel):
-    template = models.ForeignKey("ArchitectSwitch")
-
-    def __unicode__(self):
-        return "%s/%s" % (self.order, self.template.catalog)
+    template = models.ForeignKey("ArchitectSwitch",
+                                 on_delete=models.CASCADE)
 
 
 class OrderServer(OrderBaseModel):
@@ -557,11 +601,11 @@ class OrderServer(OrderBaseModel):
     mem = models.IntegerField(
         default=16,
         help_text=u"Memory size in GB")
-    ip = models.GenericIPAddressField(null=True, blank=True)
+    ip = models.GenericIPAddressField(
+        null=True,
+        blank=True,
+        verbose_name=u"IP4 address")
     storages = models.ManyToManyField("CatalogStorageDisk")
-
-    def __unicode__(self):
-        return "%s/%s" % (self.order, self.template.catalog)
 
 
 ######################################################

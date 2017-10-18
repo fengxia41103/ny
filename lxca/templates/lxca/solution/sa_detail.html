@@ -82,6 +82,22 @@
         {{ object.version }}
       </span>
     </p>
+    <p>
+      <span class="item-label">
+        LXCA:
+      </span>
+      <span class="item-value">
+        {{ object.lxca }}
+      </span>
+    </p>
+    <p>
+      <span class="item-label">
+        Compliance policy:
+      </span>
+      <span class="item-value">
+        {{ object.compliance }}
+      </span>
+    </p>
 
     <p>
       {{ object.description }}
@@ -196,6 +212,7 @@
       <th>Outputs</th>
       <th>C13</th>
       <th>C19</th>
+      <th>Firmware Policy</th>
     </thead>
     <tbody>
       {% for pdu in object.powers.all %}
@@ -211,7 +228,7 @@
                style="width:50px;height:50px;">
         </a>
         {% endwith %}
-        <a href="{% url 'catalog_pdu_detail' pdu.id %}">
+        <a href="{% url 'catalog_pdu_detail' pdu.catalog.id %}">
           {{ pdu.catalog.name }}
         </a>
       </td><td>
@@ -230,6 +247,8 @@
         {{ pdu.catalog.c13 }}
       </td><td>
         {{ pdu.catalog.c19 }}
+      </td><td>
+        {{ pdu.firmware }}
       </td></tr>
       {% endfor %}
     </tbody>
@@ -251,6 +270,7 @@
       <th>Speed</th>
       <th>Rear to Front</th>
       <th>Rules</th>
+      <th>Firmware Policy</th>
     </thead>
     <tbody>
       {% for switch in object.switches.all %}
@@ -282,6 +302,8 @@
           <li>Max: {{ switch.rule_for_count.max_count }}</li>
           <li>Min: {{ switch.rule_for_count.min_count }}</li>
         </ul>
+      </td><td>
+        {{ switch.firmware }}
       </td></tr>
       {% endfor %}
     </tbody>
@@ -304,6 +326,7 @@
       <th>Max 3.5" Disk Bay</th>
       <th>Max 2.5" Disk Bay</th>
       <th>Rules</th>
+      <th>Firmware Policy</th>
     </thead>
     <tbody>
       {% for svr in object.servers.all %}
@@ -337,6 +360,8 @@
           <li>Max: {{ svr.rule_for_count.max_count }}</li>
           <li>Min: {{ svr.rule_for_count.min_count }}</li>
         </ul>
+      </td><td>
+        {{ svr.firmware }}
       </td></tr>
       {% endfor %}
     </tbody>

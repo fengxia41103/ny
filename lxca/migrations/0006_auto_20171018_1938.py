@@ -7,16 +7,16 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lxca', '0017_auto_20171017_1842'),
+        ('lxca', '0005_remove_architectsolution_firmware_repo'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ArchitectPdu',
+            name='ArchitectLxca',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('catalog', models.ForeignKey(to='lxca.CatalogPdu')),
-                ('rule_for_count', models.ForeignKey(to='lxca.ArchitectRuleForCount')),
+                ('version', models.CharField(max_length=8)),
+                ('patch_update_filename', models.CharField(default=b'update.tgz', max_length=32)),
             ],
             options={
             },
@@ -24,8 +24,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='architectsolution',
-            name='powers',
-            field=models.ManyToManyField(to='lxca.ArchitectPdu'),
-            preserve_default=True,
+            name='lxca',
+            field=models.ForeignKey(default=1, to='lxca.ArchitectLxca'),
+            preserve_default=False,
         ),
     ]

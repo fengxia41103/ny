@@ -686,6 +686,10 @@ class ArchitectSolutionDetail(DetailView):
             "manifestversion": self.object.version,
             "hosts": self.object.hosts,
             "workloads": [a.name for a in self.object.applications.all()],
+            "global": {
+                "version": self.object.lxca.version,
+                "lxcaPatchUpdateFieldName": self.object.lxca.patch_update_filename
+            },
             "hardware": {
                 "servers": {
                     "machine_type": [s.catalog.name for s in self.object.servers.all()],
@@ -803,4 +807,117 @@ class ArchitectApplicationDetail(DetailView):
         context["attachment_form"] = AttachmentForm()
         context["images"] = [
             img.file.url for img in self.object.attachments.all()]
+        return context
+
+###################################################
+#
+#	 Order solution views
+#
+###################################################
+
+
+class OrderSolutionListFilter (FilterSet):
+
+    class Meta:
+        model = OrderSolution
+        fields = ["order", "status"]
+
+
+class OrderSolutionList(FilterView):
+    template_name = "lxca/solution/order_list.html"
+    paginate_by = 10
+
+    def get_filterset_class(self):
+        return OrderSolutionListFilter
+
+
+class OrderSolutionAdd(CreateView):
+    model = OrderSolution
+    template_name = 'common/add_form.html'
+    success_url = reverse_lazy('order_solution_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateView, self).get_context_data(**kwargs)
+        context['title'] = u'New Order'
+        context['list_url'] = self.success_url
+        context['objects'] = OrderSolution.objects.all()
+        return context
+
+
+class OrderSolutionDelete (DeleteView):
+    model = OrderSolution
+    template_name = 'common/delete_form.html'
+    success_url = reverse_lazy('order_solution_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(DeleteView, self).get_context_data(**kwargs)
+        context['title'] = u'Delete Order'
+        context['list_url'] = reverse_lazy('order_solution_list')
+        return context
+
+
+class OrderSolutionEdit(UpdateView):
+    model = OrderSolution
+    template_name = "common/edit_form.html"
+    success_url = reverse_lazy("order_solution_list")
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateView, self).get_context_data(**kwargs)
+        context['title'] = u'Edit Order'
+        context['list_url'] = reverse_lazy('order_solution_list')
+        return context
+
+
+class OrderSolutionDetail(DetailView):
+    model = OrderSolution
+    template_name = "lxca/solution/order_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context["server_forms"] = [
+            OrderServerForm(instance=i) for i in self.object.servers.all()]
+
+        # solution template YAML
+        servers = [{
+            "machine_type": server.template.catalog.name,
+            "max": server.template.rule_for_count.max_count,
+            "min": server.template.rule_for_count.min_count
+        } for server in self.object.servers]
+        solution = {}
+        context["manifest"] = json.dumps(solution, indent=4)
+        return context
+
+###################################################
+#
+#	 Order server views
+#
+###################################################
+
+
+class OrderServerListFilter (FilterSet):
+
+    class Meta:
+        model = OrderServer
+        fields = ["firmware", "cores", "mem"]
+
+
+class OrderServerList(FilterView):
+    template_name = "lxca/server/order_list.html"
+    paginate_by = 10
+
+    def get_filterset_class(self):
+        return OrderServerListFilter
+
+
+class OrderServerEdit(UpdateView):
+    model = OrderServer
+    template_name = "common/edit_form.html"
+    form_class = OrderServerForm
+    success_url = reverse_lazy("order_server_list")
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateView, self).get_context_data(**kwargs)
+        context['title'] = u'Edit OrderServer'
+        context['list_url'] = reverse_lazy('order_solution_detail',
+                                           kwargs={"pk": self.object.order.id})
         return context

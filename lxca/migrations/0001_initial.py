@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 from django.conf import settings
+import annoying.fields
 
 
 class Migration(migrations.Migration):
@@ -17,8 +18,20 @@ class Migration(migrations.Migration):
             name='ArchitectApplication',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(max_length=32)),
+                ('name', models.CharField(default='default name', max_length=128)),
+                ('description', models.TextField(default=b'')),
+                ('is_active', models.BooleanField(default=True)),
                 ('host', models.CharField(max_length=32, choices=[(b'bm', b'BareMetal'), (b'win210svr', b'Windows Server 2010'), (b'esxi', b'ESXI server'), (b'Ubuntu xeniel', b'Ubuntu 16.04 Xeniel'), (b'Ubuntu trusty', b'Ubuntu 14.04 Trusty')])),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='ArchitectBaseModel',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
             ],
             options={
             },
@@ -28,10 +41,10 @@ class Migration(migrations.Migration):
             name='ArchitectFirmwareRepo',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('update_access_method', models.CharField(default=b'm', max_length=8, choices=[(b'm', b'manual')])),
-                ('update_access_location', models.FilePathField(path=b'/home/lenovo', recursive=True, match=b'foo.*')),
-                ('firmware_pack', models.FilePathField(path=b'/home/lenovo', recursive=True, match=b'pack[.]zip')),
                 ('firmware_fix_id', models.CharField(default=b'fixid', max_length=8)),
+                ('update_access_method', models.CharField(default=b'm', max_length=8, choices=[(b'm', b'manual')])),
+                ('update_access_location', models.FilePathField(recursive=True, blank=True, path=b'/home/lenovo', null=True, match=b'foo.*')),
+                ('firmware_pack', models.FilePathField(recursive=True, blank=True, path=b'/home/lenovo', null=True, match=b'pack[.]zip')),
             ],
             options={
             },
@@ -49,13 +62,22 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.CreateModel(
-            name='ArchitectRack',
+            name='ArchitectPdu',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('architectbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectBaseModel')),
             ],
             options={
             },
-            bases=(models.Model,),
+            bases=('lxca.architectbasemodel',),
+        ),
+        migrations.CreateModel(
+            name='ArchitectRack',
+            fields=[
+                ('architectbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectBaseModel')),
+            ],
+            options={
+            },
+            bases=('lxca.architectbasemodel',),
         ),
         migrations.CreateModel(
             name='ArchitectRuleForCount',
@@ -71,12 +93,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ArchitectServer',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('rule_for_count', models.ForeignKey(to='lxca.ArchitectRuleForCount')),
+                ('architectbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectBaseModel')),
             ],
             options={
             },
-            bases=(models.Model,),
+            bases=('lxca.architectbasemodel',),
         ),
         migrations.CreateModel(
             name='ArchitectSolution',
@@ -84,14 +105,13 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(default='default name', max_length=128)),
                 ('description', models.TextField(default=b'')),
-                ('help_text', models.CharField(max_length=64, null=True, verbose_name='Help', blank=True)),
                 ('is_active', models.BooleanField(default=True)),
-                ('manifestversion_major', models.CharField(default=b'0', max_length=8)),
-                ('manifestversion_minor', models.CharField(default=b'1', max_length=8)),
+                ('version', models.CharField(max_length=8)),
                 ('applications', models.ManyToManyField(to='lxca.ArchitectApplication')),
                 ('firmware_policy', models.ForeignKey(to='lxca.ArchitectFirmwareRepoPolicy')),
                 ('firmware_repo', models.ForeignKey(to='lxca.ArchitectFirmwareRepo')),
-                ('parent', models.ForeignKey(default=None, blank=True, to='lxca.ArchitectSolution', null=True, verbose_name='Solution')),
+                ('parent', models.ForeignKey(default=None, blank=True, to='lxca.ArchitectSolution', null=True)),
+                ('powers', models.ManyToManyField(to='lxca.ArchitectPdu')),
                 ('racks', models.ManyToManyField(to='lxca.ArchitectRack')),
                 ('servers', models.ManyToManyField(to='lxca.ArchitectServer')),
             ],
@@ -103,12 +123,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ArchitectSwitch',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('rule_for_count', models.ForeignKey(to='lxca.ArchitectRuleForCount')),
+                ('architectbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectBaseModel')),
             ],
             options={
             },
-            bases=(models.Model,),
+            bases=('lxca.architectbasemodel',),
         ),
         migrations.CreateModel(
             name='Attachment',
@@ -126,6 +145,103 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.CreateModel(
+            name='CatalogPdu',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(default='default name', max_length=128)),
+                ('description', models.TextField(default=b'')),
+                ('is_active', models.BooleanField(default=True)),
+                ('size', models.IntegerField(default=1, choices=[(0, '0U'), (1, '1U'), (2, '2U')])),
+                ('orientation', models.CharField(default='h', max_length=16, choices=[('h', 'Horizontal'), ('v', 'Vertical')])),
+                ('c13', models.IntegerField(default=0)),
+                ('c19', models.IntegerField(default=0)),
+                ('is_monitored', models.BooleanField(default=False)),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='CatalogRack',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(default='default name', max_length=128)),
+                ('description', models.TextField(default=b'')),
+                ('is_active', models.BooleanField(default=True)),
+                ('is_primary', models.BooleanField(default=True, verbose_name='Is primary rack')),
+                ('eia_capacity', models.IntegerField(default=25, choices=[(25, '25U'), (42, '42U')])),
+                ('sidewall_compartment', models.IntegerField(default=0)),
+                ('expansion_rack', models.ForeignKey(default=None, blank=True, to='lxca.CatalogRack', help_text=b'Expansion rack for the primary', null=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='CatalogRaidAdapter',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(default='default name', max_length=128)),
+                ('description', models.TextField(default=b'')),
+                ('is_active', models.BooleanField(default=True)),
+                ('size', models.IntegerField(default=1, choices=[(0, '0U'), (1, '1U'), (2, '2U')])),
+                ('orientation', models.CharField(default='h', max_length=16, choices=[('h', 'Horizontal'), ('v', 'Vertical')])),
+                ('speed', models.IntegerField(default=1, verbose_name='PCI speed', choices=[(1, b'PCIx1'), (4, b'PCIx4'), (6, b'PCIx6')])),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='CatalogServer',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(default='default name', max_length=128)),
+                ('description', models.TextField(default=b'')),
+                ('is_active', models.BooleanField(default=True)),
+                ('size', models.IntegerField(default=1, choices=[(0, '0U'), (1, '1U'), (2, '2U')])),
+                ('orientation', models.CharField(default='h', max_length=16, choices=[('h', 'Horizontal'), ('v', 'Vertical')])),
+                ('cpu_sockets', models.IntegerField(default=2)),
+                ('max_25_disk', models.IntegerField(default=12, help_text='Maximum number of 2.5inch disks')),
+                ('max_35_disk', models.IntegerField(default=10)),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='CatalogStorageDisk',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('physical_format', models.CharField(default=b'2.5', max_length=8, choices=[(b'2.5', b'2.5 inch'), (b'3.5', b'3.5 inch'), (b'ssd', b'ssd')])),
+                ('capacity', models.IntegerField(default=100, help_text='Storage capacity in GB.')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='CatalogSwitch',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(default='default name', max_length=128)),
+                ('description', models.TextField(default=b'')),
+                ('is_active', models.BooleanField(default=True)),
+                ('size', models.IntegerField(default=1, choices=[(0, '0U'), (1, '1U'), (2, '2U')])),
+                ('orientation', models.CharField(default='h', max_length=16, choices=[('h', 'Horizontal'), ('v', 'Vertical')])),
+                ('speed', models.IntegerField(default=10, choices=[(1, '1G'), (10, '10G')])),
+                ('rear_to_front', models.BooleanField(default=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
             name='MfgRack',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -137,7 +253,7 @@ class Migration(migrations.Migration):
                 ('imm_password', models.CharField(default=b'', max_length=32)),
                 ('serial', models.CharField(max_length=64, null=True, verbose_name='Serial number', blank=True)),
                 ('uuid', models.CharField(default=b'uuid', max_length=32)),
-                ('mtm', models.CharField(default=b'mtm', max_length=64)),
+                ('mtm', models.CharField(default=b'', help_text=b'Machine type model', max_length=64)),
                 ('firmware_update', models.CharField(default=b'', max_length=32)),
                 ('config_pattern', models.CharField(default=b'', max_length=32)),
             ],
@@ -158,7 +274,7 @@ class Migration(migrations.Migration):
                 ('imm_password', models.CharField(default=b'', max_length=32)),
                 ('serial', models.CharField(max_length=64, null=True, verbose_name='Serial number', blank=True)),
                 ('uuid', models.CharField(default=b'uuid', max_length=32)),
-                ('mtm', models.CharField(default=b'mtm', max_length=64)),
+                ('mtm', models.CharField(default=b'', help_text=b'Machine type model', max_length=64)),
                 ('firmware_update', models.CharField(default=b'', max_length=32)),
                 ('config_pattern', models.CharField(default=b'', max_length=32)),
             ],
@@ -190,7 +306,7 @@ class Migration(migrations.Migration):
                 ('imm_password', models.CharField(default=b'', max_length=32)),
                 ('serial', models.CharField(max_length=64, null=True, verbose_name='Serial number', blank=True)),
                 ('uuid', models.CharField(default=b'uuid', max_length=32)),
-                ('mtm', models.CharField(default=b'mtm', max_length=64)),
+                ('mtm', models.CharField(default=b'', help_text=b'Machine type model', max_length=64)),
                 ('firmware_update', models.CharField(default=b'', max_length=32)),
                 ('config_pattern', models.CharField(default=b'', max_length=32)),
             ],
@@ -215,17 +331,37 @@ class Migration(migrations.Migration):
             name='OrderBaseModel',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('count', models.IntegerField(default=1)),
+                ('qty', models.IntegerField(default=1)),
             ],
             options={
             },
             bases=(models.Model,),
         ),
         migrations.CreateModel(
+            name='OrderApplication',
+            fields=[
+                ('orderbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderBaseModel')),
+                ('template', models.ForeignKey(to='lxca.ArchitectApplication')),
+            ],
+            options={
+            },
+            bases=('lxca.orderbasemodel',),
+        ),
+        migrations.CreateModel(
+            name='OrderPdu',
+            fields=[
+                ('orderbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderBaseModel')),
+                ('template', models.ForeignKey(to='lxca.ArchitectPdu')),
+            ],
+            options={
+            },
+            bases=('lxca.orderbasemodel',),
+        ),
+        migrations.CreateModel(
             name='OrderRack',
             fields=[
                 ('orderbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderBaseModel')),
-                ('rack', models.ForeignKey(to='lxca.ArchitectRack')),
+                ('template', models.ForeignKey(to='lxca.ArchitectRack')),
             ],
             options={
             },
@@ -238,8 +374,9 @@ class Migration(migrations.Migration):
                 ('firmware', models.CharField(default=b'firmware version', max_length=32)),
                 ('cores', models.IntegerField(default=2)),
                 ('mem', models.IntegerField(default=16, help_text='Memory size in GB')),
-                ('ip', models.GenericIPAddressField()),
-                ('server', models.ForeignKey(to='lxca.ArchitectServer')),
+                ('ip', models.GenericIPAddressField(null=True, verbose_name='IP4 address', blank=True)),
+                ('storages', models.ManyToManyField(to='lxca.CatalogStorageDisk')),
+                ('template', models.ForeignKey(to='lxca.ArchitectServer')),
             ],
             options={
             },
@@ -249,8 +386,8 @@ class Migration(migrations.Migration):
             name='OrderSolution',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('racks', models.ManyToManyField(to='lxca.OrderRack')),
-                ('servers', models.ManyToManyField(to='lxca.OrderServer')),
+                ('order', models.CharField(default=b'21873', help_text='Order number', unique=True, max_length=32)),
+                ('status', models.IntegerField(default=1, choices=[(1, 'draft'), (2, 'in MFG'), (3, 'in provisioning'), (4, 'in deployment'), (5, 'obsolete')])),
                 ('solution', models.ForeignKey(to='lxca.ArchitectSolution')),
             ],
             options={
@@ -261,107 +398,49 @@ class Migration(migrations.Migration):
             name='OrderSwitch',
             fields=[
                 ('orderbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderBaseModel')),
-                ('switch', models.ForeignKey(to='lxca.ArchitectSwitch')),
+                ('template', models.ForeignKey(to='lxca.ArchitectSwitch')),
             ],
             options={
             },
             bases=('lxca.orderbasemodel',),
         ),
         migrations.CreateModel(
-            name='PDU',
+            name='PduInput',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(default='default name', max_length=128)),
-                ('description', models.TextField(default=b'')),
-                ('help_text', models.CharField(max_length=64, null=True, verbose_name='Help', blank=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('size', models.CharField(default='1U', max_length=8, choices=[('1U', '1U'), ('2U', '2U')])),
-                ('voltage', models.CharField(default='120-1', max_length=16, choices=[('120-1', '120V single phase'), ('208-1', '208V single phase'), ('120-3', '208V three phase'), ('400-3', '400V three phase')])),
-                ('orientation', models.CharField(default='h', max_length=16, choices=[('h', 'Horizontal'), ('v', 'Vertical')])),
-                ('form_factor', models.IntegerField(default=1, help_text='0=vertical mount, 1=1U, 2=2U, and so on', verbose_name='Form factor')),
-            ],
-            options={
-                'abstract': False,
-            },
-            bases=(models.Model,),
-        ),
-        migrations.CreateModel(
-            name='Rack',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(default='default name', max_length=128)),
-                ('description', models.TextField(default=b'')),
-                ('help_text', models.CharField(max_length=64, null=True, verbose_name='Help', blank=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('is_primary', models.BooleanField(default=True, verbose_name='Is primary rack')),
-                ('size', models.CharField(default='16U', max_length=8, choices=[('16U', '16U'), ('32U', '32U'), ('48U', '48U')])),
-                ('width', models.FloatField(default=19, verbose_name=b'Rack width (inch)')),
-            ],
-            options={
-                'abstract': False,
-            },
-            bases=(models.Model,),
-        ),
-        migrations.CreateModel(
-            name='RaidAdapter',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(default='default name', max_length=128)),
-                ('description', models.TextField(default=b'')),
-                ('help_text', models.CharField(max_length=64, null=True, verbose_name='Help', blank=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('size', models.CharField(default='1U', max_length=8, choices=[('1U', '1U'), ('2U', '2U')])),
-                ('speed', models.CharField(default='PCIx1', max_length=32, verbose_name='PCI speed', choices=[(b'PCIx1', b'PCIx1'), (b'PCIx4', b'PCIx4'), (b'PCIx6', b'PCIx6')])),
-            ],
-            options={
-                'abstract': False,
-            },
-            bases=(models.Model,),
-        ),
-        migrations.CreateModel(
-            name='Server',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(default='default name', max_length=128)),
-                ('description', models.TextField(default=b'')),
-                ('help_text', models.CharField(max_length=64, null=True, verbose_name='Help', blank=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('size', models.CharField(default='1U', max_length=8, choices=[('1U', '1U'), ('2U', '2U')])),
-                ('cpu_sockets', models.IntegerField(default=2)),
-                ('max_25_disk', models.IntegerField(default=12)),
-                ('max_35_disk', models.IntegerField(default=10)),
-            ],
-            options={
-                'abstract': False,
-            },
-            bases=(models.Model,),
-        ),
-        migrations.CreateModel(
-            name='StorageDisk',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('physical_format', models.CharField(default=b'2.5', max_length=8, choices=[(b'2.5', b'2.5 inch'), (b'3.5', b'3.5 inch'), (b'ssd', b'ssd')])),
-                ('capacity_in_gb', models.IntegerField(default=100, help_text='Storage capacity in GB.')),
+                ('voltage', models.IntegerField(default=120)),
+                ('phase', models.IntegerField(default=1, choices=[(1, '1 Phase'), (3, '3 Phase')])),
+                ('frequency', models.IntegerField(default=1, choices=[(1, '50-60Hz')])),
+                ('current', models.IntegerField(default=13)),
             ],
             options={
             },
             bases=(models.Model,),
         ),
         migrations.CreateModel(
-            name='Switch',
+            name='PduOutput',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(default='default name', max_length=128)),
-                ('description', models.TextField(default=b'')),
-                ('help_text', models.CharField(max_length=64, null=True, verbose_name='Help', blank=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('size', models.CharField(default='1U', max_length=8, choices=[('1U', '1U'), ('2U', '2U')])),
-                ('speed', models.CharField(default='1G', max_length=8, choices=[('1G', '1G'), ('10G', '10G')])),
-                ('cooling_orientation', models.CharField(default='h', max_length=8, verbose_name='Cooling orientation', choices=[('h', 'Horizontal'), ('v', 'Vertical')])),
-                ('rear_to_front', models.BooleanField(default=True)),
+                ('voltage', models.IntegerField(default=120)),
+                ('capacity', models.IntegerField(help_text='Capacity per PDU (w)')),
+                ('power_limit_per_pdu', models.IntegerField()),
+                ('power_limit_per_outlet', models.IntegerField()),
+                ('power_limit_per_group', models.IntegerField(null=True, blank=True)),
             ],
             options={
-                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Playbook',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=32)),
+                ('path', models.FilePathField()),
+                ('tags', models.CharField(default=b'', max_length=32)),
+                ('extra_vars', annoying.fields.JSONField(default=b'')),
+            ],
+            options={
             },
             bases=(models.Model,),
         ),
@@ -375,21 +454,23 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
-        migrations.AddField(
-            model_name='ordersolution',
-            name='switches',
-            field=models.ManyToManyField(to='lxca.OrderSwitch'),
-            preserve_default=True,
+        migrations.AlterUniqueTogether(
+            name='pduoutput',
+            unique_together=set([('voltage', 'capacity', 'power_limit_per_pdu', 'power_limit_per_outlet', 'power_limit_per_group')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='pduinput',
+            unique_together=set([('voltage', 'phase', 'current')]),
         ),
         migrations.AddField(
-            model_name='orderserver',
-            name='storages',
-            field=models.ManyToManyField(to='lxca.StorageDisk'),
+            model_name='orderbasemodel',
+            name='order',
+            field=models.ForeignKey(to='lxca.OrderSolution'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='mfgswitch',
-            name='switch',
+            name='on_order',
             field=models.ForeignKey(to='lxca.OrderSwitch'),
             preserve_default=True,
         ),
@@ -401,20 +482,32 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='mfgserver',
-            name='server',
+            name='on_order',
             field=models.ForeignKey(to='lxca.OrderServer'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='mfgrack',
-            name='rack',
+            name='on_order',
             field=models.ForeignKey(to='lxca.OrderRack'),
             preserve_default=True,
         ),
         migrations.AddField(
+            model_name='catalogpdu',
+            name='inputs',
+            field=models.ManyToManyField(to='lxca.PduInput'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='catalogpdu',
+            name='outputs',
+            field=models.ManyToManyField(to='lxca.PduOutput'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
             model_name='architectswitch',
-            name='switch',
-            field=models.ForeignKey(to='lxca.Switch'),
+            name='catalog',
+            field=models.ForeignKey(to='lxca.CatalogSwitch'),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -425,18 +518,24 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='architectserver',
-            name='server',
-            field=models.ForeignKey(to='lxca.Server'),
+            name='catalog',
+            field=models.ForeignKey(to='lxca.CatalogServer'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='architectrack',
-            name='rack',
-            field=models.ForeignKey(to='lxca.Rack'),
+            name='catalog',
+            field=models.ForeignKey(to='lxca.CatalogRack'),
             preserve_default=True,
         ),
         migrations.AddField(
-            model_name='architectrack',
+            model_name='architectpdu',
+            name='catalog',
+            field=models.ForeignKey(to='lxca.CatalogPdu'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='architectbasemodel',
             name='rule_for_count',
             field=models.ForeignKey(to='lxca.ArchitectRuleForCount'),
             preserve_default=True,
@@ -444,7 +543,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='architectapplication',
             name='compatible_servers',
-            field=models.ManyToManyField(to='lxca.Server'),
+            field=models.ManyToManyField(to='lxca.CatalogServer'),
             preserve_default=True,
         ),
     ]

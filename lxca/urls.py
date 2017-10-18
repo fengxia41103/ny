@@ -164,4 +164,28 @@ urlpatterns = patterns(
         views.ArchitectSolutionDetail.as_view(),
         name='sa_solution_detail'),
 
+    # order solution
+    url('^order/solutions/$',
+        views.OrderSolutionList.as_view(),
+        name='order_solution_list'),
+    url(r'^order/solution/add/$',
+        views.OrderSolutionAdd.as_view(),
+        name='order_solution_add'),
+    url(r'^order/solution/(?P<pk>\d+)/delete/$',
+        views.OrderSolutionDelete.as_view(),
+        name='order_solution_delete'),
+    url(r'^order/solution/(?P<pk>\d+)/edit/$',
+        views.OrderSolutionEdit.as_view(),
+        name='order_solution_edit'),
+    url(r'^order/solution/(?P<pk>\d+)/$',
+        views.OrderSolutionDetail.as_view(),
+        name='order_solution_detail'),
+
+    # order server
+    url('^order/servers/$',
+        views.OrderServerList.as_view(),
+        name='order_server_list'),
+    url(r'^order/server/(?P<pk>\d+)/edit/$',
+        views.OrderServerEdit.as_view(),
+        name='order_server_edit'),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
