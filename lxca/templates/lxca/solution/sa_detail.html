@@ -248,7 +248,7 @@
       </td><td>
         {{ pdu.catalog.c19 }}
       </td><td>
-        {{ pdu.firmware }}
+        {{ pdu.firmware_policy }}
       </td></tr>
       {% endfor %}
     </tbody>
@@ -303,7 +303,7 @@
           <li>Min: {{ switch.rule_for_count.min_count }}</li>
         </ul>
       </td><td>
-        {{ switch.firmware }}
+        {{ switch.firmware_policy }}
       </td></tr>
       {% endfor %}
     </tbody>
@@ -361,7 +361,7 @@
           <li>Min: {{ svr.rule_for_count.min_count }}</li>
         </ul>
       </td><td>
-        {{ svr.firmware }}
+        {{ svr.firmware_policy }}
       </td></tr>
       {% endfor %}
     </tbody>
@@ -369,15 +369,39 @@
 </div>
 {% endif %}
 
-<div class="row">
-  <h4 class="page-header">
-    <i class="fa fa-book"></i>
-    Manifest (JSON)
-  </h4>
-  <pre class="brush:js;">
-  {{ manifest }}
-  </pre>
+{# manifest #}
+<h2>Manifests</h2>
+<ul class="nav nav-tabs" role="tablist">
+  <li>
+    <a href="#yaml-manifest"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      YAML
+    </a>
+  </li>
+  <li>
+    <a href="#json-manifest"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      JSON
+    </a>
+  </li>
+</ul>
+<div class="tab-content">
+  <div class="tab-pane" id="yaml-manifest">
+    <pre class="brush:yaml;">
+    {{ object.yaml_manifest }}
+    </pre>
+  </div>
+  <div class="tab-pane" id="json-manifest">
+    <pre class="brush:js;">
+      {{ object.json_manifest }}
+    </pre>
+  </div>
 </div>
+
 {% endblock %}
 
 

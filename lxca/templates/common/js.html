@@ -96,6 +96,9 @@
 <script type="text/javascript"
         src="{% static 'bower_components/SyntaxHighlighter/scripts/shBrushJScript.js' %}">
 </script>
+<script type="text/javascript"
+        src="{% static 'bower_components/SyntaxHighlighter/scripts/shBrushYaml.js' %}">
+</script>
 
 
 <script type="text/javascript">
@@ -138,6 +141,20 @@
      paging: false,
      info:false,
      "pagingType": "simple"
+   });
+
+   // register tab events
+   j$('a[data-toggle="tab"]').click(function ( e ) {
+     e.preventDefault ();
+     j$(this).tab('show');
+   });
+
+   // show first tab after page loading
+   j$('a[data-toggle="tab"]:first').tab('show');
+
+   // initialize all tooltips
+   j$("[data-toggle='tooltip']").tooltip({
+     'placement': 'bottom'
    });
 
    // navbar dropdown form

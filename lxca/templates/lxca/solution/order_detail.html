@@ -144,6 +144,39 @@
     {% endfor %}
   </div>
 </div>
+
+{# manifest #}
+<h2>Manifests</h2>
+<ul class="nav nav-tabs" role="tablist">
+  <li>
+    <a href="#yaml-manifest"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      YAML
+    </a>
+  </li>
+  <li>
+    <a href="#json-manifest"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      JSON
+    </a>
+  </li>
+</ul>
+<div class="tab-content">
+  <div class="tab-pane" id="yaml-manifest">
+    <pre class="brush:yaml;">
+    {{ object.yaml_manifest }}
+    </pre>
+  </div>
+  <div class="tab-pane" id="json-manifest">
+    <pre class="brush:js;">
+      {{ object.json_manifest }}
+    </pre>
+  </div>
+</div>
 {% endblock %}
 
 {% block custom_js %}

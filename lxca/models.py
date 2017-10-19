@@ -3,7 +3,9 @@
 import logging
 from datetime import datetime as dt
 import itertools
-
+import uuid
+import simplejson as json
+from ruamel import yaml
 from annoying.fields import JSONField  # django-annoying
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -346,6 +348,7 @@ class ArchitectSolution(BaseModel):
     version = models.CharField(max_length=8)
     lxca = models.ForeignKey("ArchitectLxca")
     compliance = models.ForeignKey("ArchitectCompliance")
+    firmware_repo = models.ForeignKey("ArchitectFirmwareRepo")
 
     # software meets hardware! Picking application will determine
     # which servers are available to pick.
@@ -365,6 +368,56 @@ class ArchitectSolution(BaseModel):
     racks = models.ManyToManyField("ArchitectRack")
     switches = models.ManyToManyField("ArchitectSwitch")
     servers = models.ManyToManyField("ArchitectServer")
+
+    def _manifest(self):
+        # solution template YAML
+        return {"solution": {
+            "name": self.name,
+            "manifestversion": self.version,
+            "hosts": self.hosts,
+            "workloads": [a.name for a in self.applications.all()],
+            "compliancepolicies": {
+                "name": self.compliance.name,
+                "rule": []
+            },
+            "firmwareRepository": {
+                "updateAccess": self.firmware_repo.update_access_method,
+                "packFileName": self.firmware_repo.pack_filename,
+                "fixId": self.firmware_repo.fix_id
+            },
+            "lxca": {
+                "version": self.lxca.version,
+                "lxcaPatchUpdateFieldName": self.lxca.patch_update_filename
+            },
+            "hardware": {
+                "servers": {
+                    "machine_type": [
+                        s.catalog.name for s in self.servers.all()],
+                },
+                "switches": {
+                    "machine_type": [
+                        s.catalog.name for s in self.switches.all()],
+                },
+                "racks": {
+                    "machine_type": [
+                        s.catalog.name for s in self.racks.all()],
+                },
+                "pdus": {
+                    "machine_type": [s.catalog.name for s in self.powers.all()],
+                }
+            }
+        }}
+    manifest = property(_manifest)
+
+    def _json_manifest(self):
+        return json.dumps(self.manifest,
+                          indent=4)
+    json_manifest = property(_json_manifest)
+
+    def _yaml_manifest(self):
+        return yaml.dump(self.manifest,
+                         Dumper=yaml.RoundTripDumper)
+    yaml_manifest = property(_yaml_manifest)
 
 
 class ArchitectCompliance(models.Model):
@@ -443,18 +496,20 @@ class ArchitectRuleForCount(models.Model):
         return "%d-%d" % (self.min_count, self.max_count)
 
 
+class ArchitectConfigPattern(models.Model):
+    filename = models.CharField(
+        max_length=32,
+        default="configpattern.tgz"
+    )
+
+    def __unicode__(self):
+        return self.filename
+
+
 class ArchitectBaseModel(models.Model):
-    # design rules
     rule_for_count = models.ForeignKey("ArchitectRuleForCount")
-
-    # firmware
-    firmware_repo = models.ForeignKey("ArchitectFirmwareRepo")
     firmware_policy = models.CharField(max_length=32, default="")
-
-    def _firmware(self):
-        return "/".join([self.firmware_repo.fix_id,
-                         self.firmware_policy])
-    firmware = property(_firmware)
+    config_pattern = models.ForeignKey("ArchitectConfigPattern")
 
 
 class ArchitectRack(ArchitectBaseModel):
@@ -557,6 +612,50 @@ class OrderSolution(models.Model):
         return sum([s.qty for s in self.servers])
     num_servers = property(_num_servers)
 
+    def _manifest(self):
+        solution = self.solution.manifest["solution"]
+        solution["productdata"] = {
+            "order": self.order,
+            "uuid": str(uuid.uuid4()),
+        }
+        solution["hardware"]["pdus"] = [{
+            "machine_type": [pdu.template.catalog.name],
+            "qty": pdu.qty,
+            "rules":{
+                "max": pdu.template.rule_for_count.max_count,
+                "min": pdu.template.rule_for_count.min_count,
+            }
+        } for pdu in self.pdus.all()]
+        solution["hardware"]["switches"] = [{
+            "machine_type": [switch.template.catalog.name],
+            "qty": switch.qty,
+            "rules":{
+                "max": pdu.template.rule_for_count.max_count,
+                "min": pdu.template.rule_for_count.min_count,
+            }
+        } for switch in self.switches.all()]
+        solution["hardware"]["servers"] = [{
+            "machine_type": [server.template.catalog.name],
+            "qty": server.qty,
+            "layer0": server.layer0,
+            "rules":{
+                "max": pdu.template.rule_for_count.max_count,
+                "min": pdu.template.rule_for_count.min_count,
+            }
+        } for server in self.servers.all()]
+        return {"solution": solution}
+    manifest = property(_manifest)
+
+    def _json_manifest(self):
+        return json.dumps(self.manifest,
+                          indent=4)
+    json_manifest = property(_json_manifest)
+
+    def _yaml_manifest(self):
+        return yaml.dump(self.manifest,
+                         Dumper=yaml.RoundTripDumper)
+    yaml_manifest = property(_yaml_manifest)
+
 
 class OrderBaseModel(models.Model):
     """Common configurations that will be determined at ordering.
@@ -607,6 +706,15 @@ class OrderServer(OrderBaseModel):
         verbose_name=u"IP4 address")
     storages = models.ManyToManyField("CatalogStorageDisk")
 
+    LAYER0_CHOICES = (
+        (1, "Windows Server 2010"),
+        (2, "ESXI server"),
+        (3, "Ubuntu 16.04 Xeniel"),
+        (4, "Ubuntu 14.04 Trusty"),
+        (5, "Cent 7.0"),
+        (6, "RHEL 7.4")
+    )
+    layer0 = models.IntegerField(default=6)
 
 ######################################################
 #

@@ -679,33 +679,7 @@ class ArchitectSolutionDetail(DetailView):
         context["attachment_form"] = AttachmentForm()
         context["images"] = [
             img.file.url for img in self.object.attachments.all()]
-
-        # solution template YAML
-        solution = {"solution": {
-            "name": self.object.name,
-            "manifestversion": self.object.version,
-            "hosts": self.object.hosts,
-            "workloads": [a.name for a in self.object.applications.all()],
-            "global": {
-                "version": self.object.lxca.version,
-                "lxcaPatchUpdateFieldName": self.object.lxca.patch_update_filename
-            },
-            "hardware": {
-                "servers": {
-                    "machine_type": [s.catalog.name for s in self.object.servers.all()],
-                },
-                "tor-switches": {
-                    "machine_type": [s.catalog.name for s in self.object.switches.all()],
-                },
-                "racks": {
-                    "machine_type": [s.catalog.name for s in self.object.racks.all()],
-                },
-                "pdus": {
-                    "machine_type": [s.catalog.name for s in self.object.powers.all()],
-                }
-            }
-        }}
-        context["manifest"] = json.dumps(solution, indent=4)
+        context["manifest"] = self.object.json_manifest
         return context
 
 ###################################################
@@ -876,15 +850,6 @@ class OrderSolutionDetail(DetailView):
         context = super(DetailView, self).get_context_data(**kwargs)
         context["server_forms"] = [
             OrderServerForm(instance=i) for i in self.object.servers.all()]
-
-        # solution template YAML
-        servers = [{
-            "machine_type": server.template.catalog.name,
-            "max": server.template.rule_for_count.max_count,
-            "min": server.template.rule_for_count.min_count
-        } for server in self.object.servers]
-        solution = {}
-        context["manifest"] = json.dumps(solution, indent=4)
         return context
 
 ###################################################
