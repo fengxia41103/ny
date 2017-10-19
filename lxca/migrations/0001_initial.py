@@ -29,9 +29,30 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.CreateModel(
-            name='ArchitectBaseModel',
+            name='ArchitectCompliance',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(default=b'compliance', max_length=32)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='ArchitectConfigPattern',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('filename', models.CharField(default=b'configpattern.tgz', max_length=32)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='ArchitectEndpoint',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('firmware_policy', models.CharField(default=b'', max_length=32)),
             ],
             options={
             },
@@ -41,21 +62,20 @@ class Migration(migrations.Migration):
             name='ArchitectFirmwareRepo',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('firmware_fix_id', models.CharField(default=b'fixid', max_length=8)),
-                ('update_access_method', models.CharField(default=b'm', max_length=8, choices=[(b'm', b'manual')])),
-                ('update_access_location', models.FilePathField(recursive=True, blank=True, path=b'/home/lenovo', null=True, match=b'foo.*')),
-                ('firmware_pack', models.FilePathField(recursive=True, blank=True, path=b'/home/lenovo', null=True, match=b'pack[.]zip')),
+                ('update_access_method', models.CharField(default=b'm', max_length=1, choices=[(b'm', b'manual')])),
+                ('fix_id', models.CharField(default=b'fixpack', max_length=8)),
+                ('pack_filename', models.CharField(default=b'fixpack.tgz', max_length=32)),
             ],
             options={
             },
             bases=(models.Model,),
         ),
         migrations.CreateModel(
-            name='ArchitectFirmwareRepoPolicy',
+            name='ArchitectLxca',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(default=b'repo policy', max_length=32)),
-                ('device', models.CharField(default=b'policity device', max_length=32)),
+                ('version', models.CharField(max_length=8)),
+                ('patch_update_filename', models.CharField(default=b'update.tgz', max_length=32)),
             ],
             options={
             },
@@ -64,20 +84,20 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ArchitectPdu',
             fields=[
-                ('architectbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectBaseModel')),
+                ('architectendpoint_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectEndpoint')),
             ],
             options={
             },
-            bases=('lxca.architectbasemodel',),
+            bases=('lxca.architectendpoint',),
         ),
         migrations.CreateModel(
             name='ArchitectRack',
             fields=[
-                ('architectbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectBaseModel')),
+                ('architectendpoint_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectEndpoint')),
             ],
             options={
             },
-            bases=('lxca.architectbasemodel',),
+            bases=('lxca.architectendpoint',),
         ),
         migrations.CreateModel(
             name='ArchitectRuleForCount',
@@ -93,11 +113,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ArchitectServer',
             fields=[
-                ('architectbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectBaseModel')),
+                ('architectendpoint_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectEndpoint')),
             ],
             options={
             },
-            bases=('lxca.architectbasemodel',),
+            bases=('lxca.architectendpoint',),
         ),
         migrations.CreateModel(
             name='ArchitectSolution',
@@ -108,8 +128,9 @@ class Migration(migrations.Migration):
                 ('is_active', models.BooleanField(default=True)),
                 ('version', models.CharField(max_length=8)),
                 ('applications', models.ManyToManyField(to='lxca.ArchitectApplication')),
-                ('firmware_policy', models.ForeignKey(to='lxca.ArchitectFirmwareRepoPolicy')),
+                ('compliance', models.ForeignKey(to='lxca.ArchitectCompliance')),
                 ('firmware_repo', models.ForeignKey(to='lxca.ArchitectFirmwareRepo')),
+                ('lxca', models.ForeignKey(to='lxca.ArchitectLxca')),
                 ('parent', models.ForeignKey(default=None, blank=True, to='lxca.ArchitectSolution', null=True)),
                 ('powers', models.ManyToManyField(to='lxca.ArchitectPdu')),
                 ('racks', models.ManyToManyField(to='lxca.ArchitectRack')),
@@ -123,11 +144,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ArchitectSwitch',
             fields=[
-                ('architectbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectBaseModel')),
+                ('architectendpoint_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.ArchitectEndpoint')),
             ],
             options={
             },
-            bases=('lxca.architectbasemodel',),
+            bases=('lxca.architectendpoint',),
         ),
         migrations.CreateModel(
             name='Attachment',
@@ -328,7 +349,7 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.CreateModel(
-            name='OrderBaseModel',
+            name='OrderEndpointModel',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('qty', models.IntegerField(default=1)),
@@ -340,47 +361,48 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='OrderApplication',
             fields=[
-                ('orderbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderBaseModel')),
+                ('orderendpointmodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderEndpointModel')),
                 ('template', models.ForeignKey(to='lxca.ArchitectApplication')),
             ],
             options={
             },
-            bases=('lxca.orderbasemodel',),
+            bases=('lxca.orderendpointmodel',),
         ),
         migrations.CreateModel(
             name='OrderPdu',
             fields=[
-                ('orderbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderBaseModel')),
+                ('orderendpointmodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderEndpointModel')),
                 ('template', models.ForeignKey(to='lxca.ArchitectPdu')),
             ],
             options={
             },
-            bases=('lxca.orderbasemodel',),
+            bases=('lxca.orderendpointmodel',),
         ),
         migrations.CreateModel(
             name='OrderRack',
             fields=[
-                ('orderbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderBaseModel')),
+                ('orderendpointmodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderEndpointModel')),
                 ('template', models.ForeignKey(to='lxca.ArchitectRack')),
             ],
             options={
             },
-            bases=('lxca.orderbasemodel',),
+            bases=('lxca.orderendpointmodel',),
         ),
         migrations.CreateModel(
             name='OrderServer',
             fields=[
-                ('orderbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderBaseModel')),
+                ('orderendpointmodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderEndpointModel')),
                 ('firmware', models.CharField(default=b'firmware version', max_length=32)),
                 ('cores', models.IntegerField(default=2)),
                 ('mem', models.IntegerField(default=16, help_text='Memory size in GB')),
                 ('ip', models.GenericIPAddressField(null=True, verbose_name='IP4 address', blank=True)),
+                ('layer0', models.IntegerField(default=6)),
                 ('storages', models.ManyToManyField(to='lxca.CatalogStorageDisk')),
                 ('template', models.ForeignKey(to='lxca.ArchitectServer')),
             ],
             options={
             },
-            bases=('lxca.orderbasemodel',),
+            bases=('lxca.orderendpointmodel',),
         ),
         migrations.CreateModel(
             name='OrderSolution',
@@ -397,12 +419,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='OrderSwitch',
             fields=[
-                ('orderbasemodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderBaseModel')),
+                ('orderendpointmodel_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='lxca.OrderEndpointModel')),
                 ('template', models.ForeignKey(to='lxca.ArchitectSwitch')),
             ],
             options={
             },
-            bases=('lxca.orderbasemodel',),
+            bases=('lxca.orderendpointmodel',),
         ),
         migrations.CreateModel(
             name='PduInput',
@@ -463,7 +485,7 @@ class Migration(migrations.Migration):
             unique_together=set([('voltage', 'phase', 'current')]),
         ),
         migrations.AddField(
-            model_name='orderbasemodel',
+            model_name='orderendpointmodel',
             name='order',
             field=models.ForeignKey(to='lxca.OrderSolution'),
             preserve_default=True,
@@ -535,7 +557,13 @@ class Migration(migrations.Migration):
             preserve_default=True,
         ),
         migrations.AddField(
-            model_name='architectbasemodel',
+            model_name='architectendpoint',
+            name='config_pattern',
+            field=models.ForeignKey(to='lxca.ArchitectConfigPattern'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='architectendpoint',
             name='rule_for_count',
             field=models.ForeignKey(to='lxca.ArchitectRuleForCount'),
             preserve_default=True,

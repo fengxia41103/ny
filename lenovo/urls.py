@@ -2,15 +2,10 @@ from django.conf.urls import include
 from django.conf.urls import patterns
 from django.conf.urls import url
 from django.contrib import admin
-# tastypie API urls
-from tastypie.api import Api
+
 
 import settings
-from lxca.api import *
-
-v1_api = Api(api_name='v1')
-v1_api.register(CatalogServerResource())
-v1_api.register(ArchitectSolutionResource())
+from lxca.api import v1_api
 
 urlpatterns = patterns(
     '',

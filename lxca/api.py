@@ -1,10 +1,13 @@
 # myapp/api.py
 from django.http import HttpResponse
-from tastypie import resources
+from tastypie import resources, fields, utils
 from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource
-
 from lxca.models import *
+
+# tastypie API urls
+from tastypie.api import Api
+v1_api = Api(api_name='v1')
 
 
 def build_content_type(format, encoding="utf-8"):
@@ -32,6 +35,32 @@ class MyModelResource(resources.ModelResource):
                               **response_kwargs)
 
 
+######################################################
+#
+#	Catalog resources
+#
+#####################################################
+class CatalogRackResource(MyModelResource):
+
+    class Meta:
+        queryset = CatalogRack.objects.all()
+        resource_name = "racks"
+
+
+class CatalogPduResource(MyModelResource):
+
+    class Meta:
+        queryset = CatalogPdu.objects.all()
+        resource_name = "pdus"
+
+
+class CatalogSwitchResource(MyModelResource):
+
+    class Meta:
+        queryset = CatalogSwitch.objects.all()
+        resource_name = "switches"
+
+
 class CatalogServerResource(MyModelResource):
 
     class Meta:
@@ -39,8 +68,52 @@ class CatalogServerResource(MyModelResource):
         resource_name = "servers"
 
 
+######################################################
+#
+#	SA resources
+#
+#####################################################
+class ArchitectLxcaResource(MyModelResource):
+
+    class Meta:
+        queryset = ArchitectLxca.objects.all()
+        resource_name = "lxca"
+
+
+class ArchitectComplianceResource(MyModelResource):
+
+    class Meta:
+        queryset = ArchitectCompliance.objects.all()
+        resource_name = "compliance"
+
+
+class ArchitectFirmwareResource(MyModelResource):
+
+    class Meta:
+        queryset = ArchitectFirmwareRepo.objects.all()
+        resource_name = "firmware"
+
+
 class ArchitectSolutionResource(MyModelResource):
+    lxca = fields.ForeignKey(ArchitectLxcaResource,
+                             "lxca", full=True)
+    compliance = fields.ForeignKey(ArchitectComplianceResource,
+                                   "compliance", full=True)
+    firmware_repo = fields.ForeignKey(ArchitectFirmwareResource,
+                                      "firmware",
+                                      full=True,
+                                      null=True)
 
     class Meta:
         queryset = ArchitectSolution.objects.all()
         resource_name = "solutions"
+
+# Register resources
+v1_api.register(CatalogRackResource())
+v1_api.register(CatalogPduResource())
+v1_api.register(CatalogSwitchResource())
+v1_api.register(CatalogServerResource())
+v1_api.register(ArchitectLxcaResource())
+v1_api.register(ArchitectFirmwareResource())
+v1_api.register(ArchitectComplianceResource())
+v1_api.register(ArchitectSolutionResource())

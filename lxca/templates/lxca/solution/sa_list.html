@@ -31,7 +31,7 @@ Architect Solutions
     </td><td>{{ obj.name }}
     </td><td> {{ obj.version }}
     </td><td>
-      <ul>
+      <ul class="list-unstyled">
         {% for app in  obj.applications.all %}
         <li> {{ app.name }}</li>
         {% endfor %}

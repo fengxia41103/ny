@@ -182,8 +182,6 @@ class PduInput(models.Model):
     """PDU input voltage, phase, current.
     https://lenovopress.com/redp5267.pdf
     """
-    voltage = models.IntegerField(default=120)
-
     PHASE_CHOICES = (
         (1, u"1 Phase"),
         (3, u"3 Phase")
@@ -200,16 +198,14 @@ class PduInput(models.Model):
         default=1,
         choices=FREQUENCY_CHOICES
     )
-    current = models.IntegerField(default=13)
 
     class Meta:
-        unique_together = ("voltage", "phase", "current")
+        unique_together = ("phase", "frequency")
 
     def __unicode__(self):
         return " ".join([
-            "%dVAC" % self.voltage,
-            "%d Phase" % self.phase,
-            "%dA" % self.current
+            "%s" % self.get_phase_display(),
+            "%s" % self.get_frequency_display()
         ])
 
 
@@ -218,9 +214,6 @@ class PduOutput(models.Model):
     https://lenovopress.com/redp5267.pdf
     """
     voltage = models.IntegerField(default=120)
-    capacity = models.IntegerField(
-        help_text=u"Capacity per PDU (w)"
-    )
     power_limit_per_pdu = models.IntegerField()
     power_limit_per_outlet = models.IntegerField()
     power_limit_per_group = models.IntegerField(
@@ -228,8 +221,12 @@ class PduOutput(models.Model):
         blank=True
     )
 
+    def _capacity(self):
+        return self.voltage * self.power_limit_per_pdu
+    capacity = property(_capacity)
+
     class Meta:
-        unique_together = ("voltage", "capacity",
+        unique_together = ("voltage",
                            "power_limit_per_pdu",
                            "power_limit_per_outlet",
                            "power_limit_per_group")
@@ -251,23 +248,27 @@ class PduOutput(models.Model):
 class CatalogPdu(CatalogEndpoint):
     c13 = models.IntegerField(default=0)
     c19 = models.IntegerField(default=0)
-    inputs = models.ManyToManyField(PduInput)
+
+    # input only specify phase and frequency,
+    # so it is 1-N relation.
+    # The range of voltages and currents are
+    # derived from selected outputs.
+    input = models.ForeignKey(PduInput)
     outputs = models.ManyToManyField(PduOutput)
     is_monitored = models.BooleanField(default=False)
 
     def _input_voltages(self):
-        voltages = [i.voltage for i in self.inputs.all()]
+        voltages = [i.voltage for i in self.outputs.all()]
         min_vol = min(voltages)
         max_vol = max(voltages)
         return "%d-%dVAC" % (min_val, max_val)
     input_voltages = property(_input_voltages)
 
-    def _input_phases(self):
-        return set(["%d Phase" % i.phase for i in self.inputs.all()])
-    input_phases = property(_input_phases)
-
     def _input_currents(self):
-        return set(["%dA" % i.current for i in self.inputs.all()])
+        currents = [i.current for i in self.outputs.all()]
+        min_vol = min(currents)
+        max_vol = max(currents)
+        return "%d-%dVAC" % (min_val, max_val)
     input_currents = property(_input_currents)
 
 
@@ -506,13 +507,13 @@ class ArchitectConfigPattern(models.Model):
         return self.filename
 
 
-class ArchitectBaseModel(models.Model):
+class ArchitectEndpoint(models.Model):
     rule_for_count = models.ForeignKey("ArchitectRuleForCount")
     firmware_policy = models.CharField(max_length=32, default="")
     config_pattern = models.ForeignKey("ArchitectConfigPattern")
 
 
-class ArchitectRack(ArchitectBaseModel):
+class ArchitectRack(ArchitectEndpoint):
     catalog = models.ForeignKey("CatalogRack")
 
     def __unicode__(self):
@@ -520,7 +521,7 @@ class ArchitectRack(ArchitectBaseModel):
                             self.rule_for_count)
 
 
-class ArchitectPdu(ArchitectBaseModel):
+class ArchitectPdu(ArchitectEndpoint):
     catalog = models.ForeignKey("CatalogPdu")
 
     def __unicode__(self):
@@ -528,7 +529,7 @@ class ArchitectPdu(ArchitectBaseModel):
                             self.rule_for_count)
 
 
-class ArchitectSwitch(ArchitectBaseModel):
+class ArchitectSwitch(ArchitectEndpoint):
     catalog = models.ForeignKey("CatalogSwitch")
 
     def __unicode__(self):
@@ -536,7 +537,7 @@ class ArchitectSwitch(ArchitectBaseModel):
                             self.rule_for_count)
 
 
-class ArchitectServer(ArchitectBaseModel):
+class ArchitectServer(ArchitectEndpoint):
     catalog = models.ForeignKey("CatalogServer")
 
     def _hosts(self):
@@ -657,7 +658,7 @@ class OrderSolution(models.Model):
     yaml_manifest = property(_yaml_manifest)
 
 
-class OrderBaseModel(models.Model):
+class OrderEndpointModel(models.Model):
     """Common configurations that will be determined at ordering.
     """
     order = models.ForeignKey("OrderSolution")
@@ -667,27 +668,27 @@ class OrderBaseModel(models.Model):
         return "%s/%s" % (self.order, self.template.catalog)
 
 
-class OrderApplication(OrderBaseModel):
+class OrderApplication(OrderEndpointModel):
     template = models.ForeignKey("ArchitectApplication",
                                  on_delete=models.CASCADE)
 
 
-class OrderRack(OrderBaseModel):
+class OrderRack(OrderEndpointModel):
     template = models.ForeignKey("ArchitectRack",
                                  on_delete=models.CASCADE)
 
 
-class OrderPdu(OrderBaseModel):
+class OrderPdu(OrderEndpointModel):
     template = models.ForeignKey("ArchitectPdu",
                                  on_delete=models.CASCADE)
 
 
-class OrderSwitch(OrderBaseModel):
+class OrderSwitch(OrderEndpointModel):
     template = models.ForeignKey("ArchitectSwitch",
                                  on_delete=models.CASCADE)
 
 
-class OrderServer(OrderBaseModel):
+class OrderServer(OrderEndpointModel):
     """Server model in Ordering phase.
 
     Based on SA specifics, client can configure his server with
