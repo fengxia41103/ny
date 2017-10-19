@@ -181,6 +181,22 @@ urlpatterns = patterns(
         views.OrderSolutionDetail.as_view(),
         name='order_solution_detail'),
 
+    # order pdu
+    url('^order/pdus/$',
+        views.OrderPduList.as_view(),
+        name='order_pdu_list'),
+    url(r'^order/pdu/(?P<pk>\d+)/edit/$',
+        views.OrderPduEdit.as_view(),
+        name='order_pdu_edit'),
+
+    # order switch
+    url('^order/switches/$',
+        views.OrderSwitchList.as_view(),
+        name='order_switch_list'),
+    url(r'^order/switch/(?P<pk>\d+)/edit/$',
+        views.OrderSwitchEdit.as_view(),
+        name='order_switch_edit'),
+
     # order server
     url('^order/servers/$',
         views.OrderServerList.as_view(),

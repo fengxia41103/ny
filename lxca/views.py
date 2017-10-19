@@ -679,177 +679,75 @@ class ArchitectSolutionDetail(DetailView):
         context["attachment_form"] = AttachmentForm()
         context["images"] = [
             img.file.url for img in self.object.attachments.all()]
-        context["manifest"] = self.object.json_manifest
+
         return context
 
 ###################################################
 #
-#	 Architect application views
+#	 Order PDU views
 #
 ###################################################
 
 
-def ArchitectApplication_attachment_add(request, pk):
-    tmp_form = AttachmentForm(request.POST, request.FILES)
-
-    if tmp_form.is_valid():
-        t = tmp_form.save(commit=False)
-        t.name = request.FILES["file"].name
-        t.content_object = ArchitectApplication.objects.get(id=pk)
-        t.created_by = request.user
-        t.save()
-    return HttpResponseRedirect(
-        reverse_lazy("sa_application_detail",
-                     kwargs={"pk": pk}))
-
-
-@login_required
-def ArchitectApplication_attachment_delete(request, pk):
-    a = Attachment.objects.get(id=pk)
-    object_id = a.object_id
-
-    # once we set MEDIA_ROOT, we will delete local file from file system also
-    if os.path.exists(a.file.path):
-        os.remove(os.path.join(settings.MEDIA_ROOT, a.file.path))
-
-    # delete model
-    a.delete()
-    return HttpResponseRedirect(
-        reverse_lazy("sa_application_detail",
-                     kwargs={"pk": object_id}))
-
-
-class ArchitectApplicationListFilter (FilterSet):
+class OrderPduListFilter (FilterSet):
 
     class Meta:
-        model = ArchitectApplication
-        fields = ["name", "host"]
+        model = OrderPdu
 
 
-class ArchitectApplicationList(FilterView):
-    template_name = "lxca/application/sa_list.html"
+class OrderPduList(FilterView):
+    template_name = "lxca/pdu/order_list.html"
     paginate_by = 10
 
     def get_filterset_class(self):
-        return ArchitectApplicationListFilter
+        return OrderPduListFilter
 
 
-class ArchitectApplicationAdd(CreateView):
-    model = ArchitectApplication
-    template_name = 'common/add_form.html'
-    success_url = reverse_lazy('sa_application_list')
-
-    def get_context_data(self, **kwargs):
-        context = super(CreateView, self).get_context_data(**kwargs)
-        context['title'] = u'New Application'
-        context['list_url'] = self.success_url
-        context['objects'] = ArchitectApplication.objects.all()
-        return context
-
-
-class ArchitectApplicationDelete (DeleteView):
-    model = ArchitectApplication
-    template_name = 'common/delete_form.html'
-    success_url = reverse_lazy('sa_application_list')
-
-    def get_context_data(self, **kwargs):
-        context = super(DeleteView, self).get_context_data(**kwargs)
-        context['title'] = u'Delete item'
-        context['list_url'] = reverse_lazy('sa_application_list')
-        return context
-
-
-class ArchitectApplicationEdit(UpdateView):
-    model = ArchitectApplication
+class OrderPduEdit(UpdateView):
+    model = OrderPdu
     template_name = "common/edit_form.html"
-    success_url = reverse_lazy("sa_application_list")
+    form_class = OrderPduForm
+    success_url = reverse_lazy("order_pdu_list")
 
     def get_context_data(self, **kwargs):
         context = super(UpdateView, self).get_context_data(**kwargs)
-        context['title'] = u'Edit Application'
-        context['list_url'] = reverse_lazy('sa_application_list')
-        context['attachment_form'] = AttachmentForm()
-        return context
-
-
-class ArchitectApplicationDetail(DetailView):
-    model = ArchitectApplication
-    template_name = "lxca/application/sa_detail.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(DetailView, self).get_context_data(**kwargs)
-        context["attachment_form"] = AttachmentForm()
-        context["images"] = [
-            img.file.url for img in self.object.attachments.all()]
+        context['title'] = u'Edit OrderPdu'
+        context['list_url'] = reverse_lazy('order_solution_detail',
+                                           kwargs={"pk": self.object.order.id})
         return context
 
 ###################################################
 #
-#	 Order solution views
+#	 Order SWITCH views
 #
 ###################################################
 
 
-class OrderSolutionListFilter (FilterSet):
+class OrderSwitchListFilter (FilterSet):
 
     class Meta:
-        model = OrderSolution
-        fields = ["order", "status"]
+        model = OrderSwitch
 
 
-class OrderSolutionList(FilterView):
-    template_name = "lxca/solution/order_list.html"
+class OrderSwitchList(FilterView):
+    template_name = "lxca/switch/order_list.html"
     paginate_by = 10
 
     def get_filterset_class(self):
-        return OrderSolutionListFilter
+        return OrderSwitchListFilter
 
 
-class OrderSolutionAdd(CreateView):
-    model = OrderSolution
-    template_name = 'common/add_form.html'
-    success_url = reverse_lazy('order_solution_list')
-
-    def get_context_data(self, **kwargs):
-        context = super(CreateView, self).get_context_data(**kwargs)
-        context['title'] = u'New Order'
-        context['list_url'] = self.success_url
-        context['objects'] = OrderSolution.objects.all()
-        return context
-
-
-class OrderSolutionDelete (DeleteView):
-    model = OrderSolution
-    template_name = 'common/delete_form.html'
-    success_url = reverse_lazy('order_solution_list')
-
-    def get_context_data(self, **kwargs):
-        context = super(DeleteView, self).get_context_data(**kwargs)
-        context['title'] = u'Delete Order'
-        context['list_url'] = reverse_lazy('order_solution_list')
-        return context
-
-
-class OrderSolutionEdit(UpdateView):
-    model = OrderSolution
+class OrderSwitchEdit(UpdateView):
+    model = OrderSwitch
     template_name = "common/edit_form.html"
-    success_url = reverse_lazy("order_solution_list")
+    form_class = OrderSwitchForm
+    success_url = reverse_lazy("order_switch_list")
 
     def get_context_data(self, **kwargs):
         context = super(UpdateView, self).get_context_data(**kwargs)
-        context['title'] = u'Edit Order'
-        context['list_url'] = reverse_lazy('order_solution_list')
-        return context
-
-
-class OrderSolutionDetail(DetailView):
-    model = OrderSolution
-    template_name = "lxca/solution/order_detail.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(DetailView, self).get_context_data(**kwargs)
-        context["server_forms"] = [
-            OrderServerForm(instance=i) for i in self.object.servers.all()]
+        context['title'] = u'Edit OrderSwitch'
+        context['list_url'] = reverse_lazy('order_solution_detail',
+                                           kwargs={"pk": self.object.order.id})
         return context
 
 ###################################################

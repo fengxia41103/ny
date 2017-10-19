@@ -13,6 +13,26 @@ class AttachmentForm(ModelForm):
         fields = ['description', 'file']
 
 
+class OrderPduForm(ModelForm):
+
+    class Meta:
+        model = OrderPdu
+        widgets = {
+            "order": HiddenInput(),
+            "template": HiddenInput()
+        }
+
+
+class OrderSwitchForm(ModelForm):
+
+    class Meta:
+        model = OrderSwitch
+        widgets = {
+            "order": HiddenInput(),
+            "template": HiddenInput()
+        }
+
+
 class OrderServerForm(ModelForm):
 
     class Meta:
