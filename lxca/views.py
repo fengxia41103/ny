@@ -684,6 +684,107 @@ class ArchitectSolutionDetail(DetailView):
 
 ###################################################
 #
+#	 Architect application views
+#
+###################################################
+
+
+def ArchitectApplication_attachment_add(request, pk):
+    tmp_form = AttachmentForm(request.POST, request.FILES)
+
+    if tmp_form.is_valid():
+        t = tmp_form.save(commit=False)
+        t.name = request.FILES["file"].name
+        t.content_object = ArchitectApplication.objects.get(id=pk)
+        t.created_by = request.user
+        t.save()
+    return HttpResponseRedirect(
+        reverse_lazy("sa_application_detail",
+                     kwargs={"pk": pk}))
+
+
+@login_required
+def ArchitectApplication_attachment_delete(request, pk):
+    a = Attachment.objects.get(id=pk)
+    object_id = a.object_id
+
+    # once we set MEDIA_ROOT, we will delete local file from file system also
+    if os.path.exists(a.file.path):
+        os.remove(os.path.join(settings.MEDIA_ROOT, a.file.path))
+
+    # delete model
+    a.delete()
+    return HttpResponseRedirect(
+        reverse_lazy("sa_application_detail",
+                     kwargs={"pk": object_id}))
+
+
+class ArchitectApplicationListFilter (FilterSet):
+
+    class Meta:
+        model = ArchitectApplication
+        fields = ["name", "host"]
+
+
+class ArchitectApplicationList(FilterView):
+    template_name = "lxca/application/sa_list.html"
+    paginate_by = 10
+
+    def get_filterset_class(self):
+        return ArchitectApplicationListFilter
+
+
+class ArchitectApplicationAdd(CreateView):
+    model = ArchitectApplication
+    template_name = 'common/add_form.html'
+    success_url = reverse_lazy('sa_application_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateView, self).get_context_data(**kwargs)
+        context['title'] = u'New Application'
+        context['list_url'] = self.success_url
+        context['objects'] = ArchitectApplication.objects.all()
+        return context
+
+
+class ArchitectApplicationDelete (DeleteView):
+    model = ArchitectApplication
+    template_name = 'common/delete_form.html'
+    success_url = reverse_lazy('sa_application_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(DeleteView, self).get_context_data(**kwargs)
+        context['title'] = u'Delete item'
+        context['list_url'] = reverse_lazy('sa_application_list')
+        return context
+
+
+class ArchitectApplicationEdit(UpdateView):
+    model = ArchitectApplication
+    template_name = "common/edit_form.html"
+    success_url = reverse_lazy("sa_application_list")
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateView, self).get_context_data(**kwargs)
+        context['title'] = u'Edit Application'
+        context['list_url'] = reverse_lazy('sa_application_list')
+        context['attachment_form'] = AttachmentForm()
+        return context
+
+
+class ArchitectApplicationDetail(DetailView):
+    model = ArchitectApplication
+    template_name = "lxca/application/sa_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailView, self).get_context_data(**kwargs)
+        context["attachment_form"] = AttachmentForm()
+        context["images"] = [
+            img.file.url for img in self.object.attachments.all()]
+        return context
+
+###################################################
+#
 #	 Order PDU views
 #
 ###################################################
