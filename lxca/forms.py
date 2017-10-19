@@ -34,6 +34,7 @@ class OrderSwitchForm(ModelForm):
 
 
 class OrderServerForm(ModelForm):
+    layer0 = forms.ChoiceField(OrderServer.LAYER0_CHOICES)
 
     class Meta:
         model = OrderServer
