@@ -93,15 +93,113 @@
 <h2>Order Details</h2>
 <ul class="nav nav-tabs" role="tablist">
   <li>
+    <a href="#pdus"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      PDUs
+    </a>
+  </li>
+  <li>
+    <a href="#switches"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      Switches
+    </a>
+  </li>
+  <li>
     <a href="#servers"
        role="tab"
        data-toggle="tab">
       <i class="fa fa-folder"></i>
-      servers
+      Servers
     </a>
   </li>
 </ul>
 <div class="tab-content">
+  <div class="tab-pane" id="pdus">
+    {% for s_form in pdu_forms %}
+    {% with s_form.instance as pdu %}
+    <div class="row"
+         style="border-bottom:1px dashed #bcbcbc; padding:10px 0px;">
+
+      {# pdu image #}
+      <div class="col-md-2">
+	{% with pdu.template.catalog.attachments.all.0 as item_img %}
+	<img src="{{item_img.file.url}}"
+             data-type="attachment-thumbnail"
+             class="img-responsive img-thumbnail"
+             style="width:90%;">
+	{% endwith %}
+      </div>
+      <div class="col-md-4">
+	<h4>
+	  {{ pdu.template.catalog|upper }}
+	</h4>
+	<p>
+	  <a href="{% url 'catalog_pdu_detail' pdu.template.catalog.id %}">
+	    <i class="fa fa-hand-o-right"></i>
+	    details
+	  </a>
+	</p>
+      </div>
+      <div class="col-md-4">
+        <form method="post"
+              action="{% url 'order_pdu_edit' pdu.id %}">
+          {% csrf_token %}
+          {{ s_form|crispy }}
+          <button class="btn btn-small"
+                  type="submit">
+            update
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  <div class="tab-pane" id="switches">
+    {% for s_form in switch_forms %}
+    {% with s_form.instance as switch %}
+    <div class="row"
+         style="border-bottom:1px dashed #bcbcbc; padding:10px 0px;">
+
+      {# switch image #}
+      <div class="col-md-2">
+	{% with switch.template.catalog.attachments.all.0 as item_img %}
+	<img src="{{item_img.file.url}}"
+             data-type="attachment-thumbnail"
+             class="img-responsive img-thumbnail"
+             style="width:90%;">
+	{% endwith %}
+      </div>
+      <div class="col-md-4">
+	<h4>
+	  {{ switch.template.catalog|upper }}
+	</h4>
+	<p>
+	  <a href="{% url 'catalog_switch_detail' switch.template.catalog.id %}">
+	    <i class="fa fa-hand-o-right"></i>
+	    details
+	  </a>
+	</p>
+      </div>
+      <div class="col-md-4">
+        <form method="post"
+              action="{% url 'order_switch_edit' switch.id %}">
+          {% csrf_token %}
+          {{ s_form|crispy }}
+          <button class="btn btn-small"
+                  type="submit">
+            update
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
   <div class="tab-pane" id="servers">
     {% for s_form in server_forms %}
     {% with s_form.instance as server %}
