@@ -88,12 +88,48 @@ class OrderSolutionDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
+        context["rack_forms"] = [
+            OrderRackForm(instance=i) for i in self.object.racks.all()]
         context["pdu_forms"] = [
             OrderPduForm(instance=i) for i in self.object.pdus.all()]
         context["switch_forms"] = [
             OrderSwitchForm(instance=i) for i in self.object.switches.all()]
         context["server_forms"] = [
             OrderServerForm(instance=i) for i in self.object.servers.all()]
+        return context
+
+###################################################
+#
+#	 Order RACK views
+#
+###################################################
+
+
+class OrderRackListFilter (FilterSet):
+
+    class Meta:
+        model = OrderRack
+
+
+class OrderRackList(FilterView):
+    template_name = "lxca/rack/order_list.html"
+    paginate_by = 10
+
+    def get_filterset_class(self):
+        return OrderRackListFilter
+
+
+class OrderRackEdit(UpdateView):
+    model = OrderRack
+    template_name = "common/edit_form.html"
+    form_class = OrderRackForm
+    success_url = reverse_lazy("order_rack_list")
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateView, self).get_context_data(**kwargs)
+        context['title'] = u'Edit OrderRack'
+        context['list_url'] = reverse_lazy('order_solution_detail',
+                                           kwargs={"pk": self.object.order.id})
         return context
 
 ###################################################

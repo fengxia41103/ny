@@ -199,6 +199,14 @@ urlpatterns = patterns(
         order.OrderSolutionDetail.as_view(),
         name='order_solution_detail'),
 
+    # order rack
+    url('^order/racks/$',
+        order.OrderRackList.as_view(),
+        name='order_rack_list'),
+    url(r'^order/rack/(?P<pk>\d+)/edit/$',
+        order.OrderRackEdit.as_view(),
+        name='order_rack_edit'),
+
     # order pdu
     url('^order/pdus/$',
         order.OrderPduList.as_view(),
@@ -239,6 +247,14 @@ urlpatterns = patterns(
     url(r'^mfg/solution/(?P<pk>\d+)/$',
         mfg.MfgSolutionDetail.as_view(),
         name='mfg_solution_detail'),
+
+    # mfg rack
+    url('^mfg/racks/$',
+        mfg.MfgRackList.as_view(),
+        name='mfg_rack_list'),
+    url(r'^mfg/rack/(?P<pk>\d+)/edit/$',
+        mfg.MfgRackEdit.as_view(),
+        name='mfg_rack_edit'),
 
     # mfg pdu
     url('^mfg/pdus/$',

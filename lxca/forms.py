@@ -18,6 +18,13 @@ class AttachmentForm(ModelForm):
         fields = ['description', 'file']
 
 
+class OrderRackForm(ModelForm):
+
+    class Meta:
+        model = OrderRack
+        exclude = ["order", "template"]
+
+
 class OrderPduForm(ModelForm):
 
     class Meta:
@@ -38,6 +45,13 @@ class OrderServerForm(ModelForm):
     class Meta:
         model = OrderServer
         exclude = ["order", "template", ]
+
+
+class MfgRackForm(ModelForm):
+
+    class Meta:
+        model = MfgRack
+        exclude = ["mfg", "uuid", "order"]
 
 
 class MfgPduForm(ModelForm):

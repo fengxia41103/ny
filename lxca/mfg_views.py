@@ -89,6 +89,8 @@ class MfgSolutionDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(DetailView, self).get_context_data(**kwargs)
+
+        # use MFG forms
         context["pdu_forms"] = [
             MfgPduForm(instance=i) for i in self.object.pdus.all()]
         context["switch_forms"] = [
@@ -97,6 +99,39 @@ class MfgSolutionDetail(DetailView):
             MfgServerForm(instance=i) for i in self.object.servers.all()]
         return context
 
+###################################################
+#
+#	 Mfg RACK views
+#
+###################################################
+
+
+class MfgRackListFilter (FilterSet):
+
+    class Meta:
+        model = MfgRack
+
+
+class MfgRackList(FilterView):
+    template_name = "lxca/rack/mfg_list.html"
+    paginate_by = 10
+
+    def get_filterset_class(self):
+        return MfgRackListFilter
+
+
+class MfgRackEdit(UpdateView):
+    model = MfgRack
+    template_name = "common/edit_form.html"
+    form_class = MfgRackForm
+    success_url = reverse_lazy("mfg_rack_list")
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateView, self).get_context_data(**kwargs)
+        context['title'] = u'Edit MfgRack'
+        context['list_url'] = reverse_lazy('mfg_solution_detail',
+                                           kwargs={"pk": self.object.mfg.id})
+        return context
 ###################################################
 #
 #	 Mfg PDU views

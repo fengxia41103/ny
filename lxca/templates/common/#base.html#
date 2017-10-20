@@ -1,0 +1,71 @@
+{% load staticfiles %}
+{% load compress %}
+{% load crispy_forms_tags %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />    
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Lenovo Unified</title>
+    {% include "common/head.html" %}
+  </head>
+
+  <body>
+    {% include "common/navbar.html" %}
+    
+    {% block main %}
+    <div class="col-sm-1">
+      {% block nav-sidebar %}
+      <ul class="nav nav-stacked affix">		
+      </ul>		
+      {% endblock %}
+    </div>
+
+    {% block custom_tags %}
+    {% endblock %}
+    <div id="wrap">
+      <div class="container ">
+	{% block page-info %}
+	{% endblock %}
+	
+	{% block common-header %}
+	<div class="page-header">
+	  <h1>
+	    {% block page-header %}
+	    {% endblock %}
+	  </h1>
+	</div><!-- end of block header -->
+	{% endblock %}
+
+	{% block message %}
+	{% endblock %}
+	
+	{% block content %}
+	{% endblock %}
+      </div><!-- /.container -->
+      <div id="push"></div>
+    </div>
+    {% endblock %}<!-- end of block main -->
+
+    {% block modal %}
+    {% endblock %}
+
+    {% include "common/footer.html" %}
+    {% include "common/js.html" %}
+
+    {% block custom_js %}
+    {% endblock %}
+
+  </body>
+
+</html>
+
+
+
+

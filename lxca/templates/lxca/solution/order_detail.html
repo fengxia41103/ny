@@ -95,6 +95,14 @@
 <h2>Order Details</h2>
 <ul class="nav nav-tabs" role="tablist">
   <li>
+    <a href="#racks"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      Racks
+    </a>
+  </li>
+  <li>
     <a href="#pdus"
        role="tab"
        data-toggle="tab">
@@ -120,6 +128,48 @@
   </li>
 </ul>
 <div class="tab-content">
+  <div class="tab-pane" id="racks">
+    {% for s_form in rack_forms %}
+    {% with s_form.instance as rack %}
+    <div class="row"
+         style="border-bottom:1px dashed #bcbcbc; padding:10px 0px;">
+
+      {# rack image #}
+      <div class="col-md-2">
+	{% with rack.template.catalog.attachments.all.0 as item_img %}
+	<img src="{{item_img.file.url}}"
+             data-type="attachment-thumbnail"
+             class="img-responsive img-thumbnail"
+             style="width:90%;">
+	{% endwith %}
+      </div>
+      <div class="col-md-4">
+	<h4>
+	  {{ rack.template.catalog|upper }}
+	</h4>
+	<p>
+	  <a href="{% url 'catalog_rack_detail' rack.template.catalog.id %}">
+	    <i class="fa fa-hand-o-right"></i>
+	    details
+	  </a>
+	</p>
+      </div>
+      <div class="col-md-4">
+        <form method="post"
+              action="{% url 'order_rack_edit' rack.id %}">
+          {% csrf_token %}
+          {{ s_form|crispy }}
+          <button class="btn btn-small"
+                  type="submit">
+            update
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+
   <div class="tab-pane" id="pdus">
     {% for s_form in pdu_forms %}
     {% with s_form.instance as pdu %}

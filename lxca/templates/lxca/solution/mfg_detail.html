@@ -87,6 +87,14 @@
 <h2>Mfg Details</h2>
 <ul class="nav nav-tabs" role="tablist">
   <li>
+    <a href="#racks"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      RACKs
+    </a>
+  </li>
+  <li>
     <a href="#pdus"
        role="tab"
        data-toggle="tab">
@@ -112,6 +120,37 @@
   </li>
 </ul>
 <div class="tab-content">
+  <div class="tab-pane" id="racks">
+    {% for rack in object.racks %}
+    <div class="row"
+         style="border-bottom:1px dashed #bcbcbc; padding:10px 0px;">
+
+      {# rack image #}
+      <div class="col-md-2">
+	{% with rack.order.template.catalog.attachments.all.0 as item_img %}
+	<img src="{{item_img.file.url}}"
+             data-type="attachment-thumbnail"
+             class="img-responsive img-thumbnail"
+             style="width:90%;">
+	{% endwith %}
+      </div>
+      <div class="col-md-4">
+	<h4>
+	  {{ rack.order.template.catalog|upper }}
+	</h4>
+	<p>
+	  <a href="{% url 'catalog_rack_detail' rack.order.template.catalog.id %}">
+	    <i class="fa fa-hand-o-right"></i>
+	    details
+	  </a>
+	</p>
+      </div>
+      <div class="col-md-4">
+        QTY: {{ rack.order.qty }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
   <div class="tab-pane" id="pdus">
     {% for s_form in pdu_forms %}
     {% with s_form.instance as pdu %}
