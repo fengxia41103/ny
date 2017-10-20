@@ -1,3 +1,5 @@
+import os
+from django.conf import settings
 from django.views.generic import DetailView
 from django.views.generic import ListView
 from django.views.generic import TemplateView
@@ -7,6 +9,7 @@ from django.views.generic.edit import FormView
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponseRedirect
 
 # django-filters
 from django_filters import AllValuesFilter

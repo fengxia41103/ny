@@ -132,3 +132,87 @@ class Note(models.Model):
 #    UHM config  models
 #
 #####################################################
+
+class BaremetalManager(models.Model):
+    # BM manager, eg. LXCA
+    user = models.CharField(max_length=64, default="")
+    password = models.CharField(max_length=32, default="")
+    url = models.URLField(default="")
+
+    def __unicode__(self):
+        return self.url
+
+
+class MfgSolution(models.Model):
+    order = models.ForeignKey("OrderSolution")
+    bm_manager = models.ForeignKey("BaremetalManager",
+                                   blank=True,
+                                   null=True)
+
+
+class MfgEndpoint(models.Model):
+    # this is a traceable piece of HW
+    # that is unique within the entire org!
+    serial = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        verbose_name=u"Serial number"
+    )
+    uuid = UUIDField(default=uuid.uuid4)
+
+    # imm
+    imm_ip = models.GenericIPAddressField(
+        blank=True, null=True,
+        verbose_name=u"IMM IP4 address")
+    imm_user = models.CharField(
+        max_length=32,
+        default="lenovo",
+        blank=True, null=True,
+        verbose_name=u"IMM user")
+    imm_password = models.CharField(
+        max_length=32, default="passw0rd",
+        blank=True, null=True,
+        verbose_name=u"IMM password")
+
+    # regular access
+    username = models.CharField(
+        max_length=32, default="lxca",
+        blank=True, null=True,
+        verbose_name=u"Mgt user")
+    password = models.CharField(
+        max_length=32,
+        default="Th1nkAg!le",
+        blank=True, null=True,
+        verbose_name=u"Mgt password")
+    ip4 = models.GenericIPAddressField(
+        blank=True,
+        null=True,
+        verbose_name=u"Mgt IP4 address")
+    ip6 = models.GenericIPAddressField(
+        blank=True,
+        null=True,
+        verbose_name=u"Mgt IP6 address")
+
+    class Meta:
+        abstract = True
+
+
+class MfgRack(MfgEndpoint):
+    solution = models.ForeignKey("MfgSolution")
+    order = models.ForeignKey("OrderRack")
+
+
+class MfgPdu(MfgEndpoint):
+    solution = models.ForeignKey("MfgSolution")
+    order = models.ForeignKey("OrderPdu")
+
+
+class MfgSwitch(MfgEndpoint):
+    solution = models.ForeignKey("MfgSolution")
+    order = models.ForeignKey("OrderSwitch")
+
+
+class MfgServer(MfgEndpoint):
+    solution = models.ForeignKey("MfgSolution")
+    order = models.ForeignKey("OrderServer")
