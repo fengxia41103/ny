@@ -1,10 +1,12 @@
 from django.db import models
 from annoying.fields import JSONField  # django-annoying
+from django_extensions.db.fields import UUIDField
 from ruamel import yaml
 import uuid
 import simplejson as json
 
 from lxca.models import BaseModel
+from lxca.orchestrator_models import *
 
 ######################################################
 #
@@ -46,6 +48,8 @@ class Playbook(models.Model):
 
 
 class ArchitectSolution(BaseModel):
+    uuid = UUIDField(default=uuid.uuid4)
+
     # allow solution chain
     parent = models.ForeignKey(
         "self",
@@ -54,8 +58,13 @@ class ArchitectSolution(BaseModel):
         default=None,
     )
 
+    # orchestrator
+    charm = models.ForeignKey("MyCharm",
+                              null=True, blank=True)
     playbooks = models.ManyToManyField("Playbook",
                                        null=True, blank=True)
+
+    # everything else
     version = models.CharField(max_length=8, default="Alpha")
     lxca = models.ForeignKey("ArchitectLxca",
                              default=1)
@@ -137,6 +146,15 @@ class ArchitectSolution(BaseModel):
         return yaml.dump(self.manifest,
                          Dumper=yaml.RoundTripDumper)
     yaml_manifest = property(_yaml_manifest)
+
+    def _playbook_bundle(self):
+        return {
+            pb.name.replace(" ", "_"): {
+                "path": pb.path,
+                "vars": pb.extra_vars,
+                "tags": pb.tags
+            } for pb in self.playbooks.all()}
+    playbook_bundle = property(_playbook_bundle)
 
 
 class ArchitectCompliance(models.Model):
@@ -229,8 +247,21 @@ class ArchitectEndpoint(models.Model):
     rule_for_count = models.ForeignKey("ArchitectRuleForCount")
     firmware_policy = models.CharField(max_length=32, default="")
     config_pattern = models.ForeignKey("ArchitectConfigPattern")
+
+    # orchestrator
+    charm = models.ForeignKey("MyCharm",
+                              null=True, blank=True)
     playbooks = models.ManyToManyField("Playbook",
                                        null=True, blank=True)
+
+    def _playbook_bundle(self):
+        return {
+            pb.name.replace(" ", "_"): {
+                "path": pb.path,
+                "vars": pb.extra_vars,
+                "tags": pb.tags
+            } for pb in self.playbooks.all()}
+    playbook_bundle = property(_playbook_bundle)
 
 
 class ArchitectRack(ArchitectEndpoint):

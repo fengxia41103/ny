@@ -1,6 +1,6 @@
 digraph model_graph {
   // Dotfile by Django-Extensions graph_models
-  // Created: 2017-10-20 01:14
+  // Created: 2017-10-20 22:01
   // Cli Options: -X Attachment,User,Note,TaggedItem,CatalogRaidAdapter,CatalogRack,ArchitectRack,OrderRack,CatalogPdu,ArchitectPdu,OrderPdu,CatalogSwitch,ArchitectSwitch,OrderSwitch,PduInput,PduOutput lxca
 
   fontname = "Helvetica"
@@ -20,6 +20,104 @@ digraph model_graph {
 
   // Labels
 
+
+  lxca_models_BaseModel [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    BaseModel
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">description</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">TextField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">is_active</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">BooleanField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">name</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  lxca_mfg_models_MfgEndpoint [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    MfgEndpoint
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">mfg</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (id)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">imm_ip</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">imm_password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">imm_user</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">ip4</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">ip6</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">serial</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">username</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">uuid</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica ">UUIDField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
 
   lxca_catalog_models_CatalogEndpoint [label=<
     <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -56,34 +154,6 @@ digraph model_graph {
     <FONT FACE="Helvetica ">size</FONT>
     </TD><TD ALIGN="LEFT">
     <FONT FACE="Helvetica ">IntegerField</FONT>
-    </TD></TR>
-  
-    </TABLE>
-    >]
-
-  lxca_models_BaseModel [label=<
-    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
-    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
-    <FONT FACE="Helvetica Bold" COLOR="white">
-    BaseModel
-    </FONT></TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT FACE="Helvetica ">description</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT FACE="Helvetica ">TextField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">is_active</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">BooleanField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT FACE="Helvetica ">name</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT FACE="Helvetica ">CharField</FONT>
     </TD></TR>
   
     </TABLE>
@@ -181,6 +251,34 @@ digraph model_graph {
     </TABLE>
     >]
 
+  lxca_orchestrator_models_MyCharm [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    MyCharm
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">AutoField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">host</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">IntegerField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">name</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
   lxca_architect_models_Playbook [label=<
     <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
     <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
@@ -244,6 +342,12 @@ digraph model_graph {
     <FONT FACE="Helvetica Bold">id</FONT>
     </TD><TD ALIGN="LEFT">
     <FONT FACE="Helvetica Bold">AutoField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">charm</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">ForeignKey (id)</FONT>
     </TD></TR>
   
     <TR><TD ALIGN="LEFT" BORDER="0">
@@ -485,6 +589,12 @@ digraph model_graph {
     </TD></TR>
   
     <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">charm</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">ForeignKey (id)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
     <FONT FACE="Helvetica Bold">config_pattern</FONT>
     </TD><TD ALIGN="LEFT">
     <FONT FACE="Helvetica Bold">ForeignKey (id)</FONT>
@@ -527,40 +637,6 @@ digraph model_graph {
     </TABLE>
     >]
 
-  lxca_order_models_BaremetalManager [label=<
-    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
-    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
-    <FONT FACE="Helvetica Bold" COLOR="white">
-    BaremetalManager
-    </FONT></TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT FACE="Helvetica Bold">id</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT FACE="Helvetica Bold">AutoField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT FACE="Helvetica ">password</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT FACE="Helvetica ">CharField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT FACE="Helvetica ">url</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT FACE="Helvetica ">URLField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT FACE="Helvetica ">user</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT FACE="Helvetica ">CharField</FONT>
-    </TD></TR>
-  
-    </TABLE>
-    >]
-
   lxca_order_models_OrderSolution [label=<
     <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
     <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
@@ -572,12 +648,6 @@ digraph model_graph {
     <FONT FACE="Helvetica Bold">id</FONT>
     </TD><TD ALIGN="LEFT">
     <FONT FACE="Helvetica Bold">AutoField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">bm_manager</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">ForeignKey (id)</FONT>
     </TD></TR>
   
     <TR><TD ALIGN="LEFT" BORDER="0">
@@ -621,63 +691,9 @@ digraph model_graph {
     </TD></TR>
   
     <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">imm_ip</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">GenericIPAddressField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">imm_password</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">CharField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">imm_user</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">CharField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">ip4</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">GenericIPAddressField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">ip6</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">GenericIPAddressField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">password</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">CharField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
     <FONT FACE="Helvetica ">qty</FONT>
     </TD><TD ALIGN="LEFT">
     <FONT FACE="Helvetica ">IntegerField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">serial</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">CharField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">username</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">CharField</FONT>
-    </TD></TR>
-  
-    <TR><TD ALIGN="LEFT" BORDER="0">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">uuid</FONT>
-    </TD><TD ALIGN="LEFT">
-    <FONT COLOR="#7B7B7B" FACE="Helvetica ">UUIDField</FONT>
     </TD></TR>
   
     </TABLE>
@@ -751,10 +767,415 @@ digraph model_graph {
     </TABLE>
     >]
 
+  lxca_mfg_models_BaremetalManager [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    BaremetalManager
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">AutoField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">recovery_id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">recovery_password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">url</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">URLField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ">user</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ">CharField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  lxca_mfg_models_MfgSolution [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    MfgSolution
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">AutoField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">bm_manager</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Bold">ForeignKey (id)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">order</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (id)</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  lxca_mfg_models_MfgRack [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    MfgRack<BR/>&lt;<FONT FACE="Helvetica Italic">MfgEndpoint</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">AutoField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ItalicBold">mfg</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ItalicBold">ForeignKey (id)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">order</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (orderendpointmodel_ptr)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_ip</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_user</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">ip4</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">ip6</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">serial</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">username</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">uuid</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">UUIDField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  lxca_mfg_models_MfgPdu [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    MfgPdu<BR/>&lt;<FONT FACE="Helvetica Italic">MfgEndpoint</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">AutoField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ItalicBold">mfg</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ItalicBold">ForeignKey (id)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">order</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (orderendpointmodel_ptr)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_ip</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_user</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">ip4</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">ip6</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">serial</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">username</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">uuid</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">UUIDField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  lxca_mfg_models_MfgSwitch [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    MfgSwitch<BR/>&lt;<FONT FACE="Helvetica Italic">MfgEndpoint</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">AutoField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ItalicBold">mfg</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ItalicBold">ForeignKey (id)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">order</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (orderendpointmodel_ptr)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_ip</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_user</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">ip4</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">ip6</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">serial</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">username</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">uuid</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">UUIDField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
+  lxca_mfg_models_MfgServer [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    MfgServer<BR/>&lt;<FONT FACE="Helvetica Italic">MfgEndpoint</FONT>&gt;
+    </FONT></TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">id</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">AutoField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica ItalicBold">mfg</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica ItalicBold">ForeignKey (id)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Helvetica Bold">order</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Helvetica Bold">ForeignKey (orderendpointmodel_ptr)</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_ip</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">imm_user</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">ip4</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">ip6</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">GenericIPAddressField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">password</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">serial</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">username</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">CharField</FONT>
+    </TD></TR>
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">uuid</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Helvetica Italic">UUIDField</FONT>
+    </TD></TR>
+  
+    </TABLE>
+    >]
+
 
 
 
   // Relations
+
+  lxca_mfg_models_MfgEndpoint -> lxca_mfg_models_MfgSolution
+  [label="mfg (mfgendpoint)"] [arrowhead=none, arrowtail=dot, dir=both];
 
   lxca_catalog_models_CatalogEndpoint -> lxca_models_BaseModel
   [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
@@ -764,6 +1185,9 @@ digraph model_graph {
 
   lxca_architect_models_ArchitectSolution -> lxca_architect_models_ArchitectSolution
   [label="parent (architectsolution)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  lxca_architect_models_ArchitectSolution -> lxca_orchestrator_models_MyCharm
+  [label="charm (architectsolution)"] [arrowhead=none, arrowtail=dot, dir=both];
 
   lxca_architect_models_ArchitectSolution -> lxca_architect_models_ArchitectLxca
   [label="lxca (architectsolution)"] [arrowhead=none, arrowtail=dot, dir=both];
@@ -798,6 +1222,9 @@ digraph model_graph {
   lxca_architect_models_ArchitectEndpoint -> lxca_architect_models_ArchitectConfigPattern
   [label="config_pattern (architectendpoint)"] [arrowhead=none, arrowtail=dot, dir=both];
 
+  lxca_architect_models_ArchitectEndpoint -> lxca_orchestrator_models_MyCharm
+  [label="charm (architectendpoint)"] [arrowhead=none, arrowtail=dot, dir=both];
+
   lxca_architect_models_ArchitectEndpoint -> lxca_architect_models_Playbook
   [label="playbooks (architectendpoint)"] [arrowhead=dot arrowtail=dot, dir=both];
 
@@ -806,9 +1233,6 @@ digraph model_graph {
 
   lxca_architect_models_ArchitectServer -> lxca_architect_models_ArchitectEndpoint
   [label="multi-table\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
-
-  lxca_order_models_OrderSolution -> lxca_order_models_BaremetalManager
-  [label="bm_manager (ordersolution)"] [arrowhead=none, arrowtail=dot, dir=both];
 
   lxca_order_models_OrderSolution -> lxca_architect_models_ArchitectSolution
   [label="solution (ordersolution)"] [arrowhead=none, arrowtail=dot, dir=both];
@@ -830,6 +1254,27 @@ digraph model_graph {
 
   lxca_order_models_OrderServer -> lxca_order_models_OrderEndpointModel
   [label="multi-table\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  lxca_mfg_models_MfgSolution -> lxca_order_models_OrderSolution
+  [label="order (mfgsolution)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  lxca_mfg_models_MfgSolution -> lxca_mfg_models_BaremetalManager
+  [label="bm_manager (mfgsolution)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  lxca_mfg_models_MfgRack -> lxca_mfg_models_MfgEndpoint
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  lxca_mfg_models_MfgPdu -> lxca_mfg_models_MfgEndpoint
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  lxca_mfg_models_MfgSwitch -> lxca_mfg_models_MfgEndpoint
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
+
+  lxca_mfg_models_MfgServer -> lxca_order_models_OrderServer
+  [label="order (mfgserver)"] [arrowhead=none, arrowtail=dot, dir=both];
+
+  lxca_mfg_models_MfgServer -> lxca_mfg_models_MfgEndpoint
+  [label="abstract\ninheritance"] [arrowhead=empty, arrowtail=none, dir=both];
 
 }
 

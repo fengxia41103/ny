@@ -1,4 +1,5 @@
 import uuid
+import re
 from ruamel import yaml
 import simplejson as json
 from django.db import models
@@ -136,6 +137,74 @@ class MfgSolution(models.Model):
         return yaml.dump(self.manifest,
                          Dumper=yaml.RoundTripDumper)
     yaml_manifest = property(_yaml_manifest)
+
+    def _charm_bundle(self):
+        pat = re.compile("[()\s]+")
+
+        services = {}
+        ref_solution = self.order.solution
+
+        # dump lxca
+        bm = self.bm_manager
+        lxca = {
+            "user": bm.user,
+            "password": bm.password,
+            "url": bm.url
+        }
+        # dump solution
+        s_name = pat.sub("", ref_solution.name)
+        uhm = {
+            "lxca": lxca,
+            "playbooks": ref_solution.playbook_bundle
+        }
+
+        services[s_name] = {
+            "charm": str(ref_solution.charm),
+            "num_units": 1,
+            "options": {
+                "name": ref_solution.name,
+                "uuid": ref_solution.uuid,
+                "mtm": "mtm",  # TODO: doesn't need this!
+                "uhm": uhm,
+                "endpoints": {
+                    "endpoint_ip": lxca["url"],
+                    "manage_user": lxca["user"],
+                    "manage_password": lxca["password"]
+                }
+            }
+        }
+
+        # dump racks
+        for aa in [self.racks, self.pdus, self.switches, self.servers]:
+            for mfg in aa:
+                my_catalog = mfg.order.template.catalog
+                my_ref = mfg.order.template
+                my_order = mfg.order
+
+                uhm = {
+                    "lxca": lxca,
+                    "playbooks": my_ref.playbook_bundle
+                }
+
+                services[pat.sub("", my_catalog.name)] = {
+                    "charm": str(my_ref.charm),
+                    "num_units": 1,
+                    "uuid": mfg.uuid,
+                    "mtm": "mtm",
+                    "uhm": uhm
+                }
+        return services
+    charm_bundle = property(_charm_bundle)
+
+    def _json_bundle(self):
+        return json.dumps(self.charm_bundle,
+                          indent=4)
+    json_bundle = property(_json_bundle)
+
+    def _yaml_bundle(self):
+        return yaml.dump(self.charm_bundle,
+                         Dumper=yaml.RoundTripDumper)
+    yaml_bundle = property(_yaml_bundle)
 
 
 class MfgEndpoint(models.Model):

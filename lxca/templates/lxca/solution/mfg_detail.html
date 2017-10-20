@@ -17,6 +17,11 @@
 {% endblock %}
 
 {% block content %}
+{# charm bundle #}
+<h2>My beloved bundle</h2>
+<pre class="brush:js;">
+{{ object.json_bundle }}
+</pre>
 
 {# mfg header #}
 <h2>Summary</h2>
@@ -308,7 +313,10 @@
     </pre>
   </div>
 </div>
+
+
 {% endblock %}
+
 
 {% block custom_js %}
 <script type="text/javascript">

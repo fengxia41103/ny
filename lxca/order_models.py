@@ -177,4 +177,5 @@ class OrderServer(OrderEndpointModel):
         (5, u"Cent 7.0"),
         (6, u"RHEL 7.4")
     )
-    layer0 = models.IntegerField(default=6)
+    layer0 = models.IntegerField(default=6,
+                                 choices=LAYER0_CHOICES)
