@@ -3,20 +3,15 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from lxca.models import *
-
-###################################################
-#
-#	MyOrder signals
-#
-###################################################
+from lxca.catalog_models import *
+from lxca.architect_models import *
+from lxca.order_models import *
 
 
 @receiver(post_save, sender=OrderSolution)
 def OrderSolution_post_save(sender, instance, **kwargs):
-    """Auto create order line items based on the solution
-    one has picked.
-
-    These line items will then be used for configuring this order.
+    """Auto create Order-hw for each hardware
+    defined in the reference architecture.
     """
     if instance.solution and instance.status == 1:
         for r in instance.solution.applications.all():

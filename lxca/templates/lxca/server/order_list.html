@@ -14,6 +14,7 @@ Order Servers
   <thead>
     <th></th>
     <th>Related Order</th>
+    <th>Model</th>
     <th>Related Solution</th>
     <th>CPU Cores</th>
     <th>Memory in GiB</th>
@@ -30,6 +31,8 @@ Order Servers
       <a href="{% url 'order_solution_detail' obj.order.id %}">
         {{ obj.order.order }}
       </a>
+    </td><td>
+      
     </td><td>
       <a href="{% url 'sa_solution_detail' obj.order.solution.id %}">
         {{ obj.order.solution }}

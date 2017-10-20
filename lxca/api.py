@@ -4,6 +4,9 @@ from tastypie import resources, fields, utils
 from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource
 from lxca.models import *
+from lxca.catalog_models import *
+from lxca.architect_models import *
+from lxca.order_models import *
 
 # tastypie API urls
 from tastypie.api import Api

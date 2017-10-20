@@ -3,7 +3,11 @@ from django import forms
 from django.forms import ModelForm
 from django.forms.widgets import HiddenInput
 
+
 from lxca.models import *
+from lxca.catalog_models import *
+from lxca.architect_models import *
+from lxca.order_models import *
 
 
 class AttachmentForm(ModelForm):
@@ -17,20 +21,14 @@ class OrderPduForm(ModelForm):
 
     class Meta:
         model = OrderPdu
-        widgets = {
-            "order": HiddenInput(),
-            "template": HiddenInput()
-        }
+        exclude = ["order", "template"]
 
 
 class OrderSwitchForm(ModelForm):
 
     class Meta:
         model = OrderSwitch
-        widgets = {
-            "order": HiddenInput(),
-            "template": HiddenInput()
-        }
+        exclude = ["order", "template"]
 
 
 class OrderServerForm(ModelForm):
@@ -38,7 +36,4 @@ class OrderServerForm(ModelForm):
 
     class Meta:
         model = OrderServer
-        widgets = {
-            "order": HiddenInput(),
-            "template": HiddenInput()
-        }
+        exclude = ["order", "template", ]
