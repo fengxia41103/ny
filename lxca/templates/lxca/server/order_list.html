@@ -18,7 +18,7 @@ Order Servers
     <th>Related Solution</th>
     <th>CPU Cores</th>
     <th>Memory in GiB</th>
-    <th>IP4 Address</th>
+    <th>Layer0</th>
     <th></th>
   </thead>
   <tbody>
@@ -32,14 +32,14 @@ Order Servers
         {{ obj.order.order }}
       </a>
     </td><td>
-      
+      {{ obj.template.catalog.name }}
     </td><td>
       <a href="{% url 'sa_solution_detail' obj.order.solution.id %}">
         {{ obj.order.solution }}
       </a>
     </td><td>{{ obj.cores }}
     </td><td>{{ obj.mem }}
-    </td><td>{{ obj.ip }}
+    </td><td>{{ obj.get_layer0_display }}
     </td></tr>
     {% endfor %}
   </tbody>

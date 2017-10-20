@@ -167,14 +167,14 @@ class OrderServer(OrderEndpointModel):
     mem = models.IntegerField(
         default=16,
         help_text=u"Memory size in GB")
-    storages = models.ManyToManyField("CatalogStorageDisk")
+    storages = models.ManyToManyField("CatalogStorageDisk", blank=True)
 
     LAYER0_CHOICES = (
-        (1, "Windows Server 2010"),
-        (2, "ESXI server"),
-        (3, "Ubuntu 16.04 Xeniel"),
-        (4, "Ubuntu 14.04 Trusty"),
-        (5, "Cent 7.0"),
-        (6, "RHEL 7.4")
+        (1, u"Windows Server 2010"),
+        (2, u"ESXI server"),
+        (3, u"Ubuntu 16.04 Xeniel"),
+        (4, u"Ubuntu 14.04 Trusty"),
+        (5, u"Cent 7.0"),
+        (6, u"RHEL 7.4")
     )
     layer0 = models.IntegerField(default=6)

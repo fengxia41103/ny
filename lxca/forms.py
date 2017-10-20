@@ -8,6 +8,7 @@ from lxca.models import *
 from lxca.catalog_models import *
 from lxca.architect_models import *
 from lxca.order_models import *
+from lxca.mfg_models import *
 
 
 class AttachmentForm(ModelForm):
@@ -37,3 +38,24 @@ class OrderServerForm(ModelForm):
     class Meta:
         model = OrderServer
         exclude = ["order", "template", ]
+
+
+class MfgPduForm(ModelForm):
+
+    class Meta:
+        model = MfgPdu
+        exclude = ["mfg", "uuid", "order"]
+
+
+class MfgSwitchForm(ModelForm):
+
+    class Meta:
+        model = MfgSwitch
+        exclude = ["mfg", "uuid", "order"]
+
+
+class MfgServerForm(ModelForm):
+
+    class Meta:
+        model = MfgServer
+        exclude = ["mfg", "uuid", "order"]

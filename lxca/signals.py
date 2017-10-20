@@ -6,6 +6,7 @@ from lxca.models import *
 from lxca.catalog_models import *
 from lxca.architect_models import *
 from lxca.order_models import *
+from lxca.mfg_models import *
 
 
 @receiver(post_save, sender=OrderSolution)
@@ -33,17 +34,17 @@ def OrderSolution_post_save(sender, instance, **kwargs):
         mfg.save()
         for r in instance.racks:
             for i in range(r.qty):
-                tmp = MfgRack(solution=mfg, order=r)
+                tmp = MfgRack(mfg=mfg, order=r)
                 tmp.save()
         for r in instance.pdus:
             for i in range(r.qty):
-                tmp = MfgPdu(solution=mfg, order=r)
+                tmp = MfgPdu(mfg=mfg, order=r)
                 tmp.save()
         for r in instance.switches:
             for i in range(r.qty):
-                tmp = MfgSwitch(solution=mfg, order=r)
+                tmp = MfgSwitch(mfg=mfg, order=r)
                 tmp.save()
         for r in instance.servers:
             for i in range(r.qty):
-                tmp = MfgServer(solution=mfg, order=r)
+                tmp = MfgServer(mfg=mfg, order=r)
                 tmp.save()

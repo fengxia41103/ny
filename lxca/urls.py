@@ -12,6 +12,7 @@ from lxca import views
 from lxca import catalog_views as catalog
 from lxca import architect_views as architect
 from lxca import order_views as order
+from lxca import mfg_views as mfg
 
 urlpatterns = patterns(
     '',
@@ -221,4 +222,45 @@ urlpatterns = patterns(
     url(r'^order/server/(?P<pk>\d+)/edit/$',
         order.OrderServerEdit.as_view(),
         name='order_server_edit'),
+
+    # mfg solution
+    url('^mfg/solutions/$',
+        mfg.MfgSolutionList.as_view(),
+        name='mfg_solution_list'),
+    url(r'^mfg/solution/add/$',
+        mfg.MfgSolutionAdd.as_view(),
+        name='mfg_solution_add'),
+    url(r'^mfg/solution/(?P<pk>\d+)/delete/$',
+        mfg.MfgSolutionDelete.as_view(),
+        name='mfg_solution_delete'),
+    url(r'^mfg/solution/(?P<pk>\d+)/edit/$',
+        mfg.MfgSolutionEdit.as_view(),
+        name='mfg_solution_edit'),
+    url(r'^mfg/solution/(?P<pk>\d+)/$',
+        mfg.MfgSolutionDetail.as_view(),
+        name='mfg_solution_detail'),
+
+    # mfg pdu
+    url('^mfg/pdus/$',
+        mfg.MfgPduList.as_view(),
+        name='mfg_pdu_list'),
+    url(r'^mfg/pdu/(?P<pk>\d+)/edit/$',
+        mfg.MfgPduEdit.as_view(),
+        name='mfg_pdu_edit'),
+
+    # mfg switch
+    url('^mfg/switches/$',
+        mfg.MfgSwitchList.as_view(),
+        name='mfg_switch_list'),
+    url(r'^mfg/switch/(?P<pk>\d+)/edit/$',
+        mfg.MfgSwitchEdit.as_view(),
+        name='mfg_switch_edit'),
+
+    # mfg server
+    url('^mfg/servers/$',
+        mfg.MfgServerList.as_view(),
+        name='mfg_server_list'),
+    url(r'^mfg/server/(?P<pk>\d+)/edit/$',
+        mfg.MfgServerEdit.as_view(),
+        name='mfg_server_edit'),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

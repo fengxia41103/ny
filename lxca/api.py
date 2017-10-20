@@ -7,6 +7,7 @@ from lxca.models import *
 from lxca.catalog_models import *
 from lxca.architect_models import *
 from lxca.order_models import *
+from lxca.mfg_models import *
 
 # tastypie API urls
 from tastypie.api import Api

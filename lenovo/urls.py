@@ -6,7 +6,6 @@ from django.contrib import admin
 
 import settings
 from lxca.api import v1_api
-
 urlpatterns = patterns(
     '',
     url(r'^api/',

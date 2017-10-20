@@ -1,0 +1,296 @@
+{% extends "common/base.html" %}
+
+{% load crispy_forms_tags %}
+{% load static %}
+{% block page-header %}
+<ol class="breadcrumb">
+  <li>
+    <a href="{% url 'mfg_solution_list' %}"
+      <i class="fa fa-list-ul"></i>
+      Mfg Solutions
+    </a>
+  </li>
+  <li class="active">
+    {{ object.id }}
+  </li>
+</ol>
+{% endblock %}
+
+{% block content %}
+
+{# mfg header #}
+<h2>Summary</h2>
+<div class="panel panel-default">
+  <div class="panel-body">
+    <div class="row ">
+      <div class="col-md-2">
+        <label>Order #</label>
+      </div>
+      <div class="col-md-9 my-sf-display-bmfg">
+        <a href="{% url 'order_solution_detail' object.order.id %}">
+          {{ object.order }}
+        </a>
+      </div>
+      <div class="col-md-1"></div>
+    </div><div class="row">
+      <div class="col-md-2">
+        <label>BM Manager</label>
+      </div>
+      <div class="col-md-3 my-sf-display-bmfg">
+        {{ object.bm_manager }}
+      </div>
+      <div class="col-md-1"></div>
+      <div class="col-md-2">
+        <label>Status</label>
+      </div>
+      <div class="col-md-3 my-sf-display-bmfg">
+        <span class="label label-info">
+          {{ object.order.get_status_display }}
+        </span>
+      </div>
+      <div class="col-md-1"></div>
+    </div><div class="row">
+      <div class="col-md-2">
+        <label>Racks</label>
+      </div>
+      <div class="col-md-3 my-sf-display-bmfg">
+        {{ object.num_racks }}
+      </div>
+      <div class="col-md-1"></div>
+      <div class="col-md-2">
+        <label>PDUs</label>
+      </div>
+      <div class="col-md-3 my-sf-display-bmfg">
+        {{ object.num_pdus }}
+      </div>
+      <div class="col-md-1"></div>
+    </div><div class="row">
+      <div class="col-md-2">
+        <label>Switches</label>
+      </div>
+      <div class="col-md-3 my-sf-display-bmfg">
+        {{ object.num_switches }}
+      </div>
+      <div class="col-md-1"></div>
+      <div class="col-md-2">
+        <label>Servers</label>
+      </div>
+      <div class="col-md-3 my-sf-display-bmfg">
+        {{ object.num_servers }}
+      </div>
+      <div class="col-md-1"></div>
+    </div>
+  </div>
+</div>
+
+{# mfg details #}
+<h2>Mfg Details</h2>
+<ul class="nav nav-tabs" role="tablist">
+  <li>
+    <a href="#pdus"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      PDUs
+    </a>
+  </li>
+  <li>
+    <a href="#switches"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      Switches
+    </a>
+  </li>
+  <li>
+    <a href="#servers"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      Servers
+    </a>
+  </li>
+</ul>
+<div class="tab-content">
+  <div class="tab-pane" id="pdus">
+    {% for s_form in pdu_forms %}
+    {% with s_form.instance as pdu %}
+    <div class="row"
+         style="border-bottom:1px dashed #bcbcbc; padding:10px 0px;">
+
+      {# pdu image #}
+      <div class="col-md-2">
+	{% with pdu.order.template.catalog.attachments.all.0 as item_img %}
+	<img src="{{item_img.file.url}}"
+             data-type="attachment-thumbnail"
+             class="img-responsive img-thumbnail"
+             style="width:90%;">
+	{% endwith %}
+      </div>
+      <div class="col-md-4">
+	<h4>
+	  {{ pdu.order.template.catalog|upper }}
+	</h4>
+	<p>
+	  <a href="{% url 'catalog_pdu_detail' pdu.order.template.catalog.id %}">
+	    <i class="fa fa-hand-o-right"></i>
+	    details
+	  </a>
+	</p>
+      </div>
+      <div class="col-md-4">
+        <form method="post"
+              action="{% url 'mfg_pdu_edit' pdu.id %}">
+          {% csrf_token %}
+          {{ s_form|crispy }}
+          <button class="btn btn-small"
+                  type="submit">
+            update
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  <div class="tab-pane" id="switches">
+    {% for s_form in switch_forms %}
+    {% with s_form.instance as switch %}
+    <div class="row"
+         style="border-bottom:1px dashed #bcbcbc; padding:10px 0px;">
+
+      {# switch image #}
+      <div class="col-md-2">
+	{% with switch.order.template.catalog.attachments.all.0 as item_img %}
+	<img src="{{item_img.file.url}}"
+             data-type="attachment-thumbnail"
+             class="img-responsive img-thumbnail"
+             style="width:90%;">
+	{% endwith %}
+      </div>
+      <div class="col-md-4">
+	<h4>
+	  {{ switch.order.template.catalog|upper }}
+	</h4>
+	<p>
+	  <a href="{% url 'catalog_switch_detail' switch.order.template.catalog.id %}">
+	    <i class="fa fa-hand-o-right"></i>
+	    details
+	  </a>
+	</p>
+      </div>
+      <div class="col-md-4">
+        <form method="post"
+              action="{% url 'mfg_switch_edit' switch.id %}">
+          {% csrf_token %}
+          {{ s_form|crispy }}
+          <button class="btn btn-small"
+                  type="submit">
+            update
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  <div class="tab-pane" id="servers">
+    {% for s_form in server_forms %}
+    {% with s_form.instance as server %}
+    <div class="row"
+         style="border-bottom:1px dashed #bcbcbc; padding:10px 0px;">
+
+      {# server image #}
+      <div class="col-md-2">
+	{% with server.order.template.catalog.attachments.all.0 as item_img %}
+	<img src="{{item_img.file.url}}"
+             data-type="attachment-thumbnail"
+             class="img-responsive img-thumbnail"
+             style="width:90%;">
+	{% endwith %}
+      </div>
+      <div class="col-md-4">
+	<h4>
+	  {{ server.order.template.catalog|upper }}
+	</h4>
+	<p>
+	  <a href="{% url 'catalog_server_detail' server.order.template.catalog.id %}">
+	    <i class="fa fa-hand-o-right"></i>
+	    details
+	  </a>
+	</p>
+      </div>
+      <div class="col-md-4">
+        <form method="post"
+              action="{% url 'mfg_server_edit' server.id %}">
+          {% csrf_token %}
+          {{ s_form|crispy }}
+          <button class="btn btn-small"
+                  type="submit">
+            update
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+</div>
+
+{# manifest #}
+<h2>Manifests</h2>
+<ul class="nav nav-tabs" role="tablist">
+  <li>
+    <a href="#yaml-manifest"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      YAML
+    </a>
+  </li>
+  <li>
+    <a href="#json-manifest"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      JSON
+    </a>
+  </li>
+</ul>
+<div class="tab-content">
+  <div class="tab-pane" id="yaml-manifest">
+    <pre class="brush:yaml;">
+    {{ object.yaml_manifest }}
+    </pre>
+  </div>
+  <div class="tab-pane" id="json-manifest">
+    <pre class="brush:js;">
+      {{ object.json_manifest }}
+    </pre>
+  </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script type="text/javascript">
+ var j$ = jQuery.noConflict();
+ j$(document).ready(function(){
+   // starting first tab
+   j$('[data-toggle="tab"]:first').tab('show');
+
+   j$('[data-toggle="mfg-qty"]').change(function(){
+     j$.post(
+       "",
+       {
+	 'id':j$(this).attr('id'),
+	 'val':j$(this).val()
+       },
+       function(){
+	 toastr.success('Item qty has been updated.');
+       }
+     );
+   });
+   SyntaxHighlighter.highlight();
+ });
+</script>
+{% endblock %}
