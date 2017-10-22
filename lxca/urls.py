@@ -247,6 +247,9 @@ urlpatterns = patterns(
     url(r'^mfg/solution/(?P<pk>\d+)/$',
         mfg.MfgSolutionDetail.as_view(),
         name='mfg_solution_detail'),
+    url(r'^mfg/solution/(?P<pk>\d+)/bundle/$',
+        mfg.download_solution_bundle,
+        name='mfg_solution_bundle'),
 
     # mfg rack
     url('^mfg/racks/$',

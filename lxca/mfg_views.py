@@ -9,7 +9,7 @@ from django.views.generic.edit import FormView
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 
 # django-filters
 from django_filters import AllValuesFilter
@@ -98,6 +98,14 @@ class MfgSolutionDetail(DetailView):
         context["server_forms"] = [
             MfgServerForm(instance=i) for i in self.object.servers.all()]
         return context
+
+
+def download_solution_bundle(request, pk):
+    mfg = MfgSolution.objects.get(pk=int(pk))
+    response = HttpResponse(mfg.yaml_bundle,
+                            content_type='application/yaml')
+    response['Content-Disposition'] = 'attachment; filename="bundle.yaml"'
+    return response
 
 ###################################################
 #

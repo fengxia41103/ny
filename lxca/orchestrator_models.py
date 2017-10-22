@@ -17,6 +17,7 @@ class MyCharm(models.Model):
     host = models.IntegerField(default=2,
                                choices=HOST_CHOICES)
     name = models.CharField(max_length=32)
+    relations = models.ManyToManyField("self", blank=True)
 
     def __unicode__(self):
         # if not implemented, leave it as None.

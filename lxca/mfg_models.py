@@ -142,7 +142,6 @@ class MfgSolution(models.Model):
         pat = re.compile("[()\s]+")
 
         services = {}
-        ref_solution = self.order.solution
 
         # dump lxca
         bm = self.bm_manager
@@ -151,31 +150,34 @@ class MfgSolution(models.Model):
             "password": bm.password,
             "url": bm.url
         }
+
         # dump solution
-        s_name = pat.sub("", ref_solution.name)
+        ref_solution = self.order.solution
+        solution_charm_name = pat.sub("", ref_solution.name).lower()
         uhm = {
             "lxca": lxca,
             "playbooks": ref_solution.playbook_bundle
         }
 
-        services[s_name] = {
+        services[solution_charm_name] = {
+            # https://github.com/juju/juju/pull/7537/files
+            # all application name must be lower cased!
             "charm": str(ref_solution.charm),
+
             "num_units": 1,
             "options": {
                 "name": ref_solution.name,
                 "uuid": ref_solution.uuid,
                 "mtm": "mtm",  # TODO: doesn't need this!
-                "uhm": uhm,
-                "endpoints": {
-                    "endpoint_ip": lxca["url"],
-                    "manage_user": lxca["user"],
-                    "manage_password": lxca["password"]
-                }
-            }
+                "uhm": yaml.dump(uhm,
+                                 Dumper=yaml.RoundTripDumper),
+            },
+            # TODO: hardcoded for now
+            "to": ["1"]
         }
 
-        # dump racks
-        for aa in [self.racks, self.pdus, self.switches, self.servers]:
+        # dump HW charms
+        for aa in [self.racks, self.switches, self.servers]:
             for mfg in aa:
                 my_catalog = mfg.order.template.catalog
                 my_ref = mfg.order.template
@@ -186,14 +188,68 @@ class MfgSolution(models.Model):
                     "playbooks": my_ref.playbook_bundle
                 }
 
-                services[pat.sub("", my_catalog.name)] = {
+                services[pat.sub("", my_catalog.name).lower()] = {
                     "charm": str(my_ref.charm),
                     "num_units": 1,
-                    "uuid": mfg.uuid,
-                    "mtm": "mtm",
-                    "uhm": uhm
+                    "options": {
+                        "name": my_catalog.name,
+                        "uuid": mfg.uuid,
+                        "mtm": "mtm",
+                        "uhm": uhm,
+                        "uhm": yaml.dump(uhm,
+                                         Dumper=yaml.RoundTripDumper),
+                    },
+                    # TODO: hardcoded for now
+                    "to": ["1"]
                 }
-        return services
+
+        # dump relations
+        # TODO: the name of the `relation`, eg. `rack, `server`,
+        # are what is defined in `metadata.yaml` in each charm.
+        # I'm hardcoding them right now.
+        # We need to build a model to map this info into this framework.
+        relations = []
+
+        # solution <-> rack
+        for r in self.racks:
+            provide = "%s:rack" % solution_charm_name
+            require = "%s:solution" % pat.sub("", r.order.template.catalog.name)
+            relations.append([provide.lower(), require.lower()])
+
+        # rack <-> switch
+        for r in self.racks:
+            for s in self.switches:
+                provide = "%s:switch" % pat.sub("", r.order.template.catalog.name)
+                require = "%s:rack" % pat.sub("", s.order.template.catalog.name)
+                relations.append([provide.lower(), require.lower()])
+
+        # rack <-> sever
+        for r in self.racks:
+            for s in self.servers:
+                provide = "%s:server" % pat.sub("", r.order.template.catalog.name)
+                require = "%s:rack" % pat.sub("", s.order.template.catalog.name)
+                relations.append([provide.lower(), require.lower()])
+
+        # switch <-> sever
+        for r in self.switches:
+            for s in self.servers:
+                provide = "%s:server" % pat.sub("", r.order.template.catalog.name)
+                require = "%s:switch" % pat.sub("", s.order.template.catalog.name)
+                relations.append([provide.lower(), require.lower()])
+
+        # my bundle data
+        return {
+            # TODO: add a model for this info.
+            # hardcoded for now.
+            "machines": {
+                "1": {
+                    "series": "trusty"
+                }
+            },
+            "series": "trusty",
+            "services": services,
+            "relations": relations
+        }
     charm_bundle = property(_charm_bundle)
 
     def _json_bundle(self):

@@ -18,10 +18,6 @@
 
 {% block content %}
 {# charm bundle #}
-<h2>My beloved bundle</h2>
-<pre class="brush:js;">
-{{ object.json_bundle }}
-</pre>
 
 {# mfg header #}
 <h2>Summary</h2>
@@ -285,6 +281,22 @@
 <h2>Manifests</h2>
 <ul class="nav nav-tabs" role="tablist">
   <li>
+    <a href="#yaml-bundle"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      Bundle (YAML)
+    </a>
+  </li>
+  <li>
+    <a href="#json-bundle"
+       role="tab"
+       data-toggle="tab">
+      <i class="fa fa-folder"></i>
+      Bundle (JSON)
+    </a>
+  </li>
+  <li>
     <a href="#yaml-manifest"
        role="tab"
        data-toggle="tab">
@@ -302,6 +314,23 @@
   </li>
 </ul>
 <div class="tab-content">
+  <div class="tab-pane" id="yaml-bundle">
+    <form action="{% url 'mfg_solution_bundle' object.id %}"
+          method="get">
+      <button type="submite"
+              class="btn btn-primary">
+        Download
+      </button>
+    </form>
+    <pre class="brush:yaml;">
+      {{ object.yaml_bundle }}
+    </pre>
+  </div>
+  <div class="tab-pane" id="json-bundle">
+    <pre class="brush:js;">
+      {{ object.json_bundle }}
+    </pre>
+  </div>
   <div class="tab-pane" id="yaml-manifest">
     <pre class="brush:yaml;">
     {{ object.yaml_manifest }}
@@ -313,7 +342,6 @@
     </pre>
   </div>
 </div>
-
 
 {% endblock %}
 
