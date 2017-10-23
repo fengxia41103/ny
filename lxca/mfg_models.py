@@ -154,9 +154,24 @@ class MfgSolution(models.Model):
         # dump solution
         ref_solution = self.order.solution
         solution_charm_name = pat.sub("", ref_solution.name).lower()
+        endpoints = []
+        for aa in [self.racks, self.switches, self.servers]:
+            for mfg in aa:
+                my_catalog = mfg.order.template.catalog
+                my_ref = mfg.order.template
+                my_order = mfg.order
+                endpoints.append({
+                    "uuid": mfg.uuid,
+                    "machine_type": "mtm",  # TODO: what is this!?
+                    "endpoint_ip": mfg.ip4,
+                    "manage_user": mfg.username,
+                    "manage_password": mfg.password,
+                    "recovery_password": self.bm_manager.recovery_password
+                })
         uhm = {
             "lxca": lxca,
-            "playbooks": ref_solution.playbook_bundle
+            "playbooks": ref_solution.playbook_bundle,
+            "endpoints": endpoints
         }
 
         services[solution_charm_name] = {
@@ -170,7 +185,7 @@ class MfgSolution(models.Model):
                 "uuid": ref_solution.uuid,
                 "mtm": "mtm",  # TODO: doesn't need this!
                 "uhm": yaml.dump(uhm,
-                                 Dumper=yaml.RoundTripDumper),
+                                 Dumper=yaml.RoundTripDumper)
             },
             # TODO: hardcoded for now
             "to": ["1"]
@@ -185,7 +200,13 @@ class MfgSolution(models.Model):
 
                 uhm = {
                     "lxca": lxca,
-                    "playbooks": my_ref.playbook_bundle
+                    "playbooks": my_ref.playbook_bundle,
+                    "endpoints": {
+                        "endpoint_ip": mfg.imm_ip,
+                        "user": mfg.mfg.bm_manager.user,
+                        "password": mfg.mfg.bm_manager.password,
+                        "recovery_password": mfg.mfg.bm_manager.recovery_password
+                    }
                 }
 
                 services[pat.sub("", my_catalog.name).lower()] = {
@@ -259,7 +280,8 @@ class MfgSolution(models.Model):
 
     def _yaml_bundle(self):
         return yaml.dump(self.charm_bundle,
-                         Dumper=yaml.RoundTripDumper)
+                         Dumper=yaml.RoundTripDumper,
+                         indent=2)
     yaml_bundle = property(_yaml_bundle)
 
 

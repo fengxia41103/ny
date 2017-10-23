@@ -21,7 +21,8 @@ class Playbook(models.Model):
         (2, u"Rack"),
         (3, u"PDU"),
         (4, u"Switch"),
-        (5, u"Server")
+        (5, u"Server"),
+        (6, u"Endpoint")
     )
     for_type = models.IntegerField(
         blank=True, null=True,
