@@ -168,10 +168,22 @@ class MfgSolution(models.Model):
                     "manage_password": mfg.password,
                     "recovery_password": self.bm_manager.recovery_password
                 })
+        compliance = {
+            "rack": {
+                "count": self.num_racks
+            },
+            "switch": {
+                "count": self.num_switches
+            },
+            "server": {
+                "count": self.num_servers
+            }
+        }
         uhm = {
             "lxca": lxca,
             "playbooks": ref_solution.playbook_bundle,
-            "endpoints": endpoints
+            "endpoints": endpoints,
+            "check": compliance
         }
 
         services[solution_charm_name] = {
