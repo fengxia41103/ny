@@ -4,7 +4,6 @@ from django_extensions.db.fields import UUIDField
 from ruamel import yaml
 import uuid
 import simplejson as json
-
 from lxca.models import BaseModel
 from lxca.orchestrator_models import *
 

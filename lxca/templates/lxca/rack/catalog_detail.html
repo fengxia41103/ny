@@ -84,6 +84,11 @@
       </span>
     </p>
   </div>
+</div>
+
+{% if object.playbooks %}
+{% include "lxca/playbook/sa_detail.html" %}
+{% endif %}
 {% endblock %}
 
 

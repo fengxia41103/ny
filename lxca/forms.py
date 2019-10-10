@@ -3,12 +3,11 @@ from django import forms
 from django.forms import ModelForm
 from django.forms.widgets import HiddenInput
 
-
-from lxca.models import *
-from lxca.catalog_models import *
 from lxca.architect_models import *
-from lxca.order_models import *
+from lxca.catalog_models import *
 from lxca.mfg_models import *
+from lxca.models import *
+from lxca.order_models import *
 
 
 class AttachmentForm(ModelForm):

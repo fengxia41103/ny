@@ -1,5 +1,9 @@
 import os
+
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponseRedirect
 from django.views.generic import DetailView
 from django.views.generic import ListView
 from django.views.generic import TemplateView
@@ -7,10 +11,6 @@ from django.views.generic.edit import CreateView
 from django.views.generic.edit import DeleteView
 from django.views.generic.edit import FormView
 from django.views.generic.edit import UpdateView
-from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponseRedirect
-
 # django-filters
 from django_filters import AllValuesFilter
 from django_filters import BooleanFilter
@@ -19,9 +19,9 @@ from django_filters import ModelChoiceFilter
 from django_filters.views import FilterView
 from django_filters.widgets import LinkWidget
 
+from lxca.catalog_models import *
 from lxca.forms import *
 from lxca.models import *
-from lxca.catalog_models import *
 
 ###################################################
 #
@@ -122,6 +122,8 @@ class CatalogRackDetail(DetailView):
         context["attachment_form"] = AttachmentForm()
         context["images"] = [
             img.file.url for img in self.object.attachments.all()]
+
+        context['form'] = form = CatalogRackForm(instance=self.object)
         return context
 
 ###################################################

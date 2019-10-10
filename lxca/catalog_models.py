@@ -1,4 +1,8 @@
+import itertools
+
 from django.db import models
+
+from lxca.architect_models import *
 from lxca.models import BaseModel
 
 ######################################################
@@ -28,6 +32,17 @@ class CatalogRack(BaseModel):
                                        null=True,
                                        default=None,
                                        help_text="Expansion rack for the primary")
+
+    def _charms(self):
+        charms = [a.charm for a in ArchitectRack.objects.filter(catalog=self)]
+        return charms
+    charms = property(_charms)
+
+    def _playbooks(self):
+        playbooks = [a.playbooks.all() for a in ArchitectRack.objects.filter(catalog=self)]
+
+        return set(itertools.chain.from_iterable(playbooks))
+    playbooks = property(_playbooks)
 
 
 class CatalogEndpoint(BaseModel):

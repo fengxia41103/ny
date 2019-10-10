@@ -1,9 +1,11 @@
+import uuid
+
+import simplejson as json
 from django.db import models
 from django_extensions.db.fields import UUIDField
+
 from lxca.models import BaseModel
 from ruamel import yaml
-import uuid
-import simplejson as json
 
 ######################################################
 #
@@ -32,7 +34,11 @@ class OrderSolution(models.Model):
     )
 
     def __unicode__(self):
-        return "%s [#%s]" % (self.solution, self.order)
+        return "SO[#%s]" % (self.order)
+
+    def _in_mfg(self):
+        return self.mfgsolution_set.all()
+    in_mfg = property(_in_mfg)
 
     def _applications(self):
         return OrderApplication.objects.filter(order=self)

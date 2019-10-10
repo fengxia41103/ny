@@ -1,5 +1,10 @@
 import os
+
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.views.generic import DetailView
 from django.views.generic import ListView
 from django.views.generic import TemplateView
@@ -7,10 +12,6 @@ from django.views.generic.edit import CreateView
 from django.views.generic.edit import DeleteView
 from django.views.generic.edit import FormView
 from django.views.generic.edit import UpdateView
-from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponseRedirect, HttpResponse
-
 # django-filters
 from django_filters import AllValuesFilter
 from django_filters import BooleanFilter
@@ -19,10 +20,11 @@ from django_filters import ModelChoiceFilter
 from django_filters.views import FilterView
 from django_filters.widgets import LinkWidget
 
-from lxca.forms import *
-from lxca.models import *
 from lxca.architect_models import *
+from lxca.forms import *
 from lxca.mfg_models import *
+from lxca.models import *
+from lxca.task import *
 
 ###################################################
 #
@@ -105,6 +107,9 @@ def download_solution_bundle(request, pk):
     response = HttpResponse(mfg.yaml_bundle,
                             content_type='application/yaml')
     response['Content-Disposition'] = 'attachment; filename="bundle.yaml"'
+
+    # let's roll!!!
+    # orchestrate_me(pk)
     return response
 
 ###################################################
