@@ -150,7 +150,7 @@ python-social-auth==0.2.2
 pytz==2017.2
 PyYAML==3.12
 redis==2.10.6
-reportlab==3.2.0
+reportlab==3.5.55
 requests==2.5.1
 requests-oauthlib==0.4.2
 rq==0.5.1
